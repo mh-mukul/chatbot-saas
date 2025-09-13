@@ -35,10 +35,10 @@ const Layout = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar agentId={agentId} />
-        
+
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-16 border-b border-border/50 bg-gradient-card/50 backdrop-blur-sm flex items-center justify-between px-6">
+          <header className="h-16 border-b border-border/50 bg-gradient-card/50 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <SidebarTrigger>
                 <Menu className="h-5 w-5" />
@@ -47,7 +47,7 @@ const Layout = () => {
                 AI Agent Platform
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Button
