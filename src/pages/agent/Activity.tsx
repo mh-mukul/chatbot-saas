@@ -1,27 +1,56 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { getSessionList, getSessionMessages, sessionListResponse } from "@/services/chat_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Clock, User, Bot } from "lucide-react";
+import { MessageSquare, User, Bot } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { add, formatDistanceToNow } from 'date-fns';
 
 const ActivityPage = () => {
   const { id } = useParams();
 
-  const chatSessions = [
-    { id: "1", session_id: "abcdefgh", messages: 5, input: "Hi, can anyone help me?", timestamp: "2 minutes ago" },
-    { id: "2", session_id: "qwertyui", messages: 8, input: "I want refund", timestamp: "15 minutes ago" },
-    { id: "3", session_id: "mnbvcxza", messages: 4, input: "How can I upgrade to premium?", timestamp: "1 hour ago" },
-    { id: "4", session_id: "lkjhgfda", messages: 2, input: "Can I invite new members?", timestamp: "2 hours ago" }
-  ];
+  const [chatSessions, setChatSessions] = useState<sessionListResponse[]>([]);
+  const [selectedSession, setSelectedSession] = useState<sessionListResponse | null>(null);
+  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string; created_at: string }[]>([]);
 
-  const [selectedSession, setSelectedSession] = useState(chatSessions[0]);
+  useEffect(() => {
+    const fetchSessions = async () => {
+      if (id) {
+        try {
+          const sessions = await getSessionList(Number(id));
+          setChatSessions(sessions);
+          if (sessions.length > 0) {
+            setSelectedSession(sessions[0]);
+          }
+        } catch (error) {
+          console.error("Failed to fetch sessions:", error);
+        }
+      }
+    };
+    fetchSessions();
+  }, [id]);
 
-  const messages = [
-    { role: "user", content: "Hi, I need help with my account", timestamp: "14:32" },
-    { role: "assistant", content: "Hello! I'd be happy to help you with your account. What specific issue are you experiencing?", timestamp: "14:32" },
-    { role: "user", content: "I can't log in to my dashboard", timestamp: "14:33" },
-    { role: "assistant", content: "I understand you're having trouble logging in. Let me help you troubleshoot this issue.", timestamp: "14:33" }
-  ];
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (selectedSession) {
+        try {
+          const sessionMessages = await getSessionMessages(selectedSession.session_id);
+          const formattedMessages = sessionMessages.flatMap((msg) => [
+            { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at).toLocaleTimeString() },
+            { role: "assistant" as const, content: msg.output, created_at: new Date(msg.created_at).toLocaleTimeString() },
+          ]);
+          setMessages(formattedMessages);
+        } catch (error) {
+          console.error("Failed to fetch messages:", error);
+        }
+      }
+    };
+    fetchMessages();
+  }, [selectedSession]);
+
+  if (!id) {
+    return <div>Invalid agent ID</div>;
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -41,7 +70,7 @@ const ActivityPage = () => {
             {chatSessions.map((session) => (
               <Card
                 key={session.id}
-                className={`cursor-pointer transition-all ${selectedSession.id === session.id
+                className={`cursor-pointer transition-all ${selectedSession?.id === session.id
                   ? "border-primary"
                   : "border-border/50 hover:border-primary/50"
                   }`}
@@ -49,15 +78,18 @@ const ActivityPage = () => {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-sm">{session.session_id}</h3>
+                    <h3 className="font-medium text-sm">
+                      {
+                        session.session_id && session.session_id.trim().length > 20
+                          ? session.session_id.trim().slice(0, 20) + "..."
+                          : session.session_id?.trim()
+                      }
+                    </h3>
                     <span className="text-xs text-muted-foreground">
-                      {session.timestamp}
+                      {formatDistanceToNow(new Date(session.created_at), {addSuffix: true})}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      {session.messages} messages
-                    </span>
                     <span className="flex items-center gap-1">
                       <MessageSquare className="h-3 w-3" />
                       {session.input && session.input.trim().length > 25
@@ -76,7 +108,7 @@ const ActivityPage = () => {
       <div className="flex-1 flex flex-col">
         <div className="p-6 border-b border-border/50 bg-gradient-card/20">
           <p className="text-muted-foreground mt-1">
-            {selectedSession.session_id}
+            {selectedSession?.session_id}
           </p>
         </div>
 
@@ -113,7 +145,7 @@ const ActivityPage = () => {
                     <CardContent className="p-3">
                       <p className="text-sm">{message.content}</p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {message.timestamp}
+                        {message.created_at}
                       </p>
                     </CardContent>
                   </Card>
