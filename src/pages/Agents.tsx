@@ -1,84 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, MessageSquare, Clock, TrendingUp } from "lucide-react";
+import { Plus, Trash2, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-
-interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  status: "active" | "inactive" | "training";
-  conversations: number;
-  successRate: string;
-  lastActive: string;
-  category: string;
-}
+import { getAgents, Agent, deleteAgent as deleteAgentApi } from "@/services/api";
+import { formatDistanceToNow } from 'date-fns';
 
 const Agents = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const [agents, setAgents] = useState<Agent[]>([
-    {
-      id: "1",
-      name: "Customer Support Bot",
-      description: "Handles customer inquiries and support tickets with high accuracy",
-      status: "active",
-      conversations: 1247,
-      successRate: "98.5%",
-      lastActive: "2 minutes ago",
-      category: "Support"
-    },
-    {
-      id: "2", 
-      name: "Sales Assistant",
-      description: "Qualifies leads and assists with product recommendations",
-      status: "active",
-      conversations: 892,
-      successRate: "96.2%",
-      lastActive: "15 minutes ago",
-      category: "Sales"
-    },
-    {
-      id: "3",
-      name: "FAQ Bot",
-      description: "Provides instant answers to frequently asked questions",
-      status: "training",
-      conversations: 568,
-      successRate: "94.8%",
-      lastActive: "1 hour ago",
-      category: "Knowledge"
-    },
-    {
-      id: "4",
-      name: "Technical Support",
-      description: "Helps users troubleshoot technical issues and problems",
-      status: "active",
-      conversations: 340,
-      successRate: "92.1%",
-      lastActive: "5 minutes ago",
-      category: "Technical"
-    }
-  ]);
+
+  const [agents, setAgents] = useState<Agent[]>([]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const apiAgents = await getAgents();
+        const processedAgents = apiAgents.map(agent => ({
+          ...agent,
+          lastActive: formatDistanceToNow(new Date(agent.created_at), { addSuffix: true }),
+          conversations: Math.floor(Math.random() * 100) // Placeholder for total conversations
+        }));
+        setAgents(processedAgents);
+      } catch (error) {
+        toast({
+          title: "Error fetching agents",
+          description: "Could not load agent data. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchAgents();
+  }, [toast]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-500/20 text-green-400 border-green-500/50";
-      case "inactive": return "bg-gray-500/20 text-gray-400 border-gray-500/50";
+      case "trained": return "bg-green-500/20 text-green-400 border-green-500/50";
+      case "not trained": return "bg-gray-500/20 text-gray-400 border-gray-500/50";
       case "training": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
       default: return "bg-gray-500/20 text-gray-400 border-gray-500/50";
     }
   };
 
-  const deleteAgent = (id: string, name: string) => {
-    setAgents(agents.filter(agent => agent.id !== id));
-    toast({
-      title: "Agent deleted",
-      description: `${name} has been successfully removed.`,
-    });
+  const deleteAgent = async (id: number, name: string) => {
+    try {
+      await deleteAgentApi(id);
+      setAgents(agents.filter(agent => agent.id !== id));
+      toast({
+        title: "Agent deleted",
+        description: `${name} has been successfully removed.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting agent",
+        description: `Could not delete ${name}. Please try again later.`,
+        variant: "destructive",
+      });
+    }
   };
 
   const addNewAgent = () => {
@@ -99,7 +80,7 @@ const Agents = () => {
             Manage and monitor your intelligent agents
           </p>
         </div>
-        <Button 
+        <Button
           onClick={addNewAgent}
           className="transition-spring"
         >
@@ -111,7 +92,7 @@ const Agents = () => {
       {/* Agents Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {agents.map((agent) => (
-          <Card 
+          <Card
             key={agent.id}
             className="bg-gradient-card border-border/50 shadow-card hover:shadow-glow transition-spring cursor-pointer group"
             onClick={() => navigate(`/agent/${agent.id}/playground`)}
@@ -122,9 +103,6 @@ const Agents = () => {
                   <CardTitle className="text-xl font-bold group-hover:text-primary transition-smooth">
                     {agent.name}
                   </CardTitle>
-                  <CardDescription className="mt-2 text-muted-foreground">
-                    {agent.description}
-                  </CardDescription>
                 </div>
                 <Button
                   variant="ghost"
@@ -138,13 +116,10 @@ const Agents = () => {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div className="flex items-center gap-2 mt-4">
                 <Badge className={`${getStatusColor(agent.status)} font-medium`}>
                   {agent.status}
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {agent.category}
                 </Badge>
               </div>
             </CardHeader>
@@ -156,14 +131,6 @@ const Agents = () => {
                   <div>
                     <p className="text-sm font-medium">{agent.conversations.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">Conversations</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-green-400" />
-                  <div>
-                    <p className="text-sm font-medium text-green-400">{agent.successRate}</p>
-                    <p className="text-xs text-muted-foreground">Success Rate</p>
                   </div>
                 </div>
               </div>
@@ -189,9 +156,8 @@ const Agents = () => {
           <p className="text-muted-foreground mb-6">
             Create your first AI agent to get started
           </p>
-          <Button 
+          <Button
             onClick={addNewAgent}
-            className="bg-gradient-primary hover:shadow-glow transition-spring"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Your First Agent

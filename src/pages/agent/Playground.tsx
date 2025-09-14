@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Slider } from "@/components/ui/slider";
 import { Send, Bot, User, Settings } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getAgentById, updateAgent, AgentDetails } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from 'date-fns';
 
 interface Message {
   id: string;
@@ -18,21 +21,73 @@ interface Message {
 
 const Playground = () => {
   const { id } = useParams();
-  const [agentName, setAgentName] = useState("Customer Support Bot");
-  const [temperature, setTemperature] = useState([0.7]);
-  const [systemPrompt, setSystemPrompt] = useState(
-    "You are a helpful customer support assistant. Be professional, empathetic, and provide clear solutions to customer problems."
-  );
+  const [agent, setAgent] = useState<AgentDetails | null>(null);
+  const [initialAgent, setInitialAgent] = useState<AgentDetails | null>(null);
+  const setAgentName = (name: string) => setAgent(prev => prev ? ({ ...prev, name }) : null);
+  const setTemperature = (value: number[]) => setAgent(prev => prev ? ({ ...prev, temperature: value[0] }) : null);
+  const setSystemPrompt = (prompt: string) => setAgent(prev => prev ? ({ ...prev, system_prompt: prompt }) : null);
+  const { toast } = useToast();
   const [currentMessage, setCurrentMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm your customer support assistant. How can I help you today?",
+      content: "Hello! How can I help you today?",
       timestamp: new Date()
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      const fetchAgentDetails = async () => {
+        try {
+          const agentDetails = await getAgentById(Number(id));
+          setAgent(agentDetails);
+          setInitialAgent(agentDetails);
+          setInitialAgent(agentDetails);
+        } catch (error) {
+          toast({
+            title: "Error fetching agent details",
+            description: "Could not load agent data. Please try again later.",
+            variant: "destructive",
+          });
+        }
+      };
+
+      fetchAgentDetails();
+    }
+  }, [id, toast]);
+
+  const isChanged = agent && initialAgent ?
+    agent.name !== initialAgent.name ||
+    agent.temperature !== initialAgent.temperature ||
+    agent.system_prompt !== initialAgent.system_prompt
+    : false;
+
+  const handleSaveChanges = async () => {
+    if (!agent || !id || !isChanged) return;
+
+    try {
+      const updatedAgentData = await updateAgent(Number(id), {
+        name: agent.name,
+        system_prompt: agent.system_prompt,
+        temperature: agent.temperature,
+      });
+      setAgent(updatedAgentData);
+      setInitialAgent(updatedAgentData);
+      toast({
+        title: "Agent Updated",
+        description: "Your agent's settings have been saved.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error Saving Agent",
+        description: "Could not save changes. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return;
@@ -68,28 +123,59 @@ const Playground = () => {
     }
   };
 
+  if (!agent) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Loading agent...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Configuration */}
       <div className="w-full md:w-80 border-b md:border-b-0 md:border-r p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-            <Settings className="h-5 w-5 text-primary" />
-            Configuration
+            Playground
           </h2>
           <p className="text-sm text-muted-foreground">
-            Adjust your agent's behavior and settings
+            Adjust the agent's parameter based on your needs. Make sure to save after making changes.
           </p>
         </div>
 
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span>Agent Status:</span>
+            {agent.status === "trained" ? (
+              <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                Trained
+              </span>
+            ) : (
+              <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span>Last Trained:</span>
+            <span className="text-sm text-gray-600">
+              {agent.last_trained_at
+                ? formatDistanceToNow(new Date(agent.last_trained_at), { addSuffix: true })
+                : "Never"}
+            </span>
+          </div>
+          <Button className="w-full" disabled={!isChanged} onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
           <div>
             <Label htmlFor="agent-name" className="text-sm font-medium">
               Agent Name
             </Label>
             <Input
               id="agent-name"
-              value={agentName}
+              value={agent.name || ""}
               onChange={(e) => setAgentName(e.target.value)}
               className="mt-1"
             />
@@ -97,11 +183,11 @@ const Playground = () => {
 
           <div>
             <Label className="text-sm font-medium">
-              Temperature: {temperature[0]}
+              Temperature: {agent.temperature || 0}
             </Label>
             <div className="mt-2">
               <Slider
-                value={temperature}
+                value={[agent.temperature || 0]}
                 onValueChange={setTemperature}
                 max={1}
                 min={0}
@@ -120,7 +206,7 @@ const Playground = () => {
             </Label>
             <Textarea
               id="system-prompt"
-              value={systemPrompt}
+              value={agent.system_prompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
               className="mt-1 min-h-32"
               placeholder="Define how your agent should behave..."
@@ -131,15 +217,6 @@ const Playground = () => {
 
       {/* Right Panel - Chat Interface */}
       <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold">
-            Playground
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Test and interact with your AI agent
-          </p>
-        </div>
-
         {/* Messages */}
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
