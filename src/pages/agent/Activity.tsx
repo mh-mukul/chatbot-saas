@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, MessageSquare, Clock, User, Bot } from "lucide-react";
+import { MessageSquare, Clock, User, Bot } from "lucide-react";
 
 const ActivityPage = () => {
   const { id } = useParams();
 
   const chatSessions = [
-    { id: "1", user: "User #1247", messages: 12, duration: "5m 32s", timestamp: "2 minutes ago" },
-    { id: "2", user: "User #1246", messages: 8, duration: "3m 18s", timestamp: "15 minutes ago" },
-    { id: "3", user: "User #1245", messages: 15, duration: "8m 45s", timestamp: "1 hour ago" },
-    { id: "4", user: "User #1244", messages: 6, duration: "2m 12s", timestamp: "2 hours ago" }
+    { id: "1", session_id: "abcdefgh", messages: 5, input: "Hi, can anyone help me?", timestamp: "2 minutes ago" },
+    { id: "2", session_id: "qwertyui", messages: 8, input: "I want refund", timestamp: "15 minutes ago" },
+    { id: "3", session_id: "mnbvcxza", messages: 4, input: "How can I upgrade to premium?", timestamp: "1 hour ago" },
+    { id: "4", session_id: "lkjhgfda", messages: 2, input: "Can I invite new members?", timestamp: "2 hours ago" }
   ];
 
   const [selectedSession, setSelectedSession] = useState(chatSessions[0]);
@@ -26,10 +26,9 @@ const ActivityPage = () => {
   return (
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Chat Sessions */}
-      <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-border/50 bg-gradient-card/30 p-6">
+      <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
             Chat Sessions
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -43,26 +42,27 @@ const ActivityPage = () => {
               <Card
                 key={session.id}
                 className={`cursor-pointer transition-all ${selectedSession.id === session.id
-                    ? "bg-gradient-primary/20 border-primary"
-                    : "bg-gradient-card border-border/50 hover:border-primary/50"
+                  ? "border-primary"
+                  : "border-border/50 hover:border-primary/50"
                   }`}
                 onClick={() => setSelectedSession(session)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-sm">{session.user}</h3>
+                    <h3 className="font-medium text-sm">{session.session_id}</h3>
                     <span className="text-xs text-muted-foreground">
                       {session.timestamp}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" />
                       {session.messages} messages
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {session.duration}
+                      <MessageSquare className="h-3 w-3" />
+                      {session.input && session.input.trim().length > 25
+                        ? session.input.trim().slice(0, 25) + "..."
+                        : session.input?.trim()}
                     </span>
                   </div>
                 </CardContent>
@@ -75,11 +75,8 @@ const ActivityPage = () => {
       {/* Right Panel - Messages */}
       <div className="flex-1 flex flex-col">
         <div className="p-6 border-b border-border/50 bg-gradient-card/20">
-          <h1 className="text-2xl font-bold bg-clip-text">
-            Activity Log
-          </h1>
           <p className="text-muted-foreground mt-1">
-            Viewing conversation with {selectedSession.user}
+            {selectedSession.session_id}
           </p>
         </div>
 
@@ -97,8 +94,8 @@ const ActivityPage = () => {
                 >
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-primary text-primary-foreground"
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-primary text-primary-foreground"
                       }`}
                   >
                     {message.role === "user" ? (
@@ -109,8 +106,8 @@ const ActivityPage = () => {
                   </div>
                   <Card
                     className={`${message.role === "user"
-                        ? "bg-muted"
-                        : "bg-gradient-card border-border/50"
+                      ? "bg-muted"
+                      : "border-border/50"
                       }`}
                   >
                     <CardContent className="p-3">

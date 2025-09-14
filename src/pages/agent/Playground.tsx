@@ -203,7 +203,7 @@ const Playground = () => {
                 >
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-muted text-muted-foreground"
                       : "bg-primary text-primary-foreground"
                       }`}
                   >
@@ -215,19 +215,14 @@ const Playground = () => {
                   </div>
                   <Card
                     className={`${message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border"
+                      ? "bg-muted"
+                        : "border-border/50"
                       }`}
                   >
                     <CardContent className="p-3">
                       <p className="text-sm">{message.content}</p>
-                      <p
-                        className={`text-xs mt-2 ${message.role === "user"
-                          ? "text-primary-foreground/70"
-                          : "text-muted-foreground"
-                          }`}
-                      >
-                        {message.timestamp.toLocaleTimeString()}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {message.timestamp.toLocaleString()}
                       </p>
                     </CardContent>
                   </Card>
