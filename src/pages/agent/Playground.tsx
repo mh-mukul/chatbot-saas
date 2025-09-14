@@ -4,23 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Send, Bot, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getAgentById, updateAgent, AgentDetails } from "@/services/api";
+import { getAgentById, updateAgent, AgentDetails } from "@/services/agent_apis";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from 'date-fns';
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import { useChat } from '@/hooks/use-chat';
+import { clearSessionId } from '@/lib/utils';
 
 const Playground = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [agent, setAgent] = useState<AgentDetails | null>(null);
   const [initialAgent, setInitialAgent] = useState<AgentDetails | null>(null);
   const setAgentName = (name: string) => setAgent(prev => prev ? ({ ...prev, name }) : null);
@@ -28,23 +23,20 @@ const Playground = () => {
   const setSystemPrompt = (prompt: string) => setAgent(prev => prev ? ({ ...prev, system_prompt: prompt }) : null);
   const { toast } = useToast();
   const [currentMessage, setCurrentMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! How can I help you today?",
-      timestamp: new Date()
-    }
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const agentId = agent ? agent.id : 0;
+  const systemPrompt = agent ? agent.system_prompt : "You are a helpful assistant.";
+  const temperature = agent ? agent.temperature : 0;
+
+  const { messages, isLoading, sendMessage } = useChat(agentId, systemPrompt, temperature);
 
   useEffect(() => {
+    clearSessionId(); // Clear previous session
     if (id) {
       const fetchAgentDetails = async () => {
         try {
           const agentDetails = await getAgentById(Number(id));
           setAgent(agentDetails);
-          setInitialAgent(agentDetails);
           setInitialAgent(agentDetails);
         } catch (error) {
           toast({
@@ -91,29 +83,8 @@ const Playground = () => {
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: currentMessage,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    await sendMessage(currentMessage);
     setCurrentMessage("");
-    setIsLoading(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "I understand your question. Based on the current configuration, I would recommend checking our documentation or contacting our technical team for more specific guidance.",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1500);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -134,7 +105,7 @@ const Playground = () => {
   return (
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Configuration */}
-      <div className="w-full md:w-80 border-b md:border-b-0 md:border-r p-6 space-y-6">
+      <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             Playground
@@ -208,7 +179,7 @@ const Playground = () => {
               id="system-prompt"
               value={agent.system_prompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
-              className="mt-1 min-h-32"
+              className="mt-1 min-h-64"
               placeholder="Define how your agent should behave..."
             />
           </div>

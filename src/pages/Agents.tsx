@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { getAgents, Agent, deleteAgent as deleteAgentApi, createAgent as createAgentApi } from "@/services/api";
+import { getAgents, Agent, deleteAgent as deleteAgentApi, createAgent as createAgentApi } from "@/services/agent_apis";
 import { formatDistanceToNow } from 'date-fns';
 import {
   AlertDialog,
