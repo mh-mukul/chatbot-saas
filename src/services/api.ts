@@ -7,7 +7,7 @@ const apiClient = axios.create({
 export interface Agent {
     id: number;
     name: string;
-    status: "trained" | "training" | "not trained";
+    training_status: "trained" | "training" | "not trained";
     created_at: string;
     lastActive?: string;
     conversations?: number;
@@ -18,12 +18,18 @@ export interface AgentDetails {
     name: string;
     system_prompt: string;
     temperature: number | 0;
-    status: "trained" | "training" | "not trained";
+    training_status: "trained" | "training" | "not trained";
     created_at: string;
     last_trained_at: string | null;
 }
 
-export interface CreateUpdateAgentRequest {
+export interface CreateAgentRequest {
+    name: string;
+    system_prompt: "You are a helpful assistant." | string;
+    temperature: 0 | number;
+}
+
+export interface UpdateAgentRequest {
     name: string;
     system_prompt: string;
     temperature: number | 0;
@@ -49,7 +55,7 @@ export const getAgentById = async (id: number): Promise<AgentDetails> => {
     }
 };
 
-export const createAgent = async (agentData: Partial<CreateUpdateAgentRequest>): Promise<AgentDetails> => {
+export const createAgent = async (agentData: Partial<CreateAgentRequest>): Promise<AgentDetails> => {
     try {
         const response = await apiClient.post('/api/agents', agentData);
         return response.data.data;
@@ -59,7 +65,7 @@ export const createAgent = async (agentData: Partial<CreateUpdateAgentRequest>):
     }
 };
 
-export const updateAgent = async (id: number, agentData: Partial<CreateUpdateAgentRequest>): Promise<AgentDetails> => {
+export const updateAgent = async (id: number, agentData: Partial<UpdateAgentRequest>): Promise<AgentDetails> => {
     try {
         const response = await apiClient.put('/api/agents', { id, ...agentData });
         return response.data.data;

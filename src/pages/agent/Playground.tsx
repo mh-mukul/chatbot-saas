@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent} from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Send, Bot, User, Settings } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAgentById, updateAgent, AgentDetails } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
@@ -147,13 +147,13 @@ const Playground = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <span>Agent Status:</span>
-            {agent.status === "trained" ? (
+            {agent.training_status === "trained" ? (
               <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
                 Trained
               </span>
             ) : (
               <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
+                {agent.training_status.charAt(0).toUpperCase() + agent.training_status.slice(1)}
               </span>
             )}
           </div>
