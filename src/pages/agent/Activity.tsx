@@ -6,7 +6,7 @@ import { Activity, MessageSquare, Clock, User, Bot } from "lucide-react";
 
 const ActivityPage = () => {
   const { id } = useParams();
-  
+
   const chatSessions = [
     { id: "1", user: "User #1247", messages: 12, duration: "5m 32s", timestamp: "2 minutes ago" },
     { id: "2", user: "User #1246", messages: 8, duration: "3m 18s", timestamp: "15 minutes ago" },
@@ -24,9 +24,9 @@ const ActivityPage = () => {
   ];
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Chat Sessions */}
-      <div className="w-80 border-r border-border/50 bg-gradient-card/30 p-6">
+      <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-border/50 bg-gradient-card/30 p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
@@ -42,11 +42,10 @@ const ActivityPage = () => {
             {chatSessions.map((session) => (
               <Card
                 key={session.id}
-                className={`cursor-pointer transition-all ${
-                  selectedSession.id === session.id
+                className={`cursor-pointer transition-all ${selectedSession.id === session.id
                     ? "bg-gradient-primary/20 border-primary"
                     : "bg-gradient-card border-border/50 hover:border-primary/50"
-                }`}
+                  }`}
                 onClick={() => setSelectedSession(session)}
               >
                 <CardContent className="p-4">
@@ -89,21 +88,18 @@ const ActivityPage = () => {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex gap-3 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`flex gap-3 max-w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  }`}
+                  className={`flex gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"
+                    }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.role === "user"
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
                         ? "bg-muted text-muted-foreground"
                         : "bg-primary text-primary-foreground"
-                    }`}
+                      }`}
                   >
                     {message.role === "user" ? (
                       <User className="h-4 w-4" />
@@ -112,11 +108,10 @@ const ActivityPage = () => {
                     )}
                   </div>
                   <Card
-                    className={`${
-                      message.role === "user"
+                    className={`${message.role === "user"
                         ? "bg-muted"
                         : "bg-gradient-card border-border/50"
-                    }`}
+                      }`}
                   >
                     <CardContent className="p-3">
                       <p className="text-sm">{message.content}</p>

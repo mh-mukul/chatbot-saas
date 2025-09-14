@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 const Sources = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  
+
   const [sources] = useState({
     files: 8,
     text: 12,
@@ -28,7 +28,7 @@ const Sources = () => {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Tabs */}
       <div className="flex-1 p-6">
         <div className="mb-6">
@@ -108,8 +108,8 @@ const Sources = () => {
                 </div>
                 <div>
                   <Label htmlFor="content">Content</Label>
-                  <Textarea 
-                    id="content" 
+                  <Textarea
+                    id="content"
                     placeholder="Enter your text content here..."
                     className="min-h-32"
                   />
@@ -160,16 +160,16 @@ const Sources = () => {
                 </div>
                 <div>
                   <Label htmlFor="question">Question(s)</Label>
-                  <Textarea 
-                    id="question" 
+                  <Textarea
+                    id="question"
                     placeholder="Enter questions (one per line)"
                     className="min-h-24"
                   />
                 </div>
                 <div>
                   <Label htmlFor="answer">Answer</Label>
-                  <Textarea 
-                    id="answer" 
+                  <Textarea
+                    id="answer"
                     placeholder="Enter the answer"
                     className="min-h-24"
                   />
@@ -208,13 +208,13 @@ const Sources = () => {
       </div>
 
       {/* Right Panel - Summary & Actions */}
-      <div className="w-80 border-l border-border/50 bg-gradient-card/30 p-6 space-y-6">
+      <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 bg-gradient-card/30 p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
             Training Summary
           </h2>
-          
+
           <div className="space-y-4">
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
@@ -224,7 +224,7 @@ const Sources = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
@@ -233,7 +233,7 @@ const Sources = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
@@ -245,7 +245,7 @@ const Sources = () => {
           </div>
         </div>
 
-        <Button 
+        <Button
           onClick={handleTrainAgent}
           className="w-full transition-spring"
           size="lg"

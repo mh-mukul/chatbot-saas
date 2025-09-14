@@ -69,9 +69,9 @@ const Playground = () => {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Configuration */}
-      <div className="w-80 border-r p-6 space-y-6">
+      <div className="w-full md:w-80 border-b md:border-b-0 md:border-r p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
@@ -155,8 +155,8 @@ const Playground = () => {
                 >
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary text-primary-foreground"
                       }`}
                   >
                     {message.role === "user" ? (
@@ -167,16 +167,16 @@ const Playground = () => {
                   </div>
                   <Card
                     className={`${message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-card border"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card border"
                       }`}
                   >
                     <CardContent className="p-3">
                       <p className="text-sm">{message.content}</p>
                       <p
                         className={`text-xs mt-2 ${message.role === "user"
-                            ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
+                          ? "text-primary-foreground/70"
+                          : "text-muted-foreground"
                           }`}
                       >
                         {message.timestamp.toLocaleTimeString()}
