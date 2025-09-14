@@ -50,8 +50,9 @@ export const getSessionList = async (id: number): Promise<sessionListResponse[]>
 export interface sessionMessagesResponse {
     id: number;
     session_id: string;
-    input: string;  // User's input message
-    output: string; // Assistant's response message
+    input: string;
+    output: string;
+    revised: boolean;
     created_at: Date;
 }
 

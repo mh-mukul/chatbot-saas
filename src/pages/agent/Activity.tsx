@@ -1,17 +1,27 @@
-import { getSessionList, getSessionMessages, sessionListResponse } from "@/services/chat_apis";
+import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/chat_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, User, Bot } from "lucide-react";
+import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { add, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import { ReviseAnswerSheet, ReviseButton } from "@/components/ReviseAnswerSheet";
+import { Button } from "@/components/ui/button";
+
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+  revised?: boolean;
+  rawMessage?: sessionMessagesResponse;
+};
 
 const ActivityPage = () => {
   const { id } = useParams();
 
   const [chatSessions, setChatSessions] = useState<sessionListResponse[]>([]);
   const [selectedSession, setSelectedSession] = useState<sessionListResponse | null>(null);
-  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string; created_at: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -35,9 +45,15 @@ const ActivityPage = () => {
       if (selectedSession) {
         try {
           const sessionMessages = await getSessionMessages(selectedSession.session_id);
-          const formattedMessages = sessionMessages.flatMap((msg) => [
+          const formattedMessages: Message[] = sessionMessages.flatMap((msg) => [
             { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at).toLocaleTimeString() },
-            { role: "assistant" as const, content: msg.output, created_at: new Date(msg.created_at).toLocaleTimeString() },
+            {
+              role: "assistant" as const,
+              content: msg.output,
+              created_at: new Date(msg.created_at).toLocaleTimeString(),
+              revised: msg.revised,
+              rawMessage: msg
+            },
           ]);
           setMessages(formattedMessages);
         } catch (error) {
@@ -56,13 +72,18 @@ const ActivityPage = () => {
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Chat Sessions */}
       <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             Chat Sessions
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Recent conversations and activity logs
-          </p>
+          <div>
+            <Button variant="outline">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" className="ml-2">
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <ScrollArea className="h-[calc(100vh-200px)]">
@@ -86,7 +107,7 @@ const ActivityPage = () => {
                       }
                     </h3>
                     <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(session.created_at), {addSuffix: true})}
+                      {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -136,18 +157,30 @@ const ActivityPage = () => {
                       <Bot className="h-4 w-4" />
                     )}
                   </div>
-                  <Card
-                    className={`${message.role === "user"
-                      ? "bg-muted"
-                      : "border-border/50"
-                      }`}
-                  >
-                    <CardContent className="p-3">
-                      <p className="text-sm">{message.content}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {message.created_at}
-                      </p>
-                    </CardContent>
+                  <Card className="w-full border-0 shadow-none">
+                    <div className="relative inline-block">
+                      <CardContent className="p-3 bg-muted rounded-lg">
+                        <p className="text-sm">{message.content}</p>
+                        <p className="text-xs text-muted-foreground mt-2 flex justify-end">
+                          {message.created_at}
+                        </p>
+                      </CardContent>
+
+                      {/* Floating button */}
+                      {message.role === "assistant" && (
+                        <div className="absolute -bottom-5 left-4 flex items-center">
+                          {
+                            message.rawMessage && (
+                              <ReviseAnswerSheet message={message.rawMessage}>
+                                <ReviseButton>
+                                  {message.revised ? <><CheckCircle />Revised</> : "Revise Answer"}
+                                </ReviseButton>
+                              </ReviseAnswerSheet>
+                            )
+                          }
+                        </div>
+                      )}
+                    </div>
                   </Card>
                 </div>
               </div>
