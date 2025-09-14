@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
-  Bot, 
-  Activity, 
-  FileText, 
-  Settings, 
-  Zap 
+import {
+  LayoutDashboard,
+  Bot,
+  Activity,
+  FileText,
+  Settings,
+  Zap,
+  Play,
+  PanelLeft,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -28,10 +31,10 @@ const mainItems = [
 ];
 
 const agentItems = [
-  { title: "Playground", url: "/agent/:id/playground", icon: Zap },
+  { title: "Playground", url: "/agent/:id/playground", icon: Play },
   { title: "Activity", url: "/agent/:id/activity", icon: Activity },
   { title: "Sources", url: "/agent/:id/sources", icon: FileText },
-  { title: "Actions", url: "/agent/:id/actions", icon: Settings },
+  { title: "Actions", url: "/agent/:id/actions", icon: Zap },
   { title: "Settings", url: "/agent/:id/settings", icon: Settings },
 ];
 
@@ -49,8 +52,8 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
 
   const getNavClass = (path: string, agentId?: string) => {
     const active = isActive(path, agentId);
-    return active 
-      ? "bg-gradient-primary text-primary-foreground font-medium shadow-glow" 
+    return active
+      ? "bg-primary text-primary-foreground font-medium"
       : "hover:bg-muted/50 transition-smooth";
   };
 
@@ -61,19 +64,29 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
       className={`${!open ? "w-16" : "w-64"} border-r border-border bg-gradient-secondary backdrop-blur-sm`}
       collapsible="icon"
     >
-      <SidebarContent className="pt-6">
+      <SidebarHeader className="relative p-3">
+            <div className="flex items-center">
+              <span className="text-lg font-bold transition-opacity duration-300 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:overflow-hidden">
+                AgentIQ
+              </span>
+            </div>
+            <SidebarTrigger className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex">
+              <PanelLeft className="size-4" />
+            </SidebarTrigger>
+          </SidebarHeader>
+      <SidebarContent className="pt-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground font-semibold tracking-wide">
+          {/* <SidebarGroupLabel className="text-muted-foreground font-semibold tracking-wide">
             Main
-          </SidebarGroupLabel>
+          </SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
+                    <NavLink
+                      to={item.url}
                       className={getNavClass(item.url)}
                     >
                       <item.icon className="h-5 w-5 mr-3" />
@@ -88,7 +101,7 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
 
         {/* Agent Navigation (only show when in agent view) */}
         {isInAgentView && agentId && (
-          <SidebarGroup className="mt-8">
+          <SidebarGroup className="mt-2">
             <SidebarGroupLabel className="text-muted-foreground font-semibold tracking-wide">
               Agent Tools
             </SidebarGroupLabel>
@@ -97,8 +110,8 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
                 {agentItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url.replace(":id", agentId)} 
+                      <NavLink
+                        to={item.url.replace(":id", agentId)}
                         className={getNavClass(item.url, agentId)}
                       >
                         <item.icon className="h-5 w-5 mr-3" />

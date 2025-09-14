@@ -4,13 +4,15 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, PanelLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAuthenticated");
@@ -40,12 +42,11 @@ const Layout = () => {
           {/* Header */}
           <header className="h-16 border-b border-border/50 bg-gradient-card/50 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-10">
             <div className="flex items-center gap-4">
-              <SidebarTrigger>
-                <Menu className="h-5 w-5" />
-              </SidebarTrigger>
-              <div className="text-sm text-muted-foreground">
-                AI Agent Platform
-              </div>
+              {isMobile && (
+                <SidebarTrigger>
+                  <PanelLeft className="h-5 w-5" />
+                </SidebarTrigger>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

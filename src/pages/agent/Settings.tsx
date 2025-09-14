@@ -10,10 +10,10 @@ const Settings = () => {
     <div className="p-8 flex items-center justify-center min-h-[60vh]">
       <Card className="bg-gradient-card border-border/50 shadow-card max-w-md w-full text-center">
         <CardHeader className="pb-8">
-          <div className="mx-auto w-16 h-16 bg-gradient-primary/20 rounded-2xl flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
             <Construction className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-clip-text">
             Settings
           </CardTitle>
           <CardDescription>
@@ -24,7 +24,7 @@ const Settings = () => {
           <p className="text-muted-foreground mb-6">
             This section will allow you to configure advanced settings, permissions, and preferences for your AI agent.
           </p>
-          <Button disabled className="bg-gradient-primary/50">
+          <Button disabled className="w-full">
             <SettingsIcon className="h-4 w-4 mr-2" />
             Coming Soon
           </Button>

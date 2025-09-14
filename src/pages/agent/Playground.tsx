@@ -71,7 +71,7 @@ const Playground = () => {
   return (
     <div className="flex h-full">
       {/* Left Panel - Configuration */}
-      <div className="w-80 border-r border-border/50 bg-gradient-card/30 p-6 space-y-6">
+      <div className="w-80 border-r p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
@@ -131,8 +131,8 @@ const Playground = () => {
 
       {/* Right Panel - Chat Interface */}
       <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b border-border/50 bg-gradient-card/20">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+        <div className="p-6 border-b">
+          <h1 className="text-2xl font-bold">
             Playground
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -146,21 +146,18 @@ const Playground = () => {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex gap-3 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`flex gap-3 max-w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  }`}
+                  className={`flex gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"
+                    }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.role === "user"
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-gradient-primary text-primary-foreground"
-                    }`}
+                        : "bg-primary text-primary-foreground"
+                      }`}
                   >
                     {message.role === "user" ? (
                       <User className="h-4 w-4" />
@@ -169,20 +166,18 @@ const Playground = () => {
                     )}
                   </div>
                   <Card
-                    className={`${
-                      message.role === "user"
+                    className={`${message.role === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-gradient-card border-border/50"
-                    }`}
+                        : "bg-card border"
+                      }`}
                   >
                     <CardContent className="p-3">
                       <p className="text-sm">{message.content}</p>
                       <p
-                        className={`text-xs mt-2 ${
-                          message.role === "user"
+                        className={`text-xs mt-2 ${message.role === "user"
                             ? "text-primary-foreground/70"
                             : "text-muted-foreground"
-                        }`}
+                          }`}
                       >
                         {message.timestamp.toLocaleTimeString()}
                       </p>
@@ -191,10 +186,10 @@ const Playground = () => {
                 </div>
               </div>
             ))}
-            
+
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center">
                   <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <Card className="bg-gradient-card border-border/50">
@@ -212,19 +207,19 @@ const Playground = () => {
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="p-6 border-t border-border/50 bg-gradient-card/20">
+        <div className="p-6 border-t">
           <div className="flex gap-2">
             <Input
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="Type your message..."
               className="flex-1"
             />
             <Button
               onClick={handleSendMessage}
               disabled={!currentMessage.trim() || isLoading}
-              className="bg-gradient-primary hover:shadow-glow transition-spring"
+              className="transition-spring"
             >
               <Send className="h-4 w-4" />
             </Button>

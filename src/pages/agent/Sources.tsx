@@ -32,7 +32,7 @@ const Sources = () => {
       {/* Left Panel - Tabs */}
       <div className="flex-1 p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-clip-text">
             Knowledge Sources
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -247,7 +247,7 @@ const Sources = () => {
 
         <Button 
           onClick={handleTrainAgent}
-          className="w-full bg-gradient-primary hover:shadow-glow transition-spring"
+          className="w-full transition-spring"
           size="lg"
         >
           <Brain className="h-4 w-4 mr-2" />

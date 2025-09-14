@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, MessageSquare, Clock, User } from "lucide-react";
+import { Activity, MessageSquare, Clock, User, Bot } from "lucide-react";
 
 const ActivityPage = () => {
   const { id } = useParams();
@@ -76,7 +76,7 @@ const ActivityPage = () => {
       {/* Right Panel - Messages */}
       <div className="flex-1 flex flex-col">
         <div className="p-6 border-b border-border/50 bg-gradient-card/20">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-clip-text">
             Activity Log
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -102,13 +102,13 @@ const ActivityPage = () => {
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       message.role === "user"
                         ? "bg-muted text-muted-foreground"
-                        : "bg-gradient-primary text-primary-foreground"
+                        : "bg-primary text-primary-foreground"
                     }`}
                   >
                     {message.role === "user" ? (
                       <User className="h-4 w-4" />
                     ) : (
-                      <Activity className="h-4 w-4" />
+                      <Bot className="h-4 w-4" />
                     )}
                   </div>
                   <Card

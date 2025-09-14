@@ -40,7 +40,7 @@ const Dashboard = () => {
   return (
     <div className="p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold bg-clip-text">
           Dashboard
         </h1>
         <p className="text-muted-foreground mt-2">

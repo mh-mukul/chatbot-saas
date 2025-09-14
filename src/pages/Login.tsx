@@ -35,15 +35,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
-      <div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
+      <div className="absolute inset-0 opacity-5"></div>
       
       <Card className="w-full max-w-md relative z-10 bg-gradient-card border-border/50 shadow-elegant backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center pb-8">
-          <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-glow">
             <Bot className="h-8 w-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-bold bg-clip-text">
               AI Agent Platform
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
@@ -92,7 +92,7 @@ const Login = () => {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-primary hover:shadow-glow transition-spring font-medium"
+              className="w-full transition-spring font-medium"
             >
               Sign In
             </Button>

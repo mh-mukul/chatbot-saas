@@ -92,7 +92,7 @@ const Agents = () => {
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-clip-text">
             AI Agents
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -101,7 +101,7 @@ const Agents = () => {
         </div>
         <Button 
           onClick={addNewAgent}
-          className="bg-gradient-primary hover:shadow-glow transition-spring"
+          className="transition-spring"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add New Agent
