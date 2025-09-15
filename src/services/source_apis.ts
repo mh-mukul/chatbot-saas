@@ -106,3 +106,21 @@ export const getQnaSourceDetails = async (id: string): Promise<qnaSourceDetailsR
         throw error;
     }
 };
+
+export interface sourceSummaryResponse {
+    files: number;
+    texts: number;
+    qnas: number;
+    training_required: boolean;
+}
+
+export const getSourceSummary = async (agent_id: number): Promise<sourceSummaryResponse> => {
+    try {
+        const response = await apiClient.get(`/api/sources/summary?agent=${agent_id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching summary with id ${agent_id}:`, error);
+        throw error;
+    }
+};
+
