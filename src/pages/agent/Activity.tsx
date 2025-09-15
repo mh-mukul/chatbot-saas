@@ -23,20 +23,21 @@ const ActivityPage = () => {
   const [selectedSession, setSelectedSession] = useState<sessionListResponse | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      if (id) {
-        try {
-          const sessions = await getSessionList(Number(id));
-          setChatSessions(sessions);
-          if (sessions.length > 0) {
-            setSelectedSession(sessions[0]);
-          }
-        } catch (error) {
-          console.error("Failed to fetch sessions:", error);
+  const fetchSessions = async () => {
+    if (id) {
+      try {
+        const sessions = await getSessionList(Number(id));
+        setChatSessions(sessions);
+        if (sessions.length > 0) {
+          setSelectedSession(sessions[0]);
         }
+      } catch (error) {
+        console.error("Failed to fetch sessions:", error);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchSessions();
   }, [id]);
 
@@ -64,6 +65,21 @@ const ActivityPage = () => {
     fetchMessages();
   }, [selectedSession]);
 
+  const handleRevisionSuccess = (chatId: number) => {
+    setMessages(prevMessages =>
+      prevMessages.map(msg => {
+        if (msg.rawMessage && msg.rawMessage.id === chatId) {
+          return {
+            ...msg,
+            revised: true,
+            rawMessage: { ...msg.rawMessage, revised: true }
+          };
+        }
+        return msg;
+      })
+    );
+  };
+
   if (!id) {
     return <div>Invalid agent ID</div>;
   }
@@ -77,7 +93,7 @@ const ActivityPage = () => {
             Chat Sessions
           </h2>
           <div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={fetchSessions}>
               <RefreshCw className="h-4 w-4" />
             </Button>
             <Button variant="outline" className="ml-2">
@@ -168,12 +184,16 @@ const ActivityPage = () => {
 
                       {/* Floating button */}
                       {message.role === "assistant" && (
-                        <div className="absolute -bottom-5 left-4 flex items-center">
+                        <div className="absolute -bottom-4 left-4 flex items-center">
                           {
                             message.rawMessage && (
-                              <ReviseAnswerSheet message={message.rawMessage}>
+                              <ReviseAnswerSheet
+                                message={message.rawMessage}
+                                agentId={Number(id)}
+                                onSuccess={handleRevisionSuccess}
+                              >
                                 <ReviseButton>
-                                  {message.revised ? <><CheckCircle />Revised</> : "Revise Answer"}
+                                  {message.revised ? <><CheckCircle className="mr-2 h-4 w-4" />Revised</> : "Revise Answer"}
                                 </ReviseButton>
                               </ReviseAnswerSheet>
                             )

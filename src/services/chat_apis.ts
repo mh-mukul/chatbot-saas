@@ -65,3 +65,38 @@ export const getSessionMessages = async (session_id: string): Promise<sessionMes
         throw error;
     }
 };
+
+export interface reviseAnswerRequest {
+    agent_id: number;
+    chat_id: string;
+    revised_answer: string;
+}
+
+export const reviseAnswer = async (data: reviseAnswerRequest): Promise<void> => {
+    try {
+        const response = await apiClient.post('/api/chat/revise', data);
+        return response.data.data;
+    } catch (error) {
+        console.error('Error revising answer:', error);
+        throw error;
+    }
+}
+
+export interface reviseAnswerResponse {
+    id: string;
+    source_names: string;
+    source_type: string;
+    source_content: string;
+    created_at: Date;
+    revised_answer: string;
+}
+
+export const getRevisedAnswer = async (chat_id: number): Promise<reviseAnswerResponse> => {
+    try {
+        const response = await apiClient.get(`/api/sources?chat_id=${chat_id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching revised answer with id ${chat_id}:`, error);
+        throw error;
+    }
+};
