@@ -84,11 +84,10 @@ export const reviseAnswer = async (data: reviseAnswerRequest): Promise<void> => 
 
 export interface reviseAnswerResponse {
     id: string;
-    source_names: string;
-    source_type: string;
-    source_content: string;
+    title: string;
+    question: string;
+    answer: string;
     created_at: Date;
-    revised_answer: string;
 }
 
 export const getRevisedAnswer = async (chat_id: number): Promise<reviseAnswerResponse> => {

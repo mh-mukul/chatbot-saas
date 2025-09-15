@@ -193,7 +193,7 @@ const ActivityPage = () => {
                                 onSuccess={handleRevisionSuccess}
                               >
                                 <ReviseButton>
-                                  {message.revised ? <><CheckCircle className="mr-2 h-4 w-4" />Revised</> : "Revise Answer"}
+                                  {message.revised ? <><CheckCircle className="h-4 w-4" />Revised</> : "Revise Answer"}
                                 </ReviseButton>
                               </ReviseAnswerSheet>
                             )

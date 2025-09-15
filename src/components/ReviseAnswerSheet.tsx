@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "./ui/textarea";
+import { ScrollArea } from "./ui/scroll-area";
 import { Label } from "./ui/label";
 import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/chat_apis";
 import { useToast } from "@/hooks/use-toast";
@@ -33,8 +33,8 @@ export function ReviseAnswerSheet({ agentId, message, children, onSuccess }: Rev
                 try {
                     const response = await getRevisedAnswer(message.id);
                     console.log(response);
-                    if (response && response.source_content) {
-                        setRevisedAnswerText(response.source_content);
+                    if (response && response.answer) {
+                        setRevisedAnswerText(response.answer);
                     }
                 } catch (error) {
                     console.error("Failed to fetch revised answer:", error);
@@ -84,47 +84,46 @@ export function ReviseAnswerSheet({ agentId, message, children, onSuccess }: Rev
             <SheetContent className="sm:max-w-[450px]">
                 <SheetHeader>
                     <SheetTitle>Revise Answer</SheetTitle>
-                    <SheetDescription>
-                        Update the agent's response to improve its accuracy.
-                    </SheetDescription>
                 </SheetHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid w-full gap-1.5">
-                        <Label htmlFor="user-message">User Message</Label>
-                        <Textarea
-                            id="user-message"
-                            value={message.input}
-                            disabled
-                            className="h-24"
-                        />
+                <ScrollArea className="h-[calc(100vh-8rem)]">
+                    <div className="grid gap-4 p-4">
+                        <div className="grid w-full gap-1.5">
+                            <Label htmlFor="user-message">User Message</Label>
+                            <Textarea
+                                id="user-message"
+                                value={message.input}
+                                disabled
+                                className="h-24"
+                            />
+                        </div>
+                        <div className="grid w-full gap-1.5">
+                            <Label htmlFor="agent-response">Agent Response</Label>
+                            <Textarea
+                                id="agent-response"
+                                value={message.output}
+                                disabled
+                                className="h-48"
+                            />
+                        </div>
+                        <div className="grid w-full gap-1.5">
+                            <Label htmlFor="expected-response">Expected Response</Label>
+                            <Textarea
+                                id="expected-response"
+                                placeholder="Enter the expected response from the agent."
+                                className="h-48"
+                                value={revisedAnswerText}
+                                onChange={(e) => setRevisedAnswerText(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex justify-between gap-2 pt-4">
+                            <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>Cancel</Button>
+                            <Button className="w-full" onClick={handleUpdate} disabled={isUpdating}>
+                                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Update Answer
+                            </Button>
+                        </div>
                     </div>
-                    <div className="grid w-full gap-1.5">
-                        <Label htmlFor="agent-response">Agent Response</Label>
-                        <Textarea
-                            id="agent-response"
-                            value={message.output}
-                            disabled
-                            className="h-48"
-                        />
-                    </div>
-                    <div className="grid w-full gap-1.5">
-                        <Label htmlFor="expected-response">Expected Response</Label>
-                        <Textarea
-                            id="expected-response"
-                            placeholder="Enter the expected response from the agent."
-                            className="h-48"
-                            value={revisedAnswerText}
-                            onChange={(e) => setRevisedAnswerText(e.target.value)}
-                        />
-                    </div>
-                </div>
-                <div className="flex justify-between gap-2 pt-4">
-                    <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>Cancel</Button>
-                    <Button className="w-full" onClick={handleUpdate} disabled={isUpdating}>
-                        {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Update Answer
-                    </Button>
-                </div>
+                </ScrollArea>
             </SheetContent>
         </Sheet>
     );
