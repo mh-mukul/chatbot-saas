@@ -6,13 +6,13 @@ const apiClient = axios.create({
 
 export interface fileSourceListResponse {
     id: string;
-    source_name: string;
+    title: string;
 }
 
 export interface fileSourceDetailsResponse {
     id: string;
-    source_name: string;
-    source_content: string;
+    title: string;
+    content: string;
     is_trained: boolean;
     created_at: Date;
     updated_at: Date;
@@ -30,7 +30,7 @@ export const getFileSourceList = async (agent_id: number): Promise<fileSourceLis
 
 export const getFileSourceDetails = async (id: string): Promise<fileSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources?file_id=${id}`);
+        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=file`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${id}:`, error);
@@ -40,13 +40,13 @@ export const getFileSourceDetails = async (id: string): Promise<fileSourceDetail
 
 export interface textSourceListResponse {
     id: string;
-    source_name: string;
+    title: string;
 }
 
 export interface textSourceDetailsResponse {
     id: string;
-    source_name: string;
-    source_content: string;
+    title: string;
+    content: string;
     is_trained: boolean;
     created_at: Date;
     updated_at: Date;
@@ -62,9 +62,9 @@ export const getTextSourceList = async (agent_id: number): Promise<textSourceLis
     }
 };
 
-export const getTextSourceDetails = async (id: number): Promise<textSourceDetailsResponse> => {
+export const getTextSourceDetails = async (id: string): Promise<textSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources?file_id=${id}`);
+        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=text`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${id}:`, error);
@@ -97,9 +97,9 @@ export const getQnaSourceList = async (agent_id: number): Promise<qnaSourceListR
     }
 };
 
-export const getQnaSourceDetails = async (id: number): Promise<qnaSourceDetailsResponse> => {
+export const getQnaSourceDetails = async (id: string): Promise<qnaSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources?file_id=${id}`);
+        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=qna`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${id}:`, error);

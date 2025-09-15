@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,71 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Plus, Brain } from "lucide-react";
+import { FileText, Upload, Plus, Brain, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  getFileSourceList,
+  getTextSourceList,
+  getQnaSourceList,
+  fileSourceListResponse,
+  textSourceListResponse,
+  qnaSourceListResponse,
+  getFileSourceDetails,
+  getTextSourceDetails,
+  getQnaSourceDetails,
+  fileSourceDetailsResponse,
+  textSourceDetailsResponse,
+  qnaSourceDetailsResponse,
+} from "@/services/source_apis";
+
+type SourceDetails = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
 
 const Sources = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
 
-  const [sources] = useState({
-    files: 8,
-    text: 12,
-    qa: 15
-  });
+  const [fileSources, setFileSources] = useState<fileSourceListResponse[]>([]);
+  const [textSources, setTextSources] = useState<textSourceListResponse[]>([]);
+  const [qnaSources, setQnaSources] = useState<qnaSourceListResponse[]>([]);
+
+  const [selectedSource, setSelectedSource] = useState<SourceDetails>(null);
+  const [selectedSourceType, setSelectedSourceType] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const agentId = parseInt(id, 10);
+      getFileSourceList(agentId).then(setFileSources);
+      getTextSourceList(agentId).then(setTextSources);
+      getQnaSourceList(agentId).then(setQnaSources);
+    }
+  }, [id]);
+
+  const handleSourceClick = async (sourceId: string, type: string) => {
+    setSelectedSourceType(type);
+    try {
+      let details: SourceDetails = null;
+      if (type === 'file') {
+        details = await getFileSourceDetails(sourceId);
+      } else if (type === 'text') {
+        details = await getTextSourceDetails(sourceId);
+      } else if (type === 'qna') {
+        details = await getQnaSourceDetails(sourceId);
+      }
+      setSelectedSource(details);
+    } catch (error) {
+      console.error("Error fetching source details:", error);
+      toast({
+        title: "Error",
+        description: "Could not fetch source details.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBackClick = () => {
+    setSelectedSource(null);
+    setSelectedSourceType(null);
+  };
 
   const handleTrainAgent = () => {
     toast({
@@ -26,6 +79,45 @@ const Sources = () => {
       description: "Your agent is being trained with the latest sources.",
     });
   };
+
+  if (selectedSource && selectedSourceType) {
+    return (
+      <div className="flex h-full">
+        <div className="flex-1 p-6">
+          <Button variant="ghost" onClick={handleBackClick} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to sources
+          </Button>
+          <Card>
+            <CardHeader>
+              <CardTitle>{'title' in selectedSource ? selectedSource.title : "Title Not found"}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {selectedSourceType === 'file' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
+              {selectedSourceType === 'text' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
+              {selectedSourceType === 'qna' && 'questions' in selectedSource && (
+                <div>
+                  <h4 className="font-bold">Questions:</h4>
+                  <pre className="whitespace-pre-wrap mb-4">{selectedSource.questions}</pre>
+                  <h4 className="font-bold">Answer:</h4>
+                  <pre className="whitespace-pre-wrap">{selectedSource.answer}</pre>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 bg-gradient-card/30 p-6 space-y-6">
+          <h2 className="text-xl font-bold mb-4">Details</h2>
+          <div className="space-y-2 text-sm">
+            <p><strong>ID:</strong> {selectedSource.id}</p>
+            <p><strong>Trained:</strong> <Badge variant={selectedSource.is_trained ? "default" : "secondary"}>{selectedSource.is_trained ? 'Yes' : 'No'}</Badge></p>
+            <p><strong>Created At:</strong> {new Date(selectedSource.created_at).toLocaleString()}</p>
+            <p><strong>Updated At:</strong> {new Date(selectedSource.updated_at).toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -70,23 +162,15 @@ const Sources = () => {
             </Card>
 
             <div className="space-y-3">
-              {[
-                { name: "user-manual.pdf", size: "2.4 MB", status: "processed" },
-                { name: "faq-document.txt", size: "156 KB", status: "processing" },
-                { name: "product-guide.docx", size: "3.1 MB", status: "processed" }
-              ].map((file, index) => (
-                <Card key={index} className="bg-gradient-card/50 border-border/50">
+              {fileSources.map((file) => (
+                <Card key={file.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(file.id, 'file')}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="font-medium text-sm">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">{file.size}</p>
+                        <p className="font-medium text-sm">{file.title}</p>
                       </div>
                     </div>
-                    <Badge variant={file.status === "processed" ? "default" : "secondary"}>
-                      {file.status}
-                    </Badge>
                   </CardContent>
                 </Card>
               ))}
@@ -122,21 +206,12 @@ const Sources = () => {
             </Card>
 
             <div className="space-y-3">
-              {[
-                { title: "Company Policies", content: "Our comprehensive company policies and procedures...", words: 450 },
-                { title: "Product Features", content: "Detailed overview of all product features and capabilities...", words: 320 }
-              ].map((item, index) => (
-                <Card key={index} className="bg-gradient-card/50 border-border/50">
+              {textSources.map((item) => (
+                <Card key={item.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'text')}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-medium text-sm">{item.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {item.content}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {item.words} words
-                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -182,23 +257,10 @@ const Sources = () => {
             </Card>
 
             <div className="space-y-3">
-              {[
-                { title: "Account Setup", question: "How do I create an account?", answer: "To create an account, click on the sign-up button..." },
-                { title: "Password Reset", question: "I forgot my password", answer: "You can reset your password by clicking the forgot password link..." }
-              ].map((item, index) => (
-                <Card key={index} className="bg-gradient-card/50 border-border/50">
+              {qnaSources.map((item) => (
+                <Card key={item.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'qna')}>
                   <CardContent className="p-4">
                     <h3 className="font-medium text-sm mb-2">{item.title}</h3>
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Question:</p>
-                        <p className="text-xs">{item.question}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Answer:</p>
-                        <p className="text-xs line-clamp-2">{item.answer}</p>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -219,7 +281,7 @@ const Sources = () => {
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{sources.files}</div>
+                  <div className="text-2xl font-bold text-primary">{fileSources.length}</div>
                   <div className="text-sm text-muted-foreground">Files</div>
                 </div>
               </CardContent>
@@ -228,7 +290,7 @@ const Sources = () => {
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{sources.text}</div>
+                  <div className="text-2xl font-bold text-primary">{textSources.length}</div>
                   <div className="text-sm text-muted-foreground">Text Sources</div>
                 </div>
               </CardContent>
@@ -237,7 +299,7 @@ const Sources = () => {
             <Card className="bg-gradient-card border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{sources.qa}</div>
+                  <div className="text-2xl font-bold text-primary">{qnaSources.length}</div>
                   <div className="text-sm text-muted-foreground">Q&A Pairs</div>
                 </div>
               </CardContent>
