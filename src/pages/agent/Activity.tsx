@@ -1,7 +1,7 @@
 import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/chat_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw } from "lucide-react";
+import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
@@ -102,7 +102,7 @@ const ActivityPage = () => {
           </div>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-200px)]">
+        <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="space-y-3">
             {chatSessions.map((session) => (
               <Card
@@ -143,13 +143,16 @@ const ActivityPage = () => {
 
       {/* Right Panel - Messages */}
       <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b border-border/50 bg-gradient-card/20">
+        <div className="p-3 border-b border-border/50 justify-between flex items-center">
           <p className="text-muted-foreground mt-1">
             {selectedSession?.session_id}
           </p>
+          <Button variant="outline">
+            <Ellipsis className="h-4 w-4" />
+          </Button>
         </div>
 
-        <ScrollArea className="flex-1 p-6">
+        <ScrollArea className="p-3 h-[calc(100vh-180px)]">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div

@@ -23,6 +23,7 @@ import {
   textSourceDetailsResponse,
   qnaSourceDetailsResponse,
 } from "@/services/source_apis";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type SourceDetails = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
 
@@ -83,30 +84,32 @@ const Sources = () => {
   if (selectedSource && selectedSourceType) {
     return (
       <div className="flex h-full">
-        <div className="flex-1 p-6">
-          <Button variant="ghost" onClick={handleBackClick} className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to sources
-          </Button>
-          <Card>
-            <CardHeader>
-              <CardTitle>{'title' in selectedSource ? selectedSource.title : "Title Not found"}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedSourceType === 'file' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
-              {selectedSourceType === 'text' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
-              {selectedSourceType === 'qna' && 'questions' in selectedSource && (
-                <div>
-                  <h4 className="font-bold">Questions:</h4>
-                  <pre className="whitespace-pre-wrap mb-4">{selectedSource.questions}</pre>
-                  <h4 className="font-bold">Answer:</h4>
-                  <pre className="whitespace-pre-wrap">{selectedSource.answer}</pre>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 bg-gradient-card/30 p-6 space-y-6">
+        <ScrollArea className="h-[calc(100vh-80px)]">
+          <div className="flex-1 p-6">
+            <Button variant="ghost" onClick={handleBackClick} className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to sources
+            </Button>
+            <Card>
+              <CardHeader>
+                <CardTitle>{'title' in selectedSource ? selectedSource.title : "Title Not found"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedSourceType === 'file' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
+                {selectedSourceType === 'text' && 'content' in selectedSource && <pre className="whitespace-pre-wrap">{selectedSource.content}</pre>}
+                {selectedSourceType === 'qna' && 'questions' in selectedSource && (
+                  <div>
+                    <h4 className="font-bold">Questions:</h4>
+                    <pre className="whitespace-pre-wrap mb-4">{selectedSource.questions}</pre>
+                    <h4 className="font-bold">Answer:</h4>
+                    <pre className="whitespace-pre-wrap">{selectedSource.answer}</pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
+        <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
           <h2 className="text-xl font-bold mb-4">Details</h2>
           <div className="space-y-2 text-sm">
             <p><strong>ID:</strong> {selectedSource.id}</p>
@@ -123,14 +126,14 @@ const Sources = () => {
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Tabs */}
       <div className="flex-1 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold bg-clip-text">
+        {/* <div className="mb-6">
+          <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
             Knowledge Sources
-          </h1>
+          </h2>
           <p className="text-muted-foreground mt-1">
             Manage training data for your AI agent
           </p>
-        </div>
+        </div> */}
 
         <Tabs defaultValue="files" className="h-[calc(100vh-180px)]">
           <TabsList className="grid w-full grid-cols-3">
@@ -140,7 +143,7 @@ const Sources = () => {
           </TabsList>
 
           <TabsContent value="files" className="mt-6 space-y-4">
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">Upload Files</CardTitle>
                 <CardDescription>
@@ -163,7 +166,7 @@ const Sources = () => {
 
             <div className="space-y-3">
               {fileSources.map((file) => (
-                <Card key={file.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(file.id, 'file')}>
+                <Card key={file.id} className="border-border/50 cursor-pointer" onClick={() => handleSourceClick(file.id, 'file')}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-primary" />
@@ -178,7 +181,7 @@ const Sources = () => {
           </TabsContent>
 
           <TabsContent value="text" className="mt-6 space-y-4">
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">Add Text Content</CardTitle>
                 <CardDescription>
@@ -198,16 +201,18 @@ const Sources = () => {
                     className="min-h-32"
                   />
                 </div>
-                <Button className="bg-gradient-primary">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Text Source
-                </Button>
+                <div className="text-right">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Text Source
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
             <div className="space-y-3">
               {textSources.map((item) => (
-                <Card key={item.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'text')}>
+                <Card key={item.id} className="border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'text')}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -221,7 +226,7 @@ const Sources = () => {
           </TabsContent>
 
           <TabsContent value="qa" className="mt-6 space-y-4">
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">Add Q&A Pair</CardTitle>
                 <CardDescription>
@@ -249,16 +254,18 @@ const Sources = () => {
                     className="min-h-24"
                   />
                 </div>
-                <Button className="bg-gradient-primary">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Q&A Pair
-                </Button>
+                <div className="text-right">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Q&A Pair
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
             <div className="space-y-3">
               {qnaSources.map((item) => (
-                <Card key={item.id} className="bg-gradient-card/50 border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'qna')}>
+                <Card key={item.id} className="border-border/50 cursor-pointer" onClick={() => handleSourceClick(item.id, 'qna')}>
                   <CardContent className="p-4">
                     <h3 className="font-medium text-sm mb-2">{item.title}</h3>
                   </CardContent>
@@ -270,7 +277,7 @@ const Sources = () => {
       </div>
 
       {/* Right Panel - Summary & Actions */}
-      <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 bg-gradient-card/30 p-6 space-y-6">
+      <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
         <div>
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
@@ -278,7 +285,7 @@ const Sources = () => {
           </h2>
 
           <div className="space-y-4">
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{fileSources.length}</div>
@@ -287,7 +294,7 @@ const Sources = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{textSources.length}</div>
@@ -296,7 +303,7 @@ const Sources = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-card border-border/50">
+            <Card className="border-border/50">
               <CardContent className="p-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{qnaSources.length}</div>

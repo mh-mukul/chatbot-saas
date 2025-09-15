@@ -105,89 +105,92 @@ const Playground = () => {
   return (
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Configuration */}
-      <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6 space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-            Playground
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Adjust the agent's parameter based on your needs. Make sure to save after making changes.
-          </p>
-        </div>
+      <ScrollArea className="h-[calc(100vh-80px)]">
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span>Agent Status:</span>
-            {agent.training_status === "trained" ? (
-              <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                Trained
-              </span>
-            ) : (
-              <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                {agent.training_status.charAt(0).toUpperCase() + agent.training_status.slice(1)}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span>Last Trained:</span>
-            <span className="text-sm text-gray-600">
-              {agent.last_trained_at
-                ? formatDistanceToNow(new Date(agent.last_trained_at), { addSuffix: true })
-                : "Never"}
-            </span>
-          </div>
-          <Button className="w-full" disabled={!isChanged} onClick={handleSaveChanges}>
-            Save Changes
-          </Button>
+        <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6 space-y-6">
           <div>
-            <Label htmlFor="agent-name" className="text-sm font-medium">
-              Agent Name
-            </Label>
-            <Input
-              id="agent-name"
-              value={agent.name || ""}
-              onChange={(e) => setAgentName(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium">
-              Temperature: {agent.temperature || 0}
-            </Label>
-            <div className="mt-2">
-              <Slider
-                value={[agent.temperature || 0]}
-                onValueChange={setTemperature}
-                max={1}
-                min={0}
-                step={0.1}
-                className="w-full"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Controls randomness in responses
+            <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+              Playground
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Adjust the agent's parameter based on your needs. Make sure to save after making changes.
             </p>
           </div>
 
-          <div>
-            <Label htmlFor="system-prompt" className="text-sm font-medium">
-              System Prompt
-            </Label>
-            <Textarea
-              id="system-prompt"
-              value={agent.system_prompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
-              className="mt-1 min-h-64"
-              placeholder="Define how your agent should behave..."
-            />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span>Agent Status:</span>
+              {agent.training_status === "trained" ? (
+                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                  Trained
+                </span>
+              ) : (
+                <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                  {agent.training_status.charAt(0).toUpperCase() + agent.training_status.slice(1)}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span>Last Trained:</span>
+              <span className="text-sm text-gray-600">
+                {agent.last_trained_at
+                  ? formatDistanceToNow(new Date(agent.last_trained_at), { addSuffix: true })
+                  : "Never"}
+              </span>
+            </div>
+            <Button className="w-full" disabled={!isChanged} onClick={handleSaveChanges}>
+              Save Changes
+            </Button>
+            <div>
+              <Label htmlFor="agent-name" className="text-sm font-medium">
+                Agent Name
+              </Label>
+              <Input
+                id="agent-name"
+                value={agent.name || ""}
+                onChange={(e) => setAgentName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium">
+                Temperature: {agent.temperature || 0}
+              </Label>
+              <div className="mt-2">
+                <Slider
+                  value={[agent.temperature || 0]}
+                  onValueChange={setTemperature}
+                  max={1}
+                  min={0}
+                  step={0.1}
+                  className="w-full"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Controls randomness in responses
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="system-prompt" className="text-sm font-medium">
+                System Prompt
+              </Label>
+              <Textarea
+                id="system-prompt"
+                value={agent.system_prompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                className="mt-1 min-h-64"
+                placeholder="Define how your agent should behave..."
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollArea>
 
       {/* Right Panel - Chat Interface */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-[calc(100vh-80px)]">
         {/* Messages */}
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
@@ -216,7 +219,7 @@ const Playground = () => {
                   <Card
                     className={`${message.role === "user"
                       ? "bg-muted"
-                        : "border-border/50"
+                      : "border-border/50"
                       }`}
                   >
                     <CardContent className="p-3">
