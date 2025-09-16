@@ -128,6 +128,28 @@ const Sources = () => {
     }
   };
 
+  const handleSourceDeleted = () => {
+    toast({
+      title: "Source deleted",
+      description: "The source has been successfully deleted.",
+    });
+
+    // Refresh sources depending on active tab
+    if (id) {
+      const agentId = parseInt(id, 10);
+      if (activeTab === "files") {
+        getFileSourceList(agentId).then(setFileSources);
+      } else if (activeTab === "text") {
+        getTextSourceList(agentId).then(setTextSources);
+      } else if (activeTab === "qa") {
+        getQnaSourceList(agentId).then(setQnaSources);
+      }
+
+      // Refresh summary
+      getSourceSummary(agentId).then(setSourceSummary);
+    }
+  };
+
   const handleBackClick = () => {
     setSelectedSource(null);
     setSelectedSourceType(null);
@@ -172,6 +194,8 @@ const Sources = () => {
                   <FileSourceTab
                     fileSources={fileSources}
                     onSourceClick={handleSourceClick}
+                    agentId={parseInt(id!, 10)}
+                    onSourceDeleted={handleSourceDeleted}
                   />
                 </div>
               </ScrollArea>
@@ -183,6 +207,8 @@ const Sources = () => {
                   <TextSourceTab
                     textSources={textSources}
                     onSourceClick={handleSourceClick}
+                    agentId={parseInt(id!, 10)}
+                    onSourceDeleted={handleSourceDeleted}
                   />
                 </div>
               </ScrollArea>
@@ -194,6 +220,8 @@ const Sources = () => {
                   <QnaSourceTab
                     qnaSources={qnaSources}
                     onSourceClick={handleSourceClick}
+                    agentId={parseInt(id!, 10)}
+                    onSourceDeleted={handleSourceDeleted}
                   />
                 </div>
               </ScrollArea>

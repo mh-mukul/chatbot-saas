@@ -124,3 +124,19 @@ export const getSourceSummary = async (agent_id: number): Promise<sourceSummaryR
     }
 };
 
+export interface deleteSourceRequest {
+    agent_id: number;
+    source_id: string;
+    type: string;
+}
+
+// type can be 'file', 'text', or 'qna'
+export const deleteSource = async (data: deleteSourceRequest): Promise<void> => {
+    try {
+        const response = await apiClient.delete(`/api/sources`, { data });
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error deleting source with id ${data.source_id}:`, error);
+        throw error;
+    }
+}

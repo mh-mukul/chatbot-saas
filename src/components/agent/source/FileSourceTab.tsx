@@ -1,17 +1,49 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, ChevronDown, ChevronUp } from "lucide-react";
-import { fileSourceListResponse } from "@/services/source_apis";
+import { FileText, Upload, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { fileSourceListResponse, deleteSource, deleteSourceRequest } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 interface FileSourceTabProps {
     fileSources: fileSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
+    agentId: number;
+    onSourceDeleted?: () => void;
 }
 
-const FileSourceTab = ({ fileSources, onSourceClick }: FileSourceTabProps) => {
+const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted }: FileSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
+    const data: deleteSourceRequest = {
+        agent_id: agentId,
+        source_id: sourceToDelete!,
+        type: 'file'
+    };
+
+    const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Prevent card click event
+        setSourceToDelete(id);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (sourceToDelete) {
+            try {
+                await deleteSource(data);
+                setDeleteDialogOpen(false);
+                setSourceToDelete(null);
+                if (onSourceDeleted) {
+                    onSourceDeleted();
+                }
+            } catch (error) {
+                console.error('Failed to delete source:', error);
+                // You could add error handling UI here
+            }
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -45,7 +77,7 @@ const FileSourceTab = ({ fileSources, onSourceClick }: FileSourceTabProps) => {
 
             <div className="space-y-3">
                 {fileSources.map((file) => (
-                    <Card key={file.id} className="border-border/50 cursor-pointer" onClick={() => onSourceClick(file.id, 'file')}>
+                    <Card key={file.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(file.id, 'file')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <FileText className="h-5 w-5 text-primary" />
@@ -53,9 +85,24 @@ const FileSourceTab = ({ fileSources, onSourceClick }: FileSourceTabProps) => {
                                     <p className="font-medium text-sm">{file.title}</p>
                                 </div>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                onClick={(e) => handleDeleteClick(e, file.id)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}
+
+                <DeleteConfirmation
+                    isOpen={deleteDialogOpen}
+                    onClose={() => setDeleteDialogOpen(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="file source"
+                />
             </div>
         </div>
     );

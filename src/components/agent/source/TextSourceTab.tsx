@@ -4,17 +4,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, ChevronDown, ChevronUp, Text } from "lucide-react";
-import { textSourceListResponse } from "@/services/source_apis";
+import { Plus, ChevronDown, ChevronUp, Text, Trash2 } from "lucide-react";
+import { textSourceListResponse, deleteSource, deleteSourceRequest } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 interface TextSourceTabProps {
     textSources: textSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
+    agentId: number;
+    onSourceDeleted?: () => void;
 }
 
-const TextSourceTab = ({ textSources, onSourceClick }: TextSourceTabProps) => {
+const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted }: TextSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
+    const data: deleteSourceRequest = {
+        agent_id: agentId,
+        source_id: sourceToDelete!,
+        type: 'file'
+    };
+
+    const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Prevent card click event
+        setSourceToDelete(id);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (sourceToDelete) {
+            try {
+                await deleteSource(data);
+                setDeleteDialogOpen(false);
+                setSourceToDelete(null);
+                if (onSourceDeleted) {
+                    onSourceDeleted();
+                }
+            } catch (error) {
+                console.error('Failed to delete source:', error);
+                // You could add error handling UI here
+            }
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -56,7 +88,7 @@ const TextSourceTab = ({ textSources, onSourceClick }: TextSourceTabProps) => {
 
             <div className="space-y-3">
                 {textSources.map((item) => (
-                    <Card key={item.id} className="border-border/50 cursor-pointer" onClick={() => onSourceClick(item.id, 'text')}>
+                    <Card key={item.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.id, 'text')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Text className="h-5 w-5 text-primary" />
@@ -64,9 +96,24 @@ const TextSourceTab = ({ textSources, onSourceClick }: TextSourceTabProps) => {
                                     <h3 className="font-medium text-sm">{item.title}</h3>
                                 </div>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                onClick={(e) => handleDeleteClick(e, item.id)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}
+
+                <DeleteConfirmation
+                    isOpen={deleteDialogOpen}
+                    onClose={() => setDeleteDialogOpen(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="text source"
+                />
             </div>
         </div>
     );

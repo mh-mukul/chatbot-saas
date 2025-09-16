@@ -4,17 +4,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, ChevronDown, ChevronUp, TableOfContents, MessageCircleQuestion } from "lucide-react";
-import { qnaSourceListResponse } from "@/services/source_apis";
+import { Plus, ChevronDown, ChevronUp, MessageCircleQuestion, Trash2 } from "lucide-react";
+import { qnaSourceListResponse, deleteSource, deleteSourceRequest } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 interface QnaSourceTabProps {
     qnaSources: qnaSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
+    agentId: number;
+    onSourceDeleted?: () => void;
 }
 
-const QnaSourceTab = ({ qnaSources, onSourceClick }: QnaSourceTabProps) => {
+const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: QnaSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
+    const data: deleteSourceRequest = {
+        agent_id: agentId,
+        source_id: sourceToDelete!,
+        type: 'qna'
+    };
+
+    const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Prevent card click event
+        setSourceToDelete(id);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (sourceToDelete) {
+            try {
+                await deleteSource(data);
+                setDeleteDialogOpen(false);
+                setSourceToDelete(null);
+                if (onSourceDeleted) {
+                    onSourceDeleted();
+                }
+            } catch (error) {
+                console.error('Failed to delete source:', error);
+                // You could add error handling UI here
+            }
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -64,7 +96,7 @@ const QnaSourceTab = ({ qnaSources, onSourceClick }: QnaSourceTabProps) => {
 
             <div className="space-y-3">
                 {qnaSources.map((item) => (
-                    <Card key={item.id} className="border-border/50 cursor-pointer" onClick={() => onSourceClick(item.id, 'qna')}>
+                    <Card key={item.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.id, 'qna')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <MessageCircleQuestion className="h-5 w-5 text-primary" />
@@ -72,9 +104,24 @@ const QnaSourceTab = ({ qnaSources, onSourceClick }: QnaSourceTabProps) => {
                                     <h3 className="font-medium text-sm">{item.title}</h3>
                                 </div>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                onClick={(e) => handleDeleteClick(e, item.id)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}
+
+                <DeleteConfirmation
+                    isOpen={deleteDialogOpen}
+                    onClose={() => setDeleteDialogOpen(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="Q&A source"
+                />
             </div>
         </div>
     );
