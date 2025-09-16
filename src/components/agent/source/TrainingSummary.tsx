@@ -1,47 +1,49 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, MessageCircleQuestion, Text, FileText } from "lucide-react";
 
 interface TrainingSummaryProps {
     fileSources: number;
     textSources: number;
     qnaSources: number;
+    trainingRequired: boolean;
     onTrainAgent: () => void;
 }
 
-const TrainingSummary = ({ fileSources, textSources, qnaSources, onTrainAgent }: TrainingSummaryProps) => {
+const TrainingSummary = ({ fileSources, textSources, qnaSources, trainingRequired, onTrainAgent }: TrainingSummaryProps) => {
     return (
         <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
             <div>
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                     <Brain className="h-5 w-5 text-primary" />
-                    Training Summary
+                    Training Sources
                 </h2>
-
                 <div className="space-y-4">
                     <Card className="border-border/50">
-                        <CardContent className="p-4">
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">{fileSources}</div>
-                                <div className="text-sm text-muted-foreground">Files</div>
+                        <CardContent className="p-4 flex items-center justify-between gap-3">
+                            <FileText className="h-5 w-5 text-primary" />
+                            <div className="flex-1">
+                                <h3 className="font-medium text-sm">{fileSources} Files</h3>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card className="border-border/50">
-                        <CardContent className="p-4">
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">{textSources}</div>
-                                <div className="text-sm text-muted-foreground">Text Sources</div>
+                        <CardContent className="p-4 flex items-center justify-between gap-3">
+                            <Text className="h-5 w-5 text-primary" />
+                            <div className="flex-1">
+                                <h3 className="font-medium text-sm">{textSources} Text Sources</h3>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card className="border-border/50">
-                        <CardContent className="p-4">
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">{qnaSources}</div>
-                                <div className="text-sm text-muted-foreground">Q&A Pairs</div>
+                        <CardContent className="p-4 flex items-center justify-between gap-3">
+                            <MessageCircleQuestion className="h-5 w-5 text-primary" />
+                            <div className="flex-1">
+                                <h3 className="font-medium text-sm">{qnaSources} Q&A Pairs</h3>
                             </div>
                         </CardContent>
                     </Card>
@@ -53,9 +55,17 @@ const TrainingSummary = ({ fileSources, textSources, qnaSources, onTrainAgent }:
                 className="w-full transition-spring"
                 size="lg"
             >
-                <Brain className="h-4 w-4 mr-2" />
                 Train Agent
             </Button>
+
+            {trainingRequired && (
+                <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                        Training is required for changes to apply
+                    </AlertDescription>
+                </Alert>
+            )}
         </div>
     );
 };

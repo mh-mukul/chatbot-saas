@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, ChevronDown, ChevronUp, TableOfContents } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, TableOfContents, MessageCircleQuestion } from "lucide-react";
 import { qnaSourceListResponse } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -67,7 +67,7 @@ const QnaSourceTab = ({ qnaSources, onSourceClick }: QnaSourceTabProps) => {
                     <Card key={item.id} className="border-border/50 cursor-pointer" onClick={() => onSourceClick(item.id, 'qna')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <TableOfContents className="h-5 w-5 text-primary" />
+                                <MessageCircleQuestion className="h-5 w-5 text-primary" />
                                 <div className="flex-1">
                                     <h3 className="font-medium text-sm">{item.title}</h3>
                                 </div>

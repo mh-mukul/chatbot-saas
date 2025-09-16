@@ -15,12 +15,15 @@ import {
   fileSourceDetailsResponse,
   textSourceDetailsResponse,
   qnaSourceDetailsResponse,
+  getSourceSummary,
+  sourceSummaryResponse,
 } from "@/services/source_apis";
 import FileSourceTab from "@/components/agent/source/FileSourceTab";
 import TextSourceTab from "@/components/agent/source/TextSourceTab";
 import QnaSourceTab from "@/components/agent/source/QnaSourceTab";
 import SourceDetails from "@/components/agent/source/SourceDetails";
 import TrainingSummary from "@/components/agent/source/TrainingSummary";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type SourceDetailsType = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
 
@@ -28,21 +31,80 @@ const Sources = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
 
+  const [activeTab, setActiveTab] = useState("files");
   const [fileSources, setFileSources] = useState<fileSourceListResponse[]>([]);
   const [textSources, setTextSources] = useState<textSourceListResponse[]>([]);
   const [qnaSources, setQnaSources] = useState<qnaSourceListResponse[]>([]);
+  const [sourceSummary, setSourceSummary] = useState<sourceSummaryResponse | null>(null);
 
   const [selectedSource, setSelectedSource] = useState<SourceDetailsType>(null);
   const [selectedSourceType, setSelectedSourceType] = useState<string | null>(null);
 
+  // Load summary when component mounts
   useEffect(() => {
     if (id) {
       const agentId = parseInt(id, 10);
-      getFileSourceList(agentId).then(setFileSources);
-      getTextSourceList(agentId).then(setTextSources);
-      getQnaSourceList(agentId).then(setQnaSources);
+      getSourceSummary(agentId).then(setSourceSummary).catch(err => {
+        console.error("Error fetching source summary:", err);
+        toast({
+          title: "Error",
+          description: "Could not fetch source summary.",
+          variant: "destructive",
+        });
+      });
     }
-  }, [id]);
+  }, [id, toast]);
+
+  // Load file sources only when the "files" tab is active
+  useEffect(() => {
+    if (id && activeTab === "files" && fileSources.length === 0) {
+      const agentId = parseInt(id, 10);
+      getFileSourceList(agentId)
+        .then(setFileSources)
+        .catch(err => {
+          console.error("Error fetching file sources:", err);
+          toast({
+            title: "Error",
+            description: "Could not fetch file sources.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [id, activeTab, fileSources.length, toast]);
+
+  // Load text sources only when the "text" tab is active
+  useEffect(() => {
+    if (id && activeTab === "text" && textSources.length === 0) {
+      const agentId = parseInt(id, 10);
+      getTextSourceList(agentId)
+        .then(setTextSources)
+        .catch(err => {
+          console.error("Error fetching text sources:", err);
+          toast({
+            title: "Error",
+            description: "Could not fetch text sources.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [id, activeTab, textSources.length, toast]);
+
+  // Load QnA sources only when the "qa" tab is active
+  useEffect(() => {
+    if (id && activeTab === "qa" && qnaSources.length === 0) {
+      const agentId = parseInt(id, 10);
+      getQnaSourceList(agentId)
+        .then(setQnaSources)
+        .catch(err => {
+          console.error("Error fetching QnA sources:", err);
+          toast({
+            title: "Error",
+            description: "Could not fetch QnA sources.",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [id, activeTab, qnaSources.length, toast]);
 
   const handleSourceClick = async (sourceId: string, type: string) => {
     setSelectedSourceType(type);
@@ -92,41 +154,58 @@ const Sources = () => {
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Tabs */}
       <div className="flex-1 p-6">
-        <Tabs defaultValue="files" className="h-[calc(100vh-180px)]">
+        <Tabs
+          defaultValue="files"
+          className="h-[calc(100vh-120px)] flex flex-col"
+          onValueChange={(value) => setActiveTab(value)}
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="files">Files</TabsTrigger>
             <TabsTrigger value="text">Text</TabsTrigger>
             <TabsTrigger value="qa">Q&A</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="files" className="mt-6 space-y-4">
-            <FileSourceTab
-              fileSources={fileSources}
-              onSourceClick={handleSourceClick}
-            />
-          </TabsContent>
+          <div className="flex-1 overflow-hidden mt-6">
+            <TabsContent value="files" className="h-full data-[state=active]:flex data-[state=active]:flex-col">
+              <ScrollArea className="flex-1">
+                <div className="space-y-4 p-1">
+                  <FileSourceTab
+                    fileSources={fileSources}
+                    onSourceClick={handleSourceClick}
+                  />
+                </div>
+              </ScrollArea>
+            </TabsContent>
 
-          <TabsContent value="text" className="mt-6 space-y-4">
-            <TextSourceTab
-              textSources={textSources}
-              onSourceClick={handleSourceClick}
-            />
-          </TabsContent>
+            <TabsContent value="text" className="h-full data-[state=active]:flex data-[state=active]:flex-col">
+              <ScrollArea className="flex-1">
+                <div className="space-y-4 p-1">
+                  <TextSourceTab
+                    textSources={textSources}
+                    onSourceClick={handleSourceClick}
+                  />
+                </div>
+              </ScrollArea>
+            </TabsContent>
 
-          <TabsContent value="qa" className="mt-6 space-y-4">
-            <QnaSourceTab
-              qnaSources={qnaSources}
-              onSourceClick={handleSourceClick}
-            />
-          </TabsContent>
+            <TabsContent value="qa" className="h-full data-[state=active]:flex data-[state=active]:flex-col">
+              <ScrollArea className="flex-1">
+                <div className="space-y-4 p-1">
+                  <QnaSourceTab
+                    qnaSources={qnaSources}
+                    onSourceClick={handleSourceClick}
+                  />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </div>
         </Tabs>
-      </div>
-
-      {/* Right Panel - Summary & Actions */}
+      </div>      {/* Right Panel - Summary & Actions */}
       <TrainingSummary
-        fileSources={fileSources.length}
-        textSources={textSources.length}
-        qnaSources={qnaSources.length}
+        fileSources={sourceSummary?.files || 0}
+        textSources={sourceSummary?.texts || 0}
+        qnaSources={sourceSummary?.qnas || 0}
+        trainingRequired={sourceSummary?.training_required || false}
         onTrainAgent={handleTrainAgent}
       />
     </div>
