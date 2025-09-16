@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, Text, Trash2 } from "lucide-react";
-import { textSourceListResponse, deleteSource, deleteSourceRequest } from "@/services/source_apis";
+import { textSourceListResponse, deleteSource, deleteSourceRequest, createTextSource, createTextSourceRequest } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 
@@ -14,16 +14,21 @@ interface TextSourceTabProps {
     onSourceClick: (id: string, type: string) => void;
     agentId: number;
     onSourceDeleted?: () => void;
+    onSourceAdded?: () => void;
 }
 
-const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted }: TextSourceTabProps) => {
+const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded }: TextSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const data: deleteSourceRequest = {
         agent_id: agentId,
         source_id: sourceToDelete!,
-        type: 'file'
+        type: 'text'
     };
 
     const handleDeleteClick = (e: React.MouseEvent, id: string) => {
@@ -48,6 +53,36 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted }:
         }
     };
 
+    const handleAddTextSource = async () => {
+        if (!title || !content) return;
+
+        setIsSubmitting(true);
+
+        const textSourceData: createTextSourceRequest = {
+            agent_id: agentId,
+            type: 'text',
+            title,
+            content
+        };
+
+        try {
+            await createTextSource(textSourceData);
+
+            // Reset form fields
+            setTitle("");
+            setContent("");
+
+            // Refresh the source list
+            if (onSourceAdded) {
+                onSourceAdded();
+            }
+        } catch (error) {
+            console.error('Failed to create text source:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md border-border/50">
@@ -66,7 +101,12 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted }:
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="title">Title</Label>
-                            <Input id="title" placeholder="Enter content title" />
+                            <Input
+                                id="title"
+                                placeholder="Enter content title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
                         </div>
                         <div>
                             <Label htmlFor="content">Content</Label>
@@ -74,12 +114,17 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted }:
                                 id="content"
                                 placeholder="Enter your text content here..."
                                 className="min-h-32"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
                             />
                         </div>
                         <div className="text-right">
-                            <Button>
+                            <Button
+                                onClick={handleAddTextSource}
+                                disabled={isSubmitting || !title || !content}
+                            >
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Text Source
+                                {isSubmitting ? "Adding..." : "Add Text Source"}
                             </Button>
                         </div>
                     </CardContent>

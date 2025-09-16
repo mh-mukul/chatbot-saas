@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import React, { useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DeleteConfirmationProps {
     isOpen: boolean;
@@ -14,7 +23,7 @@ const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
     onClose,
     onConfirm,
     title,
-    description = "This action cannot be undone."
+    description = "This action cannot be undone.",
 }) => {
     const [isLoading, setIsLoading] = useState(false);
 
@@ -22,6 +31,8 @@ const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
         try {
             setIsLoading(true);
             await onConfirm();
+        } catch (error) {
+            console.error("Error during deletion:", error);
         } finally {
             setIsLoading(false);
             onClose();
@@ -29,16 +40,31 @@ const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
     };
 
     return (
-        <AlertDialog open={isOpen} onOpenChange={(open) => !isLoading && !open && onClose()}>
+        <AlertDialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                // Only allow the dialog to close if not loading
+                if (!isLoading && !open) {
+                    onClose();
+                }
+                // If loading, prevent closing
+                return !isLoading;
+            }}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure you want to delete this {title}?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        Are you sure you want to delete this {title}?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>{description}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isLoading} onClick={onClose}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={handleConfirm}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            handleConfirm();
+                        }}
                         disabled={isLoading}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >

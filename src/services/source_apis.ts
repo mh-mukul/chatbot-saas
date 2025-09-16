@@ -20,7 +20,7 @@ export interface fileSourceDetailsResponse {
 
 export const getFileSourceList = async (agent_id: number): Promise<fileSourceListResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/sources/?agent=${agent_id}&type=file`);
+        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=file`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_id}:`, error);
@@ -54,7 +54,7 @@ export interface textSourceDetailsResponse {
 
 export const getTextSourceList = async (agent_id: number): Promise<textSourceListResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/sources/?agent=${agent_id}&type=text`);
+        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=text`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_id}:`, error);
@@ -89,7 +89,7 @@ export interface qnaSourceDetailsResponse {
 
 export const getQnaSourceList = async (agent_id: number): Promise<qnaSourceListResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/sources/?agent=${agent_id}&type=qna`);
+        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=qna`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_id}:`, error);
@@ -130,13 +130,70 @@ export interface deleteSourceRequest {
     type: string;
 }
 
-// type can be 'file', 'text', or 'qna'
 export const deleteSource = async (data: deleteSourceRequest): Promise<void> => {
     try {
         const response = await apiClient.delete(`/api/sources`, { data });
         return response.data.data;
     } catch (error) {
         console.error(`Error deleting source with id ${data.source_id}:`, error);
+        throw error;
+    }
+}
+
+export interface uploadFileSourceRequest {
+    agent_id: number;
+    file: File;
+}
+
+export const uploadFileSource = async (data: uploadFileSourceRequest): Promise<void> => {
+    try {
+        const formData = new FormData();
+        formData.append('agent_id', data.agent_id.toString());
+        formData.append('file', data.file);
+
+        const response = await apiClient.post(`/api/sources`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error uploading file source:`, error);
+        throw error;
+    }
+}
+
+export interface createTextSourceRequest {
+    agent_id: number;
+    type: string;
+    title: string;
+    content: string;
+}
+
+export const createTextSource = async (data: createTextSourceRequest): Promise<void> => {
+    try {
+        const response = await apiClient.post(`/api/sources`, data);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error creating text source:`, error);
+        throw error;
+    }
+}
+
+export interface createQnaSourceRequest {
+    agent_id: number;
+    type: string;
+    title: string;
+    questions: string;
+    answer: string;
+}
+
+export const createQnaSource = async (data: createQnaSourceRequest): Promise<void> => {
+    try {
+        const response = await apiClient.post(`/api/sources`, data);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error creating QnA source:`, error);
         throw error;
     }
 }

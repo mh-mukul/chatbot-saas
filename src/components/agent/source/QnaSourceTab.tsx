@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, MessageCircleQuestion, Trash2 } from "lucide-react";
-import { qnaSourceListResponse, deleteSource, deleteSourceRequest } from "@/services/source_apis";
+import { qnaSourceListResponse, deleteSource, deleteSourceRequest, createQnaSource, createQnaSourceRequest } from "@/services/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 
@@ -14,12 +14,18 @@ interface QnaSourceTabProps {
     onSourceClick: (id: string, type: string) => void;
     agentId: number;
     onSourceDeleted?: () => void;
+    onSourceAdded?: () => void;
 }
 
-const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: QnaSourceTabProps) => {
+const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded }: QnaSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
+    const [title, setTitle] = useState("");
+    const [questions, setQuestions] = useState("");
+    const [answer, setAnswer] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const data: deleteSourceRequest = {
         agent_id: agentId,
         source_id: sourceToDelete!,
@@ -48,6 +54,38 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: Q
         }
     };
 
+    const handleAddQnaPair = async () => {
+        if (!title || !questions || !answer) return;
+
+        setIsSubmitting(true);
+
+        const qnaSourceData: createQnaSourceRequest = {
+            agent_id: agentId,
+            type: 'qna',
+            title,
+            questions,
+            answer
+        };
+
+        try {
+            await createQnaSource(qnaSourceData);
+
+            // Reset form fields
+            setTitle("");
+            setQuestions("");
+            setAnswer("");
+
+            // Refresh the source list
+            if (onSourceAdded) {
+                onSourceAdded();
+            }
+        } catch (error) {
+            console.error('Failed to create QnA source:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md border-border/50">
@@ -66,7 +104,12 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: Q
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="qa-title">Title</Label>
-                            <Input id="qa-title" placeholder="Enter Q&A title" />
+                            <Input
+                                id="qa-title"
+                                placeholder="Enter Q&A title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
                         </div>
                         <div>
                             <Label htmlFor="question">Question(s)</Label>
@@ -74,6 +117,8 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: Q
                                 id="question"
                                 placeholder="Enter questions (one per line)"
                                 className="min-h-24"
+                                value={questions}
+                                onChange={(e) => setQuestions(e.target.value)}
                             />
                         </div>
                         <div>
@@ -82,12 +127,17 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted }: Q
                                 id="answer"
                                 placeholder="Enter the answer"
                                 className="min-h-24"
+                                value={answer}
+                                onChange={(e) => setAnswer(e.target.value)}
                             />
                         </div>
                         <div className="text-right">
-                            <Button>
+                            <Button
+                                onClick={handleAddQnaPair}
+                                disabled={isSubmitting || !title || !questions || !answer}
+                            >
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Q&A Pair
+                                {isSubmitting ? "Adding..." : "Add Q&A Pair"}
                             </Button>
                         </div>
                     </CardContent>

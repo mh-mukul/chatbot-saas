@@ -134,7 +134,22 @@ const Sources = () => {
       description: "The source has been successfully deleted.",
     });
 
-    // Refresh sources depending on active tab
+    // Refresh sources after deletion
+    refreshSources();
+  };
+
+  const handleSourceAdded = (sourceType: string) => {
+    toast({
+      title: "Source added",
+      description: `New ${sourceType} source has been successfully added.`,
+    });
+
+    // Refresh sources after addition
+    refreshSources();
+  };
+
+  // Common function to refresh sources
+  const refreshSources = () => {
     if (id) {
       const agentId = parseInt(id, 10);
       if (activeTab === "files") {
@@ -196,6 +211,7 @@ const Sources = () => {
                     onSourceClick={handleSourceClick}
                     agentId={parseInt(id!, 10)}
                     onSourceDeleted={handleSourceDeleted}
+                    onSourceAdded={() => handleSourceAdded('file')}
                   />
                 </div>
               </ScrollArea>
@@ -209,6 +225,7 @@ const Sources = () => {
                     onSourceClick={handleSourceClick}
                     agentId={parseInt(id!, 10)}
                     onSourceDeleted={handleSourceDeleted}
+                    onSourceAdded={() => handleSourceAdded('text')}
                   />
                 </div>
               </ScrollArea>
@@ -222,13 +239,15 @@ const Sources = () => {
                     onSourceClick={handleSourceClick}
                     agentId={parseInt(id!, 10)}
                     onSourceDeleted={handleSourceDeleted}
+                    onSourceAdded={() => handleSourceAdded('Q&A')}
                   />
                 </div>
               </ScrollArea>
             </TabsContent>
           </div>
         </Tabs>
-      </div>      {/* Right Panel - Summary & Actions */}
+      </div>      
+      {/* Right Panel - Summary & Actions */}
       <TrainingSummary
         fileSources={sourceSummary?.files || 0}
         textSources={sourceSummary?.texts || 0}
