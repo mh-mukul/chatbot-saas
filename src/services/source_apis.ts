@@ -197,3 +197,36 @@ export const createQnaSource = async (data: createQnaSourceRequest): Promise<voi
         throw error;
     }
 }
+
+export interface trainSourcesRequest {
+    agent_id: number;
+}
+
+export interface trainSourcesResponse {
+    execution_id: number;
+}
+
+export const trainSources = async (data: trainSourcesRequest): Promise<trainSourcesResponse> => {
+    try {
+        const response = await apiClient.post(`/api/train-agent`, data);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error training sources for agent id ${data.agent_id}:`, error);
+        throw error;
+    }
+}
+
+export interface trainProgressResponse {
+    finished: boolean;
+    status: string; // e.g., "running", "success", "failed"
+}
+
+export const getTrainingProgress = async (execution_id: number): Promise<trainProgressResponse> => {
+    try {
+        const response = await apiClient.get(`/api/training-progress?execution_id=${execution_id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching training progress for execution id ${execution_id}:`, error);
+        throw error;
+    }
+}

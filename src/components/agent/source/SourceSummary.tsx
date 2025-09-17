@@ -2,17 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, MessageCircleQuestion, Text, FileText } from "lucide-react";
+import { AlertCircle, MessageCircleQuestion, Text, FileText, Loader2 } from "lucide-react";
 
 interface SourceSummaryProps {
     fileSources: number;
     textSources: number;
     qnaSources: number;
     trainingRequired: boolean;
+    isTraining: boolean;
     onTrainAgent: () => void;
 }
 
-const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired, onTrainAgent }: SourceSummaryProps) => {
+const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired, isTraining, onTrainAgent }: SourceSummaryProps) => {
     return (
         <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
             <div>
@@ -54,16 +55,32 @@ const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired,
                 onClick={onTrainAgent}
                 className="w-full transition-spring"
                 size="lg"
-                disabled={fileSources === 0 && textSources === 0 && qnaSources === 0}
+                disabled={(fileSources === 0 && textSources === 0 && qnaSources === 0) || isTraining}
             >
-                Retrain Agent
+                {isTraining ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Training...
+                    </>
+                ) : (
+                    "Retrain Agent"
+                )}
             </Button>
 
-            {trainingRequired && (
+            {trainingRequired && !isTraining && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
                         Retraining is required for changes to apply
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {isTraining && (
+                <Alert className="mb-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertDescription>
+                        Training in progress...
                     </AlertDescription>
                 </Alert>
             )}

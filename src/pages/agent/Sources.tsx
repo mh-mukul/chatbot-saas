@@ -17,6 +17,8 @@ import {
   qnaSourceDetailsResponse,
   getSourceSummary,
   sourceSummaryResponse,
+  trainSources,
+  getTrainingProgress,
 } from "@/services/source_apis";
 import FileSourceTab from "@/components/agent/source/FileSourceTab";
 import TextSourceTab from "@/components/agent/source/TextSourceTab";
@@ -108,6 +110,7 @@ const Sources = () => {
   const [isLoadingTextSources, setIsLoadingTextSources] = useState(false);
   const [isLoadingQnaSources, setIsLoadingQnaSources] = useState(false);
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
 
   // Load summary when component mounts
   useEffect(() => {
@@ -261,11 +264,85 @@ const Sources = () => {
     setSelectedSourceType(null);
   };
 
-  const handleTrainAgent = () => {
-    toast({
-      title: "Training started",
-      description: "Your agent is being trained with the latest sources.",
-    });
+  const handleTrainAgent = async () => {
+    if (!id) return;
+
+    setIsTraining(true);
+    try {
+      // Start the training process
+      const agentId = parseInt(id, 10);
+      const trainingResult = await trainSources({ agent_id: agentId });
+      const executionId = trainingResult.execution_id;
+
+      toast({
+        title: "Training started",
+        description: "Your agent is being trained with the latest sources.",
+      });
+
+      // Poll for training status every 3 seconds for up to 15 seconds
+      const maxAttempts = 5; // 15 seconds total (5 attempts × 3 seconds)
+      let attempts = 0;
+
+      const checkTrainingProgress = async () => {
+        try {
+          const progress = await getTrainingProgress(executionId);
+
+          if (progress.finished) {
+            setIsTraining(false);
+
+            if (progress.status === "success") {
+              toast({
+                title: "Training completed",
+                description: "Your agent has been successfully trained with the latest sources.",
+              });
+
+              // Refresh the source summary after training
+              refreshSources();
+            } else {
+              toast({
+                title: "Training failed",
+                description: "There was an error training your agent. Please try again.",
+                variant: "destructive",
+              });
+            }
+
+            return; // Exit the polling loop
+          }
+
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(checkTrainingProgress, 3000); // Check again after 3 seconds
+          } else {
+            // Max attempts reached, but don't stop showing loading state
+            // as training might still be in progress
+            toast({
+              title: "Training in progress",
+              description: "Training is still in progress. You'll be notified when it's complete.",
+            });
+          }
+        } catch (error) {
+          console.error("Error checking training progress:", error);
+          setIsTraining(false);
+          toast({
+            title: "Error",
+            description: "Could not check training progress. Please try again.",
+            variant: "destructive",
+          });
+        }
+      };
+
+      // Start polling
+      setTimeout(checkTrainingProgress, 3000);
+
+    } catch (error) {
+      console.error("Error starting training:", error);
+      setIsTraining(false);
+      toast({
+        title: "Error",
+        description: "Could not start training. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (selectedSource && selectedSourceType) {
@@ -389,6 +466,7 @@ const Sources = () => {
           textSources={sourceSummary?.texts || 0}
           qnaSources={sourceSummary?.qnas || 0}
           trainingRequired={sourceSummary?.training_required || false}
+          isTraining={isTraining}
           onTrainAgent={handleTrainAgent}
         />
       )}
