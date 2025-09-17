@@ -27,12 +27,16 @@ const ActivityPage = () => {
     if (id) {
       try {
         const sessions = await getSessionList(Number(id));
-        setChatSessions(sessions);
-        if (sessions.length > 0) {
-          setSelectedSession(sessions[0]);
+        // Ensure sessions is always an array
+        const sessionsArray = Array.isArray(sessions) ? sessions : [];
+        setChatSessions(sessionsArray);
+        if (sessionsArray.length > 0) {
+          setSelectedSession(sessionsArray[0]);
         }
       } catch (error) {
         console.error("Failed to fetch sessions:", error);
+        // Set empty array on error
+        setChatSessions([]);
       }
     }
   };
@@ -46,7 +50,9 @@ const ActivityPage = () => {
       if (selectedSession) {
         try {
           const sessionMessages = await getSessionMessages(selectedSession.session_id);
-          const formattedMessages: Message[] = sessionMessages.flatMap((msg) => [
+          // Ensure sessionMessages is always an array
+          const messagesArray = Array.isArray(sessionMessages) ? sessionMessages : [];
+          const formattedMessages: Message[] = messagesArray.flatMap((msg) => [
             { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at).toLocaleTimeString() },
             {
               role: "assistant" as const,
@@ -59,7 +65,12 @@ const ActivityPage = () => {
           setMessages(formattedMessages);
         } catch (error) {
           console.error("Failed to fetch messages:", error);
+          // Set empty array on error
+          setMessages([]);
         }
+      } else {
+        // Clear messages when no session is selected
+        setMessages([]);
       }
     };
     fetchMessages();
@@ -104,39 +115,49 @@ const ActivityPage = () => {
 
         <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="space-y-3">
-            {chatSessions.map((session) => (
-              <Card
-                key={session.id}
-                className={`cursor-pointer transition-all ${selectedSession?.id === session.id
-                  ? "border-primary"
-                  : "border-border/50 hover:border-primary/50"
-                  }`}
-                onClick={() => setSelectedSession(session)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-sm">
-                      {
-                        session.session_id && session.session_id.trim().length > 20
-                          ? session.session_id.trim().slice(0, 20) + "..."
-                          : session.session_id?.trim()
-                      }
-                    </h3>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" />
-                      {session.input && session.input.trim().length > 25
-                        ? session.input.trim().slice(0, 25) + "..."
-                        : session.input?.trim()}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {chatSessions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <h3 className="font-medium text-lg mb-2">No Chat Sessions Yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  There are no chat sessions available for this agent.
+                </p>
+              </div>
+            ) : (
+              chatSessions.map((session) => (
+                <Card
+                  key={session.id}
+                  className={`cursor-pointer transition-all ${selectedSession?.id === session.id
+                    ? "border-primary"
+                    : "border-border/50 hover:border-primary/50"
+                    }`}
+                  onClick={() => setSelectedSession(session)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium text-sm">
+                        {
+                          session.session_id && session.session_id.trim().length > 20
+                            ? session.session_id.trim().slice(0, 20) + "..."
+                            : session.session_id?.trim()
+                        }
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        {session.input && session.input.trim().length > 25
+                          ? session.input.trim().slice(0, 25) + "..."
+                          : session.input?.trim()}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -145,70 +166,90 @@ const ActivityPage = () => {
       <div className="flex-1 flex flex-col">
         <div className="p-3 border-b border-border/50 justify-between flex items-center">
           <p className="text-muted-foreground mt-1">
-            {selectedSession?.session_id}
+            {selectedSession && selectedSession.session_id ? selectedSession.session_id : "No session selected"}
           </p>
-          <Button variant="outline">
-            <Ellipsis className="h-4 w-4" />
-          </Button>
+          {selectedSession && (
+            <Button variant="outline">
+              <Ellipsis className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         <ScrollArea className="p-3 h-[calc(100vh-180px)]">
-          <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-              >
+          {!selectedSession ? (
+            <div className="flex flex-col items-center justify-center text-center h-full p-8">
+              <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="font-medium text-lg mb-2">No Session Selected</h3>
+              <p className="text-sm text-muted-foreground">
+                Please select a chat session from the left panel to view messages.
+              </p>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center h-full p-8">
+              <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="font-medium text-lg mb-2">No Messages</h3>
+              <p className="text-sm text-muted-foreground">
+                This chat session doesn't contain any messages.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message, index) => (
                 <div
-                  className={`flex gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"
+                  key={index}
+                  className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-primary text-primary-foreground"
+                    className={`flex gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"
                       }`}
                   >
-                    {message.role === "user" ? (
-                      <User className="h-4 w-4" />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
-                  </div>
-                  <Card className="w-full border-0 shadow-none">
-                    <div className="relative inline-block">
-                      <CardContent className="p-3 bg-muted rounded-lg">
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs text-muted-foreground mt-2 flex justify-end">
-                          {message.created_at}
-                        </p>
-                      </CardContent>
-
-                      {/* Floating button */}
-                      {message.role === "assistant" && (
-                        <div className="absolute -bottom-4 left-4 flex items-center">
-                          {
-                            message.rawMessage && (
-                              <ReviseAnswerSheet
-                                message={message.rawMessage}
-                                agentId={Number(id)}
-                                onSuccess={handleRevisionSuccess}
-                              >
-                                <ReviseButton>
-                                  {message.revised ? <><CheckCircle className="h-4 w-4" />Revised</> : "Revise Answer"}
-                                </ReviseButton>
-                              </ReviseAnswerSheet>
-                            )
-                          }
-                        </div>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-primary text-primary-foreground"
+                        }`}
+                    >
+                      {message.role === "user" ? (
+                        <User className="h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
                       )}
                     </div>
-                  </Card>
+                    <Card className="w-full border-0 shadow-none">
+                      <div className="relative inline-block">
+                        <CardContent className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm">{message.content}</p>
+                          <p className="text-xs text-muted-foreground mt-2 flex justify-end">
+                            {message.created_at}
+                          </p>
+                        </CardContent>
+
+                        {/* Floating button */}
+                        {message.role === "assistant" && (
+                          <div className="absolute -bottom-4 left-4 flex items-center">
+                            {
+                              message.rawMessage && (
+                                <ReviseAnswerSheet
+                                  message={message.rawMessage}
+                                  agentId={Number(id)}
+                                  onSuccess={handleRevisionSuccess}
+                                >
+                                  <ReviseButton>
+                                    {message.revised ? <><CheckCircle className="h-4 w-4" />Revised</> : "Revise Answer"}
+                                  </ReviseButton>
+                                </ReviseAnswerSheet>
+                              )
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </div>
     </div>
