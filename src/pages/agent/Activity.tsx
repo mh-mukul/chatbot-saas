@@ -1,12 +1,13 @@
 import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/chat_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis } from "lucide-react";
+import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
 import { ReviseAnswerSheet, ReviseButton } from "@/components/ReviseAnswerSheet";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Message = {
   role: "user" | "assistant";
@@ -22,9 +23,12 @@ const ActivityPage = () => {
   const [chatSessions, setChatSessions] = useState<sessionListResponse[]>([]);
   const [selectedSession, setSelectedSession] = useState<sessionListResponse | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const fetchSessions = async () => {
     if (id) {
+      setIsLoadingSessions(true);
       try {
         const sessions = await getSessionList(Number(id));
         // Ensure sessions is always an array
@@ -37,6 +41,8 @@ const ActivityPage = () => {
         console.error("Failed to fetch sessions:", error);
         // Set empty array on error
         setChatSessions([]);
+      } finally {
+        setIsLoadingSessions(false);
       }
     }
   };
@@ -48,6 +54,7 @@ const ActivityPage = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       if (selectedSession) {
+        setIsLoadingMessages(true);
         try {
           const sessionMessages = await getSessionMessages(selectedSession.session_id);
           // Ensure sessionMessages is always an array
@@ -67,6 +74,8 @@ const ActivityPage = () => {
           console.error("Failed to fetch messages:", error);
           // Set empty array on error
           setMessages([]);
+        } finally {
+          setIsLoadingMessages(false);
         }
       } else {
         // Clear messages when no session is selected
@@ -104,8 +113,16 @@ const ActivityPage = () => {
             Chat Sessions
           </h2>
           <div>
-            <Button variant="outline" onClick={fetchSessions}>
-              <RefreshCw className="h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={fetchSessions}
+              disabled={isLoadingSessions}
+            >
+              {isLoadingSessions ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
             </Button>
             <Button variant="outline" className="ml-2">
               <Filter className="h-4 w-4" />
@@ -115,7 +132,14 @@ const ActivityPage = () => {
 
         <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="space-y-3">
-            {chatSessions.length === 0 ? (
+            {isLoadingSessions ? (
+              // Loading skeletons for sessions
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="p-1">
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                </div>
+              ))
+            ) : chatSessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center p-8">
                 <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <h3 className="font-medium text-lg mb-2">No Chat Sessions Yet</h3>
@@ -184,6 +208,29 @@ const ActivityPage = () => {
                 Please select a chat session from the left panel to view messages.
               </p>
             </div>
+          ) : isLoadingMessages ? (
+            // Loading skeleton for messages
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className={`flex gap-3 ${index % 2 === 0 ? "justify-end" : "justify-start"}`}>
+                  <div className={`flex gap-3 max-w-[80%] ${index % 2 === 0 ? "flex-row-reverse" : "flex-row"}`}>
+                    <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+                    <Card className="w-full border-0 shadow-none">
+                      <div className="relative inline-block w-full">
+                        <CardContent className="p-3 bg-muted rounded-lg">
+                          <Skeleton className="h-4 w-full mb-2" />
+                          <Skeleton className="h-4 w-3/4 mb-2" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <div className="flex justify-end mt-2">
+                            <Skeleton className="h-3 w-16" />
+                          </div>
+                        </CardContent>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center h-full p-8">
               <MessageSquare className="h-12 w-12 text-muted-foreground/50 mb-4" />
@@ -205,7 +252,7 @@ const ActivityPage = () => {
                       }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
+                      className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${message.role === "user"
                         ? "bg-muted text-muted-foreground"
                         : "bg-primary text-primary-foreground"
                         }`}
@@ -217,7 +264,7 @@ const ActivityPage = () => {
                       )}
                     </div>
                     <Card className="w-full border-0 shadow-none">
-                      <div className="relative inline-block">
+                      <div className="relative inline-block w-full">
                         <CardContent className="p-3 bg-muted rounded-lg">
                           <p className="text-sm">{message.content}</p>
                           <p className="text-xs text-muted-foreground mt-2 flex justify-end">

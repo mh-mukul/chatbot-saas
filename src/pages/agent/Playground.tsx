@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '@/hooks/use-chat';
 import { clearSessionId } from '@/lib/utils';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Playground = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,12 +95,75 @@ const Playground = () => {
     }
   };
 
-  if (!agent) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading agent...</p>
+  // Skeleton loader for the agent
+  const AgentSkeleton = () => (
+    <div className="flex flex-col md:flex-row h-full">
+      {/* Left Panel - Configuration Skeleton */}
+      <div className="w-full md:w-96 border-b md:border-b-0 md:border-r p-6 space-y-6">
+        <div>
+          <Skeleton className="h-7 w-40 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+
+          <Skeleton className="h-9 w-full" />
+
+          <div>
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+
+          <div>
+            <Skeleton className="h-4 w-32 mb-1" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-2 w-40 mt-1" />
+          </div>
+
+          <div>
+            <Skeleton className="h-4 w-32 mb-1" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
       </div>
-    );
+
+      {/* Right Panel - Chat Interface Skeleton */}
+      <div className="flex-1 flex flex-col h-[calc(100vh-80px)]">
+        <div className="flex-1 p-6">
+          <div className="flex gap-3 justify-start mb-4">
+            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center bg-primary">
+              <Bot className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <Card className="border-border/50">
+              <CardContent className="p-3">
+                <Skeleton className="h-4 w-72" />
+                <Skeleton className="h-4 w-40 mt-2" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="p-6 border-t">
+          <div className="flex gap-2">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-10" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!agent) {
+    return <AgentSkeleton />;
   }
 
   return (
@@ -205,7 +269,7 @@ const Playground = () => {
                     }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
+                    className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${message.role === "user"
                       ? "bg-muted text-muted-foreground"
                       : "bg-primary text-primary-foreground"
                       }`}
@@ -235,15 +299,16 @@ const Playground = () => {
 
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center bg-primary">
                   <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <Card className="bg-gradient-card border-border/50">
+                <Card className="border-border/50">
                   <CardContent className="p-3">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-36" />
+                      <Skeleton className="h-4 w-64" />
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-4 w-24 mt-2" />
                     </div>
                   </CardContent>
                 </Card>
