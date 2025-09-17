@@ -4,7 +4,7 @@ import { Brain } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, MessageCircleQuestion, Text, FileText } from "lucide-react";
 
-interface TrainingSummaryProps {
+interface SourceSummaryProps {
     fileSources: number;
     textSources: number;
     qnaSources: number;
@@ -12,7 +12,7 @@ interface TrainingSummaryProps {
     onTrainAgent: () => void;
 }
 
-const TrainingSummary = ({ fileSources, textSources, qnaSources, trainingRequired, onTrainAgent }: TrainingSummaryProps) => {
+const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired, onTrainAgent }: SourceSummaryProps) => {
     return (
         <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
             <div>
@@ -54,15 +54,16 @@ const TrainingSummary = ({ fileSources, textSources, qnaSources, trainingRequire
                 onClick={onTrainAgent}
                 className="w-full transition-spring"
                 size="lg"
+                disabled={fileSources === 0 && textSources === 0 && qnaSources === 0}
             >
-                Train Agent
+                Retrain Agent
             </Button>
 
             {trainingRequired && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                        Training is required for changes to apply
+                        Retraining is required for changes to apply
                     </AlertDescription>
                 </Alert>
             )}
@@ -70,4 +71,4 @@ const TrainingSummary = ({ fileSources, textSources, qnaSources, trainingRequire
     );
 };
 
-export default TrainingSummary;
+export default SourceSummary;

@@ -22,7 +22,7 @@ import FileSourceTab from "@/components/agent/source/FileSourceTab";
 import TextSourceTab from "@/components/agent/source/TextSourceTab";
 import QnaSourceTab from "@/components/agent/source/QnaSourceTab";
 import SourceDetails from "@/components/agent/source/SourceDetails";
-import TrainingSummary from "@/components/agent/source/TrainingSummary";
+import SourceSummary from "@/components/agent/source/SourceSummary";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type SourceDetailsType = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
@@ -248,7 +248,7 @@ const Sources = () => {
         </Tabs>
       </div>      
       {/* Right Panel - Summary & Actions */}
-      <TrainingSummary
+      <SourceSummary
         fileSources={sourceSummary?.files || 0}
         textSources={sourceSummary?.texts || 0}
         qnaSources={sourceSummary?.qnas || 0}

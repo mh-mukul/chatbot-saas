@@ -116,7 +116,7 @@ export interface sourceSummaryResponse {
 
 export const getSourceSummary = async (agent_id: number): Promise<sourceSummaryResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources/summary?agent=${agent_id}`);
+        const response = await apiClient.get(`/api/sources/summary?agent_id=${agent_id}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching summary with id ${agent_id}:`, error);
