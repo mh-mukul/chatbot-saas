@@ -14,6 +14,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '@/hooks/use-chat';
 import { clearSessionId } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from 'react-markdown';
+
 
 const Playground = () => {
   const { id } = useParams<{ id: string }>();
@@ -288,7 +290,9 @@ const Playground = () => {
                       }`}
                   >
                     <CardContent className="p-3">
-                      <p className="text-sm">{message.content}</p>
+                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
                       <p className="text-xs text-muted-foreground mt-2">
                         {message.timestamp.toLocaleString()}
                       </p>

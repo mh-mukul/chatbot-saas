@@ -40,7 +40,7 @@ const Login = () => {
       <Card className="w-full max-w-md relative z-10 bg-gradient-card border-border/50 shadow-elegant backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-glow">
-            <Bot className="h-8 w-8 text-primary-foreground" />
+            <Bot className="h-8 w-8" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold bg-clip-text">

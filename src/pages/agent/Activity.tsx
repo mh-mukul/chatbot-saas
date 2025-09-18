@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ReviseAnswerSheet, ReviseButton } from "@/components/ReviseAnswerSheet";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from 'react-markdown';
 
 type Message = {
   role: "user" | "assistant";
@@ -266,7 +267,9 @@ const ActivityPage = () => {
                     <Card className="w-full border-0 shadow-none">
                       <div className="relative inline-block w-full">
                         <CardContent className="p-3 bg-muted rounded-lg">
-                          <p className="text-sm">{message.content}</p>
+                          <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
                           <p className="text-xs text-muted-foreground mt-2 flex justify-end">
                             {message.created_at}
                           </p>
