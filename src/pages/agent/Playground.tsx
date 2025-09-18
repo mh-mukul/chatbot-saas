@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Send, Bot, User } from "lucide-react";
+import { Bot } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAgentById, updateAgent, AgentDetails } from "@/services/agent_apis";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +14,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '@/hooks/use-chat';
 import { clearSessionId } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
-import ReactMarkdown from 'react-markdown';
 import ChatUI from "@/components/agent/playground/ChatUI";
 
 
@@ -141,23 +140,44 @@ const Playground = () => {
       </div>
 
       {/* Right Panel - Chat Interface Skeleton */}
-      <div className="flex-1 flex flex-col h-[calc(100vh-80px)]">
-        <div className="flex-1 p-6">
-          <div className="flex gap-3 justify-start mb-4">
-            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center bg-primary">
-              <Bot className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <Card className="border-border/50">
-              <CardContent className="p-3">
-                <Skeleton className="h-4 w-72" />
-                <Skeleton className="h-4 w-40 mt-2" />
-              </CardContent>
-            </Card>
+      <div className="flex-1 flex items-center justify-center dotted-background">
+        <div className="flex flex-col h-[90vh] max-w-md w-full mx-auto border rounded-2xl bg-background shadow-lg">
+          {/* Header Skeleton */}
+          <div className="px-4 py-3 border-b flex justify-between items-center">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-8 w-8" />
           </div>
-        </div>
 
-        <div className="p-6 border-t">
-          <div className="flex gap-2">
+          {/* Messages Skeleton */}
+          <div className="flex-1 p-4 space-y-4">
+            {/* Bot message skeleton */}
+            <div className="flex items-end gap-2 justify-start">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <div className="flex flex-col gap-1">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+            {/* User message skeleton */}
+            <div className="flex items-end gap-2 justify-end">
+              <div className="flex flex-col gap-1 items-end">
+                <Skeleton className="h-4 w-40" />
+              </div>
+              <Skeleton className="w-8 h-8 rounded-full" />
+            </div>
+            {/* Bot message skeleton */}
+            <div className="flex items-end gap-2 justify-start">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <div className="flex flex-col gap-1">
+                <Skeleton className="h-4 w-56" />
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Input Skeleton */}
+          <div className="p-3 border-t flex gap-2 items-center">
             <Skeleton className="h-10 flex-1" />
             <Skeleton className="h-10 w-10" />
           </div>

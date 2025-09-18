@@ -217,15 +217,15 @@ const ActivityPage = () => {
                   <div className={`flex gap-3 max-w-[80%] ${index % 2 === 0 ? "flex-row-reverse" : "flex-row"}`}>
                     <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
                     <Card className="w-full border-0 shadow-none">
-                      <div className="relative inline-block w-full">
-                        <CardContent className="p-3 bg-muted rounded-lg">
-                          <Skeleton className="h-4 w-full mb-2" />
-                          <Skeleton className="h-4 w-3/4 mb-2" />
-                          <Skeleton className="h-4 w-1/2" />
-                          <div className="flex justify-end mt-2">
-                            <Skeleton className="h-3 w-16" />
-                          </div>
-                        </CardContent>
+                      <div className="flex-1 p-6">
+                        <div className="flex gap-3 justify-start mb-4">
+                          <Card className="border-border/50">
+                            <CardContent className="p-3">
+                              <Skeleton className="h-4 w-72" />
+                              <Skeleton className="h-4 w-40 mt-2" />
+                            </CardContent>
+                          </Card>
+                        </div>
                       </div>
                     </Card>
                   </div>
@@ -266,8 +266,11 @@ const ActivityPage = () => {
                     </div>
                     <Card className="w-full border-0 shadow-none">
                       <div className="relative inline-block w-full">
-                        <CardContent className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                        <CardContent className={`p-3 rounded-lg ${message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground"
+                          }`}>
+                          <div className="text-sm max-w-none">
                             <ReactMarkdown>{message.content}</ReactMarkdown>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2 flex justify-end">
