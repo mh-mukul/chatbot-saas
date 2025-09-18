@@ -5,7 +5,13 @@ import { getOrCreateSessionId } from '@/lib/utils';
 import { chatResponse } from "@/services/chat_apis";
 
 
-export const useChat = (agentId: number, systemPrompt: string, temperature: number) => {
+export const useChat = (
+    agentId: number,
+    systemPrompt: string,
+    temperature: number,
+    modelProvider: string = '',
+    modelCode: string = ''
+) => {
     const [messages, setMessages] = useState<chatResponse[]>([
         {
             id: '1',
@@ -38,6 +44,8 @@ export const useChat = (agentId: number, systemPrompt: string, temperature: numb
                 query: content,
                 system_prompt: systemPrompt,
                 temperature: temperature,
+                model_provider: modelProvider,
+                model_code: modelCode,
                 platform: 'playground',
             };
 

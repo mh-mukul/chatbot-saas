@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Bot } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAgentById, updateAgent, AgentDetails } from "@/services/agent_apis";
 import { useToast } from "@/hooks/use-toast";
@@ -15,59 +13,99 @@ import { useChat } from '@/hooks/use-chat';
 import { clearSessionId } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
 import ChatUI from "@/components/agent/playground/ChatUI";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getModelList, modelListResponse } from "@/services/model_apis";
 
 
 const Playground = () => {
   const { id } = useParams<{ id: string }>();
   const [agent, setAgent] = useState<AgentDetails | null>(null);
   const [initialAgent, setInitialAgent] = useState<AgentDetails | null>(null);
+  const [models, setModels] = useState<modelListResponse[]>([]);
+  const [selectedModel, setSelectedModel] = useState<modelListResponse | null>(null);
   const setAgentName = (name: string) => setAgent(prev => prev ? ({ ...prev, name }) : null);
-  const setTemperature = (value: number[]) => setAgent(prev => prev ? ({ ...prev, temperature: value[0] }) : null);
+  const setTemperature = (value: number[]) => setAgent(prev => prev ? ({ ...prev, model_temperature: value[0] }) : null);
   const setSystemPrompt = (prompt: string) => setAgent(prev => prev ? ({ ...prev, system_prompt: prompt }) : null);
   const { toast } = useToast();
   const [currentMessage, setCurrentMessage] = useState("");
 
   const agentId = agent ? agent.id : 0;
   const systemPrompt = agent ? agent.system_prompt : "You are a helpful assistant.";
-  const temperature = agent ? agent.temperature : 0;
+  const temperature = agent ? agent.model_temperature : 0;
+  const modelProvider = selectedModel ? selectedModel.provider : "";
+  const modelCode = selectedModel ? selectedModel.code : "";
 
-  const { messages, isLoading, sendMessage } = useChat(agentId, systemPrompt, temperature);
+  const { messages, isLoading, sendMessage } = useChat(
+    agentId,
+    systemPrompt,
+    temperature,
+    modelProvider,
+    modelCode
+  );
 
   useEffect(() => {
     clearSessionId(); // Clear previous session
-    if (id) {
-      const fetchAgentDetails = async () => {
-        try {
+
+    const fetchData = async () => {
+      try {
+        // Fetch models first
+        const modelsList = await getModelList();
+        setModels(modelsList);
+
+        if (id) {
+          // Then fetch agent details
           const agentDetails = await getAgentById(Number(id));
           setAgent(agentDetails);
           setInitialAgent(agentDetails);
-        } catch (error) {
-          toast({
-            title: "Error fetching agent details",
-            description: "Could not load agent data. Please try again later.",
-            variant: "destructive",
-          });
-        }
-      };
+          console.log("Fetched Agent Details:", agentDetails);
 
-      fetchAgentDetails();
-    }
+          // If agent has a model_id, preselect it
+          if (agentDetails.model_id && modelsList.length > 0) {
+            const agentModel = modelsList.find(model => model.id === agentDetails.model_id);
+            console.log(agentModel)
+            if (agentModel) {
+              setSelectedModel(agentModel);
+            } else if (modelsList.length > 0) {
+              // Only set first model if agent's model is not found and there is no currently selected model
+              if (!selectedModel) {
+                // console.log("Default selection")
+                setSelectedModel(modelsList[0]);
+              }
+            }
+          } else if (modelsList.length > 0 && !selectedModel) {
+            // Only set first model if no model_id is set and there is no currently selected model
+            setSelectedModel(modelsList[0]);
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Error fetching data",
+          description: "Could not load required data. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchData();
   }, [id, toast]);
 
-  const isChanged = agent && initialAgent ?
+  const isChanged = agent && initialAgent && selectedModel ?
     agent.name !== initialAgent.name ||
-    agent.temperature !== initialAgent.temperature ||
-    agent.system_prompt !== initialAgent.system_prompt
+    agent.model_temperature !== initialAgent.model_temperature ||
+    agent.system_prompt !== initialAgent.system_prompt ||
+    initialAgent.model_id !== selectedModel.id
     : false;
 
   const handleSaveChanges = async () => {
-    if (!agent || !id || !isChanged) return;
+    if (!agent || !id || !isChanged || !selectedModel) return;
 
     try {
+      // Assuming model_id can be passed to updateAgent or the backend already handles this
       const updatedAgentData = await updateAgent(Number(id), {
         name: agent.name,
         system_prompt: agent.system_prompt,
-        temperature: agent.temperature,
+        model_temperature: agent.model_temperature,
+        model_id: selectedModel.id
       });
       setAgent(updatedAgentData);
       setInitialAgent(updatedAgentData);
@@ -120,6 +158,11 @@ const Playground = () => {
           </div>
 
           <Skeleton className="h-9 w-full" />
+
+          <div>
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-10 w-full" />
+          </div>
 
           <div>
             <Skeleton className="h-4 w-24 mb-1" />
@@ -243,12 +286,49 @@ const Playground = () => {
             </div>
 
             <div>
+              <Label htmlFor="model-selection" className="text-sm font-medium">
+                Model
+              </Label>
+              <Select
+                value={selectedModel?.id.toString()}
+                onValueChange={(value) => {
+                  const model = models.find(m => m.id === parseInt(value));
+                  if (model) {
+                    setSelectedModel(model);
+                    setAgent(prev => prev ? ({ ...prev, model_id: parseInt(value) }) : null);
+                  }
+                }}
+                defaultValue={selectedModel?.id.toString()}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map((model) => (
+                    <SelectItem key={model.id} value={model.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        {model.icon_url && (
+                          <img
+                            src={model.icon_url}
+                            alt={model.model_name}
+                            className="h-4 w-4 object-contain"
+                          />
+                        )}
+                        <span>{model.model_name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label className="text-sm font-medium">
-                Temperature: {agent.temperature || 0}
+                Model Temperature: {agent.model_temperature || 0}
               </Label>
               <div className="mt-2">
                 <Slider
-                  value={[agent.temperature || 0]}
+                  value={[agent.model_temperature || 0]}
                   onValueChange={setTemperature}
                   max={1}
                   min={0}

@@ -17,22 +17,24 @@ export interface AgentDetails {
     id: number;
     name: string;
     system_prompt: string;
-    temperature: number | 0;
+    model_temperature: number | 0;
     training_status: "trained" | "training" | "not trained";
     created_at: string;
     last_trained_at: string | null;
+    model_id: number | null;
 }
 
 export interface CreateAgentRequest {
     name: string;
     system_prompt: string | "You are a helpful assistant.";
-    temperature: number | 0;
+    model_temperature: number | 0;
 }
 
 export interface UpdateAgentRequest {
     name: string;
     system_prompt: string;
-    temperature: number | 0;
+    model_temperature: number | 0;
+    model_id: number;
 }
 
 export const getAgents = async (): Promise<Agent[]> => {

@@ -17,6 +17,8 @@ export interface playgroundChatRequest {
     query: string;
     system_prompt: string;
     temperature: 0 | number;
+    model_provider: string;
+    model_code: string;
     platform: "playground";
 }
 
