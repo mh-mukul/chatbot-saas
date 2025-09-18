@@ -279,8 +279,8 @@ const Sources = () => {
         description: "Your agent is being trained with the latest sources.",
       });
 
-      // Poll for training status every 3 seconds for up to 15 seconds
-      const maxAttempts = 5; // 15 seconds total (5 attempts × 3 seconds)
+      // Poll for training status every 3 seconds for up to 30 seconds
+      const maxAttempts = 10; // 30 seconds total (10 attempts × 3 seconds)
       let attempts = 0;
 
       const checkTrainingProgress = async () => {

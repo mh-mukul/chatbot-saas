@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Bot,
@@ -39,9 +39,28 @@ const agentItems = [
 ];
 
 export function AppSidebar({ agentId }: { agentId?: string }) {
-  const { open } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  // Load sidebar state from localStorage on initial render only (once)
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebarOpen');
+    if (savedState !== null) {
+      setOpen(savedState === 'true');
+    }
+  }, []); // Empty dependency array - runs only once
+
+  // Save sidebar state to localStorage whenever it changes
+  // Using ref to track previous value to avoid unnecessary updates
+  useEffect(() => {
+    // Skip the first render to avoid conflicts with initial state load
+    const handler = setTimeout(() => {
+      localStorage.setItem('sidebarOpen', String(open));
+    }, 0);
+
+    return () => clearTimeout(handler);
+  }, [open]);
 
   const isActive = (path: string, agentId?: string) => {
     if (agentId && path.includes(":id")) {
@@ -65,15 +84,15 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
       collapsible="icon"
     >
       <SidebarHeader className="relative p-3">
-            <div className="flex items-center">
-              <span className="text-lg font-bold transition-opacity duration-300 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:overflow-hidden">
-                AgentIQ
-              </span>
-            </div>
-            <SidebarTrigger className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex">
-              <PanelLeft className="size-4" />
-            </SidebarTrigger>
-          </SidebarHeader>
+        <div className="flex items-center">
+          <span className="text-lg font-bold transition-opacity duration-300 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:overflow-hidden">
+            AgentIQ
+          </span>
+        </div>
+        <SidebarTrigger className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex">
+          <PanelLeft className="size-4" />
+        </SidebarTrigger>
+      </SidebarHeader>
       <SidebarContent className="pt-2">
         {/* Main Navigation */}
         <SidebarGroup>

@@ -84,8 +84,9 @@ const Playground = () => {
 
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return;
-    await sendMessage(currentMessage);
-    setCurrentMessage("");
+    const messageToSend = currentMessage;
+    setCurrentMessage(""); // Clear the input field immediately before sending
+    await sendMessage(messageToSend);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -324,8 +325,9 @@ const Playground = () => {
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Type your message..."
+              placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
               className="flex-1"
+              disabled={isLoading}
             />
             <Button
               onClick={handleSendMessage}

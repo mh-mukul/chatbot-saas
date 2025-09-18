@@ -15,7 +15,7 @@ export interface playgroundChatRequest {
     agent_id: number;
     session_id: string;
     query: string;
-    system_prompt: "You are a helpful assistant." | string;
+    system_prompt: string;
     temperature: 0 | number;
     platform: "playground";
 }

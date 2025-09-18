@@ -25,8 +25,8 @@ export interface AgentDetails {
 
 export interface CreateAgentRequest {
     name: string;
-    system_prompt: "You are a helpful assistant." | string;
-    temperature: 0 | number;
+    system_prompt: string | "You are a helpful assistant.";
+    temperature: number | 0;
 }
 
 export interface UpdateAgentRequest {
