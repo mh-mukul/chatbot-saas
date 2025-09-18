@@ -103,4 +103,9 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  .dotted-background {
+    background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
 }

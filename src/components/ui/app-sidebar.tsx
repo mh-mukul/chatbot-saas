@@ -90,7 +90,7 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
           </span>
         </div>
         <SidebarTrigger className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex">
-          <PanelLeft className="size-4" />
+          <PanelLeft className="h-4 w-4" />
         </SidebarTrigger>
       </SidebarHeader>
       <SidebarContent className="pt-2">

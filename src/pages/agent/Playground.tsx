@@ -15,6 +15,7 @@ import { useChat } from '@/hooks/use-chat';
 import { clearSessionId } from '@/lib/utils';
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from 'react-markdown';
+import ChatUI from "@/components/agent/playground/ChatUI";
 
 
 const Playground = () => {
@@ -257,91 +258,13 @@ const Playground = () => {
       </ScrollArea>
 
       {/* Right Panel - Chat Interface */}
-      <div className="flex-1 flex flex-col h-[calc(100vh-80px)]">
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-              >
-                <div
-                  className={`flex gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"
-                    }`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${message.role === "user"
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-primary text-primary-foreground"
-                      }`}
-                  >
-                    {message.role === "user" ? (
-                      <User className="h-4 w-4" />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
-                  </div>
-                  <Card
-                    className={`${message.role === "user"
-                      ? "bg-muted"
-                      : "border-border/50"
-                      }`}
-                  >
-                    <CardContent className="p-3">
-                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {message.timestamp.toLocaleString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center bg-primary">
-                  <Bot className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <Card className="border-border/50">
-                  <CardContent className="p-3">
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-36" />
-                      <Skeleton className="h-4 w-64" />
-                      <Skeleton className="h-4 w-48" />
-                      <Skeleton className="h-4 w-24 mt-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Input Area */}
-        <div className="p-6 border-t">
-          <div className="flex gap-2">
-            <Input
-              value={currentMessage}
-              onChange={(e) => setCurrentMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
-              className="flex-1"
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!currentMessage.trim() || isLoading}
-              className="transition-spring"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      <div className="flex-1 flex items-center justify-center dotted-background">
+        <ChatUI
+          agentName={agent.name}
+          messages={messages}
+          isLoading={isLoading}
+          sendMessage={sendMessage}
+        />
       </div>
     </div>
   );
