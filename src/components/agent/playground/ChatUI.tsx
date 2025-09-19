@@ -1,9 +1,20 @@
 import { useState } from "react";
-import { Send, Bot, User, RefreshCcw } from "lucide-react";
+import { Send, Bot, User, RefreshCcw, Smile } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    EmojiPicker,
+    EmojiPickerSearch,
+    EmojiPickerContent,
+    EmojiPickerFooter,
+} from "@/components/ui/emoji-picker";
 
 const ChatUI = ({ agentName, messages, isLoading, sendMessage }) => {
     const [currentMessage, setCurrentMessage] = useState("");
@@ -77,31 +88,59 @@ const ChatUI = ({ agentName, messages, isLoading, sendMessage }) => {
                             <Bot className="h-4 w-4" />
                         </div>
                         <div className="bg-muted text-foreground rounded-2xl px-4 py-2 text-sm">
-                            Typing...
+                            Thinking...
                         </div>
                     </div>
                 )}
             </ScrollArea>
 
             {/* Footer Input */}
-            <div className="p-3 border-t flex gap-2 items-center">
-                <Input
-                    value={currentMessage}
-                    onChange={(e) => setCurrentMessage(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder={isLoading ? "Waiting for response..." : "Ask anything..."}
-                    className="flex-1"
-                    disabled={isLoading}
-                />
-                <Button
-                    onClick={handleSendMessage}
-                    disabled={!currentMessage.trim() || isLoading}
-                    className="rounded"
-                    variant="ghost"
-                    size="icon"
-                >
-                    <Send className="h-6 w-6" />
-                </Button>
+            <div className="p-3 border-t">
+                <div className="relative flex items-center">
+                    <Input
+                        value={currentMessage}
+                        onChange={(e) => setCurrentMessage(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        placeholder={isLoading ? "Waiting for response..." : "Ask anything..."}
+                        className="pr-20"
+                        disabled={isLoading}
+                    />
+                    <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full"
+                                    disabled={isLoading}
+                                >
+                                    <Smile className="h-4 w-4" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-fit p-0">
+                                <EmojiPicker
+                                    className="h-[342px]"
+                                    onEmojiSelect={({ emoji }) => {
+                                        setCurrentMessage(prev => prev + emoji);
+                                    }}
+                                >
+                                    <EmojiPickerSearch className="h-8 focus:outline-none focus:ring-0" />
+                                    <EmojiPickerContent />
+                                    <EmojiPickerFooter />
+                                </EmojiPicker>
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                    <Button
+                        onClick={handleSendMessage}
+                        disabled={!currentMessage.trim() || isLoading}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
+                        variant="ghost"
+                        size="icon"
+                    >
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         </div>
     );

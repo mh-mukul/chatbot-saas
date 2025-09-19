@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 type Message = {
   role: "user" | "assistant";
   content: string;
-  created_at: string;
+  created_at: Date;
   revised?: boolean;
   rawMessage?: sessionMessagesResponse;
 };
@@ -61,11 +61,11 @@ const ActivityPage = () => {
           // Ensure sessionMessages is always an array
           const messagesArray = Array.isArray(sessionMessages) ? sessionMessages : [];
           const formattedMessages: Message[] = messagesArray.flatMap((msg) => [
-            { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at).toLocaleTimeString() },
+            { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at) },
             {
               role: "assistant" as const,
               content: msg.output,
-              created_at: new Date(msg.created_at).toLocaleTimeString(),
+              created_at: new Date(msg.created_at),
               revised: msg.revised,
               rawMessage: msg
             },
@@ -274,7 +274,7 @@ const ActivityPage = () => {
                             <ReactMarkdown>{message.content}</ReactMarkdown>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2 flex justify-end">
-                            {message.created_at}
+                            {formatDistanceToNow(message.created_at, { addSuffix: true })}
                           </p>
                         </CardContent>
 
