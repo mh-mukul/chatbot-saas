@@ -1,21 +1,40 @@
 import { useState, useEffect } from "react";
-import { getAgentById, updateAgent, AgentDetails } from "@/services/agent_apis";
-import { getModelList, modelListResponse } from "@/services/model_apis";
+import {
+    getAgentById,
+    updateAgent,
+    AgentDetails,
+} from "@/services/agent_apis";
+import {
+    getModelList,
+    modelListResponse,
+    getPromptTemplateList,
+    promptTemplateListResponse,
+} from "@/services/model_apis";
 import { useToast } from "@/hooks/use-toast";
-import { clearSessionId } from '@/lib/utils';
+import { clearSessionId } from "@/lib/utils";
 
 export function useAgent(id: string | undefined) {
     const [agent, setAgent] = useState<AgentDetails | null>(null);
     const [initialAgent, setInitialAgent] = useState<AgentDetails | null>(null);
     const [models, setModels] = useState<modelListResponse[]>([]);
-    const [selectedModel, setSelectedModel] = useState<modelListResponse | null>(null);
+    const [promptTemplates, setPromptTemplates] = useState<
+        promptTemplateListResponse[]
+    >([]);
+    const [selectedModel, setSelectedModel] = useState<modelListResponse | null>(
+        null
+    );
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const { toast } = useToast();
 
     // Helper functions to update agent state
-    const setAgentName = (name: string) => setAgent(prev => prev ? ({ ...prev, name }) : null);
-    const setTemperature = (value: number[]) => setAgent(prev => prev ? ({ ...prev, model_temperature: value[0] }) : null);
-    const setSystemPrompt = (prompt: string) => setAgent(prev => prev ? ({ ...prev, system_prompt: prompt }) : null);
+    const setAgentName = (name: string) =>
+        setAgent((prev) => (prev ? { ...prev, name } : null));
+    const setTemperature = (value: number[]) =>
+        setAgent((prev) => (prev ? { ...prev, model_temperature: value[0] } : null));
+    const setSystemPrompt = (prompt: string) =>
+        setAgent((prev) =>
+            prev ? { ...prev, system_prompt: prompt, prompt_template_id: null } : null
+        );
 
     useEffect(() => {
         clearSessionId(); // Clear previous session
@@ -26,6 +45,9 @@ export function useAgent(id: string | undefined) {
                 // Fetch models first
                 const modelsList = await getModelList();
                 setModels(modelsList);
+
+                const templates = await getPromptTemplateList();
+                setPromptTemplates(templates);
 
                 if (id) {
                     // Then fetch agent details
@@ -66,12 +88,14 @@ export function useAgent(id: string | undefined) {
         fetchData();
     }, [id, toast]);
 
-    const isChanged = agent && initialAgent && selectedModel ?
-        agent.name !== initialAgent.name ||
-        agent.model_temperature !== initialAgent.model_temperature ||
-        agent.system_prompt !== initialAgent.system_prompt ||
-        initialAgent.model_id !== selectedModel.id
-        : false;
+    const isChanged =
+        agent && initialAgent && selectedModel
+            ? agent.name !== initialAgent.name ||
+            agent.model_temperature !== initialAgent.model_temperature ||
+            agent.system_prompt !== initialAgent.system_prompt ||
+            initialAgent.model_id !== selectedModel.id ||
+            agent.prompt_template_id !== initialAgent.prompt_template_id
+            : false;
 
     const handleSaveChanges = async () => {
         if (!agent || !id || !isChanged || !selectedModel) return;
@@ -91,7 +115,8 @@ export function useAgent(id: string | undefined) {
                 name: agent.name,
                 system_prompt: agent.system_prompt,
                 model_temperature: agent.model_temperature,
-                model_id: selectedModel.id
+                model_id: selectedModel.id,
+                prompt_template_id: agent.prompt_template_id,
             });
             setAgent(updatedAgentData);
             setInitialAgent(updatedAgentData);
@@ -110,15 +135,39 @@ export function useAgent(id: string | undefined) {
 
     const handleModelChange = (value: string) => {
         const model = models.find(m => m.id === parseInt(value));
-        if (model && model.status === 'active') {
+        if (model && model.status === "active") {
             setSelectedModel(model);
-            setAgent(prev => prev ? ({ ...prev, model_id: parseInt(value) }) : null);
+            setAgent((prev) => (prev ? { ...prev, model_id: parseInt(value) } : null));
+        }
+    };
+
+    const handlePromptTemplateChange = (value: string) => {
+        const templateId = parseInt(value);
+        if (templateId === 0) {
+            // Custom prompt
+            setAgent((prev) =>
+                prev ? { ...prev, prompt_template_id: null } : null
+            );
+        } else {
+            const template = promptTemplates.find((t) => t.id === templateId);
+            if (template) {
+                setAgent((prev) =>
+                    prev
+                        ? {
+                            ...prev,
+                            system_prompt: template.prompt,
+                            prompt_template_id: template.id,
+                        }
+                        : null
+                );
+            }
         }
     };
 
     return {
         agent,
         models,
+        promptTemplates,
         selectedModel,
         isLoading,
         isChanged,
@@ -126,6 +175,7 @@ export function useAgent(id: string | undefined) {
         setTemperature,
         setSystemPrompt,
         handleModelChange,
-        handleSaveChanges
+        handlePromptTemplateChange,
+        handleSaveChanges,
     };
 }

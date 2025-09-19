@@ -12,12 +12,14 @@ const Playground = () => {
   const {
     agent,
     models,
+    promptTemplates,
     selectedModel,
     isChanged,
     setAgentName,
     setTemperature,
     setSystemPrompt,
     handleModelChange,
+    handlePromptTemplateChange,
     handleSaveChanges
   } = useAgent(id);
 
@@ -50,12 +52,14 @@ const Playground = () => {
       <AgentConfigPanel
         agent={agent}
         models={models}
+        promptTemplates={promptTemplates}
         selectedModel={selectedModel}
         isChanged={isChanged}
         onAgentNameChange={setAgentName}
         onTemperatureChange={setTemperature}
         onSystemPromptChange={setSystemPrompt}
         onModelChange={handleModelChange}
+        onPromptTemplateChange={handlePromptTemplateChange}
         onSaveChanges={handleSaveChanges}
       />
 

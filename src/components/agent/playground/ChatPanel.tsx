@@ -20,7 +20,7 @@ interface ChatPanelProps {
     agentName: string;
     messages: any[];
     isLoading: boolean;
-    sendMessage: (message: string) => void;
+    sendMessage: (message: string) => Promise<void>;
 }
 
 const ChatPanel = ({ agentName, messages, isLoading, sendMessage }: ChatPanelProps) => {

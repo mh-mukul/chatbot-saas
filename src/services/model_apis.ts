@@ -24,3 +24,20 @@ export const getModelList = async (): Promise<modelListResponse[]> => {
         throw error;
     }
 };
+
+export interface promptTemplateListResponse {
+    id: number;
+    name: string;
+    prompt: string;
+    created_at: Date;
+}
+
+export const getPromptTemplateList = async (): Promise<promptTemplateListResponse[]> => {
+    try {
+        const response = await apiClient.get(`/api/prompt-templates`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching prompt templates:`, error);
+        throw error;
+    }
+};

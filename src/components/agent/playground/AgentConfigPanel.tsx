@@ -6,34 +6,46 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AgentDetails } from "@/services/agent_apis";
-import { formatDistanceToNow } from 'date-fns';
-import { modelListResponse } from "@/services/model_apis";
+import { formatDistanceToNow } from "date-fns";
+import { modelListResponse, promptTemplateListResponse } from "@/services/model_apis";
 import { getAgentTrainingStatusColor } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface AgentConfigPanelProps {
     agent: AgentDetails;
     models: modelListResponse[];
+    promptTemplates: promptTemplateListResponse[];
     selectedModel: modelListResponse | null;
     isChanged: boolean;
     onAgentNameChange: (name: string) => void;
     onTemperatureChange: (value: number[]) => void;
     onSystemPromptChange: (prompt: string) => void;
     onModelChange: (modelId: string) => void;
+    onPromptTemplateChange: (templateId: string) => void;
     onSaveChanges: () => Promise<void>;
 }
 
 const AgentConfigPanel = ({
     agent,
     models,
+    promptTemplates,
     selectedModel,
     isChanged,
     onAgentNameChange,
     onTemperatureChange,
     onSystemPromptChange,
     onModelChange,
-    onSaveChanges
+    onPromptTemplateChange,
+    onSaveChanges,
 }: AgentConfigPanelProps) => {
     return (
         <ScrollArea className="h-[calc(100vh-80px)]">
@@ -133,8 +145,39 @@ const AgentConfigPanel = ({
                     </div>
 
                     <div>
-                        <Label htmlFor="system-prompt" className="text-sm font-medium">
+                        <Label htmlFor="prompt-template-selection" className="text-sm font-medium">
                             System Prompt
+                        </Label>
+                        <Select
+                            value={agent.prompt_template_id?.toString() || "0"}
+                            onValueChange={onPromptTemplateChange}
+                        >
+                            <SelectTrigger className="w-full mt-1">
+                                <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel className="text-muted-foreground font-normal">Custom Prompt</SelectLabel>
+                                    <SelectItem value="0">Custom Prompt</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel className="text-muted-foreground font-normal">Examples</SelectLabel>
+                                    {promptTemplates.map((template) => (
+                                        <SelectItem
+                                            key={template.id}
+                                            value={template.id.toString()}
+                                        >
+                                            {template.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="system-prompt" className="text-sm font-medium">
+                            Instructions
                         </Label>
                         <Textarea
                             id="system-prompt"
