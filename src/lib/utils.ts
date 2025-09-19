@@ -20,3 +20,12 @@ export const getOrCreateSessionId = (): string => {
 export const clearSessionId = () => {
   localStorage.removeItem(SESSION_ID_KEY);
 };
+
+export const getAgentTrainingStatusColor = (status: string) => {
+    switch (status) {
+      case "trained": return "bg-green-500/20 text-green-400 border-green-500/50";
+      case "not trained": return "bg-gray-500/20 text-gray-400 border-gray-500/50";
+      case "training": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
+      default: return "bg-gray-500/20 text-gray-400 border-gray-500/50";
+    }
+  };

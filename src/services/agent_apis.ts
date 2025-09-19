@@ -9,7 +9,7 @@ export interface Agent {
     name: string;
     training_status: "trained" | "training" | "not trained";
     created_at: string;
-    lastActive?: string;
+    last_active?: Date;
     conversations?: number;
 }
 

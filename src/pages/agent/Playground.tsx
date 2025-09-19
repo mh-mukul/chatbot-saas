@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ChatUI from "@/components/agent/playground/ChatUI";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getModelList, modelListResponse } from "@/services/model_apis";
+import { getAgentTrainingStatusColor } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 
 const Playground = () => {
@@ -59,22 +61,24 @@ const Playground = () => {
           setInitialAgent(agentDetails);
           console.log("Fetched Agent Details:", agentDetails);
 
-          // If agent has a model_id, preselect it
+          // Filter only active models
+          const activeModels = modelsList.filter(model => model.status === 'active');
+
+          // If agent has a model_id, preselect it if it's active
           if (agentDetails.model_id && modelsList.length > 0) {
             const agentModel = modelsList.find(model => model.id === agentDetails.model_id);
-            console.log(agentModel)
-            if (agentModel) {
+            console.log(agentModel);
+
+            if (agentModel && agentModel.status === 'active') {
+              // Only select if the model is active
               setSelectedModel(agentModel);
-            } else if (modelsList.length > 0) {
-              // Only set first model if agent's model is not found and there is no currently selected model
-              if (!selectedModel) {
-                // console.log("Default selection")
-                setSelectedModel(modelsList[0]);
-              }
+            } else if (activeModels.length > 0 && !selectedModel) {
+              // If agent's model is not found or not active, select first active model
+              setSelectedModel(activeModels[0]);
             }
-          } else if (modelsList.length > 0 && !selectedModel) {
-            // Only set first model if no model_id is set and there is no currently selected model
-            setSelectedModel(modelsList[0]);
+          } else if (activeModels.length > 0 && !selectedModel) {
+            // If no model_id is set, select first active model
+            setSelectedModel(activeModels[0]);
           }
         }
       } catch (error) {
@@ -98,6 +102,16 @@ const Playground = () => {
 
   const handleSaveChanges = async () => {
     if (!agent || !id || !isChanged || !selectedModel) return;
+
+    // Check if selected model is active before saving
+    if (selectedModel.status !== 'active') {
+      toast({
+        title: "Invalid Model Selection",
+        description: "Please select an active model before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       // Assuming model_id can be passed to updateAgent or the backend already handles this
@@ -251,15 +265,9 @@ const Playground = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span>Agent Status:</span>
-              {agent.training_status === "trained" ? (
-                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                  Trained
-                </span>
-              ) : (
-                <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                  {agent.training_status.charAt(0).toUpperCase() + agent.training_status.slice(1)}
-                </span>
-              )}
+              <Badge className={`${getAgentTrainingStatusColor(agent.training_status)} font-medium`}>
+                {agent.training_status}
+              </Badge>
             </div>
 
             <div className="flex items-center gap-2">
@@ -293,7 +301,7 @@ const Playground = () => {
                 value={selectedModel?.id.toString()}
                 onValueChange={(value) => {
                   const model = models.find(m => m.id === parseInt(value));
-                  if (model) {
+                  if (model && model.status === 'active') {
                     setSelectedModel(model);
                     setAgent(prev => prev ? ({ ...prev, model_id: parseInt(value) }) : null);
                   }
@@ -305,7 +313,11 @@ const Playground = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {models.map((model) => (
-                    <SelectItem key={model.id} value={model.id.toString()}>
+                    <SelectItem
+                      key={model.id}
+                      value={model.id.toString()}
+                      disabled={model.status !== 'active'}
+                    >
                       <div className="flex items-center gap-2">
                         {model.icon_url && (
                           <img
@@ -315,6 +327,9 @@ const Playground = () => {
                           />
                         )}
                         <span>{model.model_name}</span>
+                        {/* {model.status !== 'active' && (
+                          <span className="text-xs text-muted-foreground ml-2">({model.status})</span>
+                        )} */}
                       </div>
                     </SelectItem>
                   ))}

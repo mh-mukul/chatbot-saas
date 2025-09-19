@@ -76,7 +76,7 @@ export interface reviseAnswerRequest {
 
 export const reviseAnswer = async (data: reviseAnswerRequest): Promise<void> => {
     try {
-        const response = await apiClient.post('/api/chat/revise', data);
+        const response = await apiClient.post('/api/revise-answer', data);
         return response.data.data;
     } catch (error) {
         console.error('Error revising answer:', error);
@@ -94,7 +94,7 @@ export interface reviseAnswerResponse {
 
 export const getRevisedAnswer = async (chat_id: number): Promise<reviseAnswerResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources?chat_id=${chat_id}`);
+        const response = await apiClient.get(`/api/revise-answer?chat_id=${chat_id}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching revised answer with id ${chat_id}:`, error);

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAgentTrainingStatusColor } from "@/lib/utils";
 
 const Agents = () => {
   const navigate = useNavigate();
@@ -34,13 +35,8 @@ const Agents = () => {
     const fetchAgents = async () => {
       setIsLoading(true);
       try {
-        const apiAgents = await getAgents();
-        const processedAgents = apiAgents.map(agent => ({
-          ...agent,
-          lastActive: formatDistanceToNow(new Date(agent.created_at), { addSuffix: true }),
-          conversations: Math.floor(Math.random() * 100) // Placeholder for total conversations
-        }));
-        setAgents(processedAgents);
+        const data = await getAgents();
+        setAgents(data);
       } catch (error) {
         toast({
           title: "Error fetching agents",
@@ -54,15 +50,6 @@ const Agents = () => {
 
     fetchAgents();
   }, [toast]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "trained": return "bg-green-500/20 text-green-400 border-green-500/50";
-      case "not trained": return "bg-gray-500/20 text-gray-400 border-gray-500/50";
-      case "training": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
-      default: return "bg-gray-500/20 text-gray-400 border-gray-500/50";
-    }
-  };
 
   const handleDeleteConfirm = async () => {
     if (!agentToDelete) return;
@@ -96,12 +83,7 @@ const Agents = () => {
 
     try {
       const newAgent = await createAgentApi({ name: newAgentName });
-      const processedAgent = {
-        ...newAgent,
-        lastActive: formatDistanceToNow(new Date(newAgent.created_at), { addSuffix: true }),
-        conversations: 0
-      };
-      setAgents(prev => [...prev, processedAgent]);
+      setAgents(prev => [...prev, newAgent]);
       toast({
         title: "Agent Created",
         description: `Successfully created ${newAgent.name}.`,
@@ -199,7 +181,7 @@ const Agents = () => {
                     </div>
 
                     <div className="flex items-center gap-2 mt-4">
-                      <Badge className={`${getStatusColor(agent.training_status)} font-medium`}>
+                      <Badge className={`${getAgentTrainingStatusColor(agent.training_status)} font-medium`}>
                         {agent.training_status}
                       </Badge>
                     </div>
@@ -219,7 +201,7 @@ const Agents = () => {
                     <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        Last active: {agent.lastActive}
+                        Last active: {agent.last_active ? formatDistanceToNow(new Date(agent.last_active), { addSuffix: true }) : 'N/A'}
                       </span>
                     </div>
                   </CardContent>
