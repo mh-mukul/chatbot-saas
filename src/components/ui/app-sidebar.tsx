@@ -7,7 +7,8 @@ import {
   Settings,
   Zap,
   Play,
-  PanelLeft,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -17,7 +18,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -80,25 +80,27 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
 
   return (
     <Sidebar
-      className={`${!open ? "w-16" : "w-64"} border-r border-border bg-gradient-secondary backdrop-blur-sm`}
+      className={`h-full ${!open ? "w-16" : "w-64"} border-r border-border bg-gradient-secondary backdrop-blur-sm`}
       collapsible="icon"
     >
       <SidebarHeader className="relative p-3">
-        <div className="flex items-center">
+        <div className="flex items-center justify-center group-data-[state=collapsed]:justify-center">
+          <img
+            src="/favicon.png"
+            alt="Logo"
+            className="h-8 w-8 min-w-8 flex-shrink-0 transition-all duration-300 group-data-[state=expanded]:mr-2"
+          />
           <span className="text-lg font-bold transition-opacity duration-300 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:overflow-hidden">
             AgentIQ
           </span>
         </div>
-        <SidebarTrigger className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex">
-          <PanelLeft className="h-4 w-4" />
-        </SidebarTrigger>
       </SidebarHeader>
+      <SidebarTrigger className="absolute top-1/2 -right-3 hidden md:inline-flex p-1 rounded-md bg-background border border-border shadow-md hover:bg-muted h-6 w-6">
+        {open ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </SidebarTrigger>
       <SidebarContent className="pt-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          {/* <SidebarGroupLabel className="text-muted-foreground font-semibold tracking-wide">
-            Main
-          </SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -120,28 +122,28 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
 
         {/* Agent Navigation (only show when in agent view) */}
         {isInAgentView && agentId && (
-          <SidebarGroup className="mt-2">
-            <SidebarGroupLabel className="text-muted-foreground font-semibold tracking-wide">
-              Agent Tools
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {agentItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url.replace(":id", agentId)}
-                        className={getNavClass(item.url, agentId)}
-                      >
-                        <item.icon className="h-5 w-5 mr-3" />
-                        {open && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <>
+            <hr className="mx-4 my-2 border-border" />
+            <SidebarGroup className="mt-2">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {agentItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url.replace(":id", agentId)}
+                          className={getNavClass(item.url, agentId)}
+                        >
+                          <item.icon className="h-5 w-5 mr-3" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
       </SidebarContent>
     </Sidebar>
