@@ -110,7 +110,7 @@ const ChatPanel = ({ agentName, messages, isLoading, sendMessage }: ChatPanelPro
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={handleKeyPress}
                             placeholder={isLoading ? "Waiting for response..." : "Ask anything..."}
-                            className="pr-20"
+                            className="pr-20 rounded-full"
                             disabled={isLoading}
                         />
                         <div className="absolute right-10 top-1/2 -translate-y-1/2">

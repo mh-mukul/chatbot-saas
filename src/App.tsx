@@ -13,6 +13,7 @@ import Sources from "./pages/agent/Sources";
 import Actions from "./pages/agent/Actions";
 import Settings from "./pages/agent/Settings";
 import NotFound from "./pages/NotFound";
+import EmbedChat from "./components/EmbedChat";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route index element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
+          <Route path="/embed" element={<EmbedChat />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

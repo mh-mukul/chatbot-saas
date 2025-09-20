@@ -32,6 +32,22 @@ export const playgroundChat = async (data: playgroundChatRequest): Promise<chatR
     }
 };
 
+export interface embedChatRequest {
+    agent_id: string;
+    session_id: string;
+    query: string;
+}
+
+export const embedChat = async (data: embedChatRequest): Promise<chatResponse> => {
+    try {
+        const response = await apiClient.post('/api/embed-chat', data);
+        return response.data.data;
+    } catch (error) {
+        console.error('Error invoking embed chat:', error);
+        throw error;
+    }
+};
+
 export interface sessionListResponse {
     id: number;
     session_id: string;
