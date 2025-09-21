@@ -191,7 +191,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
 
 
     // Chat bubble position classes
-    const bubblePosition = widgetSettings.chat_allignment === "left" ? "left-1" : "right-1";
+    const bubblePosition = widgetSettings.chat_bubble_alignment === "left" ? "left-1" : "right-1";
 
     return (
         <div className="relative flex flex-col pb-0 w-full">

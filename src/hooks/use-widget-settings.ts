@@ -58,8 +58,8 @@ export const useWidgetSettings = (agentId: string | undefined) => {
     const setChatIcon = (chat_icon: string) =>
         setWidgetSettings((prev) => (prev ? { ...prev, chat_icon } : null));
 
-    const setChatAllignment = (chat_allignment: "left" | "right") =>
-        setWidgetSettings((prev) => (prev ? { ...prev, chat_allignment } : null));
+    const setChatAllignment = (chat_bubble_alignment: "left" | "right") =>
+        setWidgetSettings((prev) => (prev ? { ...prev, chat_bubble_alignment } : null));
 
     const setIsPrivate = (is_private: boolean) =>
         setWidgetSettings((prev) => (prev ? { ...prev, is_private } : null));
@@ -75,7 +75,7 @@ export const useWidgetSettings = (agentId: string | undefined) => {
             widgetSettings.message_placeholder !== initialWidgetSettings.message_placeholder ||
             widgetSettings.chat_theme !== initialWidgetSettings.chat_theme ||
             widgetSettings.chat_icon !== initialWidgetSettings.chat_icon ||
-            widgetSettings.chat_allignment !== initialWidgetSettings.chat_allignment ||
+            widgetSettings.chat_bubble_alignment !== initialWidgetSettings.chat_bubble_alignment ||
             widgetSettings.is_private !== initialWidgetSettings.is_private ||
             widgetSettings.primary_color !== initialWidgetSettings.primary_color
             : false;

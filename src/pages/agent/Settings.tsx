@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useWidgetSettings } from "@/hooks/use-widget-settings";
-import WidgetConfigPanel from "@/components/agent/widget/WidgetConfigPanel";
-import WidgetPreview from "@/components/agent/widget/WidgetPreview";
+import WidgetConfigPanel from "@/components/agent/settings/WidgetConfigPanel";
+import WidgetPreview from "@/components/agent/settings/WidgetPreview";
 import AgentSkeleton from "@/components/agent/playground/AgentSkeleton";
 
 const Settings = () => {

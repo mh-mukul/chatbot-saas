@@ -152,7 +152,7 @@ const WidgetConfigPanel = ({
                                 Widget Position
                             </Label>
                             <Select
-                                value={widgetSettings.chat_allignment}
+                                value={widgetSettings.chat_bubble_alignment}
                                 onValueChange={(value: "left" | "right") => onChatAllignmentChange(value)}
                             >
                                 <SelectTrigger className="w-full mt-1">

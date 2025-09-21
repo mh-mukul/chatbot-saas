@@ -13,7 +13,7 @@ export interface chatWidgetSettings {
     message_placeholder: string;
     chat_theme: "light" | "dark";
     chat_icon: string;
-    chat_allignment: "left" | "right";
+    chat_bubble_alignment: "left" | "right";
     primary_color: string;
 }
 
