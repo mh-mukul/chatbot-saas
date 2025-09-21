@@ -21,7 +21,8 @@ const Settings = () => {
     setChatAllignment,
     setIsPrivate,
     setPrimaryColor,
-    handleSaveChanges
+    handleSaveChanges,
+    handleDiscardChanges
   } = useWidgetSettings(id);
 
   if (isLoading || !widgetSettings) {
@@ -44,6 +45,7 @@ const Settings = () => {
         onIsPrivateChange={setIsPrivate}
         onPrimaryColorChange={setPrimaryColor}
         onSaveChanges={handleSaveChanges}
+        onDiscardChanges={handleDiscardChanges}
       />
 
       {/* Right Panel - Chat Widget Preview */}

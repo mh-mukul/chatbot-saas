@@ -102,6 +102,16 @@ export const useWidgetSettings = (agentId: string | undefined) => {
         }
     };
 
+    const handleDiscardChanges = () => {
+        if (initialWidgetSettings) {
+            setWidgetSettings(initialWidgetSettings);
+            toast({
+                title: "Changes Discarded",
+                description: "Your changes have been discarded.",
+            });
+        }
+    };
+
     return {
         widgetSettings,
         isLoading,
@@ -116,5 +126,6 @@ export const useWidgetSettings = (agentId: string | undefined) => {
         setIsPrivate,
         setPrimaryColor,
         handleSaveChanges,
+        handleDiscardChanges,
     };
 };
