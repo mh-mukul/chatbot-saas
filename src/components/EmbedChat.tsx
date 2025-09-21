@@ -165,12 +165,14 @@ export default function EmbedChat() {
         };
     }, [theme]);
 
-    const [messages, setMessages] = useState<{
-        id: string;
-        role: "user" | "assistant";
-        content: string;
-        timestamp: Date;
-    }[]>([]);
+    const [messages, setMessages] = useState<chatResponse[]>([
+        {
+            id: '1',
+            role: 'assistant',
+            content: 'Hello! How can I help you today?',
+            timestamp: new Date(),
+        },
+    ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId] = useState<string>(getOrCreateSessionId());
@@ -178,7 +180,7 @@ export default function EmbedChat() {
     async function sendMessage() {
         if (!input.trim() || isLoading) return;
 
-        const userMessage = {
+        const userMessage: chatResponse = {
             id: crypto.randomUUID(),
             role: "user" as const,
             content: input.trim(),

@@ -28,11 +28,6 @@ const AgentSkeleton = () => (
                 </div>
 
                 <div>
-                    <Skeleton className="h-4 w-24 mb-1" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-
-                <div>
                     <Skeleton className="h-4 w-32 mb-1" />
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-2 w-40 mt-1" />

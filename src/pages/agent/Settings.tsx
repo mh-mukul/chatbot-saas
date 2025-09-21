@@ -1,35 +1,53 @@
 import { useParams } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Settings as SettingsIcon, Construction } from "lucide-react";
+import { useWidgetSettings } from "@/hooks/use-widget-settings";
+import WidgetConfigPanel from "@/components/agent/widget/WidgetConfigPanel";
+import WidgetPreview from "@/components/agent/widget/WidgetPreview";
+import AgentSkeleton from "@/components/agent/playground/AgentSkeleton";
 
 const Settings = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+
+  // Use our custom hook to handle widget settings
+  const {
+    widgetSettings,
+    isLoading,
+    isChanged,
+    setDisplayName,
+    setInitialMessages,
+    setSuggestedMessages,
+    setMessagePlaceholder,
+    setChatTheme,
+    setChatIcon,
+    setChatAllignment,
+    setIsPrivate,
+    handleSaveChanges
+  } = useWidgetSettings(id);
+
+  if (isLoading || !widgetSettings) {
+    return <AgentSkeleton />;
+  }
 
   return (
-    <div className="p-8 flex items-center justify-center min-h-[60vh]">
-      <Card className="bg-gradient-card border-border/50 shadow-card max-w-md w-full text-center">
-        <CardHeader className="pb-8">
-          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
-            <Construction className="h-8 w-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold bg-clip-text">
-            Settings
-          </CardTitle>
-          <CardDescription>
-            Agent configuration and settings will be available here
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-6">
-            This section will allow you to configure advanced settings, permissions, and preferences for your AI agent.
-          </p>
-          <Button disabled className="w-full">
-            <SettingsIcon className="h-4 w-4 mr-2" />
-            Coming Soon
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col md:flex-row h-full">
+      {/* Left Panel - Configuration */}
+      <WidgetConfigPanel
+        widgetSettings={widgetSettings}
+        isChanged={isChanged}
+        onDisplayNameChange={setDisplayName}
+        onInitialMessagesChange={setInitialMessages}
+        onSuggestedMessagesChange={setSuggestedMessages}
+        onMessagePlaceholderChange={setMessagePlaceholder}
+        onChatThemeChange={setChatTheme}
+        onChatIconChange={setChatIcon}
+        onChatAllignmentChange={setChatAllignment}
+        onIsPrivateChange={setIsPrivate}
+        onSaveChanges={handleSaveChanges}
+      />
+
+      {/* Right Panel - Chat Widget Preview */}
+      <div className="flex-1 flex items-center justify-center dotted-background">
+        <WidgetPreview widgetSettings={widgetSettings} />
+      </div>
     </div>
   );
 };
