@@ -20,6 +20,7 @@ const Settings = () => {
     setChatIcon,
     setChatAllignment,
     setIsPrivate,
+    setPrimaryColor,
     handleSaveChanges
   } = useWidgetSettings(id);
 
@@ -41,6 +42,7 @@ const Settings = () => {
         onChatIconChange={setChatIcon}
         onChatAllignmentChange={setChatAllignment}
         onIsPrivateChange={setIsPrivate}
+        onPrimaryColorChange={setPrimaryColor}
         onSaveChanges={handleSaveChanges}
       />
 

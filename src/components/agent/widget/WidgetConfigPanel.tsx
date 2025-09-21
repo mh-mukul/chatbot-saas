@@ -24,6 +24,7 @@ interface WidgetConfigPanelProps {
     onChatIconChange: (icon: string) => void;
     onChatAllignmentChange: (allignment: "left" | "right") => void;
     onIsPrivateChange: (isPrivate: boolean) => void;
+    onPrimaryColorChange: (color: string) => void;
     onSaveChanges: () => Promise<any>;
 }
 
@@ -38,6 +39,7 @@ const WidgetConfigPanel = ({
     onChatIconChange,
     onChatAllignmentChange,
     onIsPrivateChange,
+    onPrimaryColorChange,
     onSaveChanges,
 }: WidgetConfigPanelProps) => {
     return (
@@ -162,6 +164,31 @@ const WidgetConfigPanel = ({
                                 <SelectItem value="right">Right</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="primary-color" className="text-sm font-medium">
+                            Primary Color
+                        </Label>
+                        <div className="flex mt-1 gap-2">
+                            <Input
+                                id="primary-color"
+                                type="text"
+                                value={widgetSettings.primary_color || "#0099ff"}
+                                onChange={(e) => onPrimaryColorChange(e.target.value)}
+                                className="flex-1"
+                                placeholder="#0099ff"
+                            />
+                            <Input
+                                type="color"
+                                value={widgetSettings.primary_color || "#0099ff"}
+                                onChange={(e) => onPrimaryColorChange(e.target.value)}
+                                className="w-12 h-10 p-1 cursor-pointer"
+                            />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Used for chat icon, header and user messages
+                        </p>
                     </div>
 
                     <div className="flex items-center gap-2">

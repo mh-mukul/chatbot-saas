@@ -14,6 +14,7 @@ export interface chatWidgetSettings {
     chat_theme: "light" | "dark";
     chat_icon: string;
     chat_allignment: "left" | "right";
+    primary_color: string;
 }
 
 export const getChatWidgetSettings = async (agent_id: number): Promise<chatWidgetSettings> => {

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Send, Bot, User, Smile } from "lucide-react";
+import { Send, Bot, User, Smile, RefreshCcw } from "lucide-react";
 import { chatWidgetSettings } from "@/services/embed_chat_apis";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
+import "./WidgetTheme.css";
 import {
     Popover,
     PopoverContent,
@@ -127,57 +128,99 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
         });
     }, [widgetSettings.initial_messages]);
 
-    // Set theme based on widget settings
+    // Set theme based on widget settings - isolating from application theme
     useEffect(() => {
         const previewContainer = document.getElementById('widget-preview-container');
+        const widgetBubble = document.getElementById('widget-bubble-container');
+
         if (previewContainer) {
+            // Remove any existing theme classes
+            previewContainer.classList.remove('light', 'dark', 'dark-theme');
+
+            // Apply the theme directly from widget settings
             if (widgetSettings.chat_theme === 'dark') {
-                previewContainer.classList.add('dark-theme');
+                previewContainer.classList.add('dark', 'dark-theme');
                 previewContainer.setAttribute('data-theme', 'dark');
             } else {
-                previewContainer.classList.remove('dark-theme');
+                previewContainer.classList.add('light');
                 previewContainer.setAttribute('data-theme', 'light');
             }
+
+            // Apply primary color if available
+            if (widgetSettings.primary_color) {
+                previewContainer.style.setProperty('--primary', widgetSettings.primary_color);
+            }
         }
-    }, [widgetSettings.chat_theme]);
+
+        // Also apply theme to the chat bubble
+        if (widgetBubble) {
+            widgetBubble.classList.remove('light', 'dark', 'dark-theme');
+            if (widgetSettings.chat_theme === 'dark') {
+                widgetBubble.classList.add('dark', 'dark-theme');
+                widgetBubble.setAttribute('data-theme', 'dark');
+            } else {
+                widgetBubble.classList.add('light');
+                widgetBubble.setAttribute('data-theme', 'light');
+            }
+
+            // Apply primary color if available
+            if (widgetSettings.primary_color) {
+                widgetBubble.style.setProperty('--primary', widgetSettings.primary_color);
+            }
+        }
+    }, [widgetSettings.chat_theme, widgetSettings.primary_color]);
 
     // Determine icon to use
     const ChatIcon = () => {
         if (widgetSettings.chat_icon) {
             return (
-                <img
-                    src={widgetSettings.chat_icon}
-                    alt="Chat icon"
-                    className="h-4 w-4 object-contain"
-                />
+                <div className="flex items-center justify-center overflow-hidden">
+                    <img
+                        src={widgetSettings.chat_icon}
+                        alt="Chat icon"
+                        className="object-contain w-5 h-5"
+                        style={{
+                            aspectRatio: "1/1"
+                        }}
+                    />
+                </div>
             );
         }
-        return <Bot className="h-4 w-4" />;
+        return <Bot className="h-5 w-5" />;
     };
 
 
     // Chat bubble position classes
-    const bubblePosition = widgetSettings.chat_allignment === "left" ? "left-4" : "right-4";
+    const bubblePosition = widgetSettings.chat_allignment === "left" ? "left-1" : "right-1";
 
     return (
-        <div className="relative flex flex-col pb-0">
-            {/* Chat UI Centered */}
+        <div className="relative flex flex-col pb-0 w-full">
+            {/* Chat UI Centered - Using a data-theme attribute to isolate from application theme */}
             <div
                 id="widget-preview-container"
-                className="flex flex-col h-[75vh] max-w-md w-full mx-auto border rounded-2xl bg-background shadow-lg relative mb-0 overflow-hidden"
+                data-theme={widgetSettings.chat_theme}
+                className={`flex flex-col h-[75vh] w-full max-w-md mx-auto border rounded-2xl bg-background shadow-lg relative mb-0 overflow-hidden ${widgetSettings.chat_theme}`}
+                style={{ width: '28rem', maxWidth: '100%' }}
             >
                 {/* Header */}
-                <div className="px-4 py-3 border-b flex justify-between items-center">
+                <div className="px-4 py-6 border-b flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
+                        <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground scale-110"
+                            style={widgetSettings.primary_color ?
+                                { backgroundColor: widgetSettings.primary_color } : {}}
+                        >
                             <ChatIcon />
                         </div>
                         <h2 className="font-medium">{widgetSettings.display_name || "Chat Assistant"}</h2>
                     </div>
+                    <Button variant="ghost" size="icon" onClick={() => window.location.reload()}>
+                        <RefreshCcw className="h-4 w-4" />
+                    </Button>
                 </div>
 
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
+                <ScrollArea className="flex-1 p-4 w-full">
                     {messages.map((message, index) => (
                         <div
                             key={message.id}
@@ -190,12 +233,14 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                                 </div>
                             )}
 
-                            <div className="flex flex-col max-w-[75%]">
+                            <div className="flex flex-col max-w-[75%] min-w-0">
                                 <div
                                     className={`rounded-2xl px-4 py-2 text-sm ${message.role === "user"
                                         ? "bg-primary text-primary-foreground rounded-br-none self-end"
                                         : "bg-muted text-foreground rounded-bl-none self-start"
                                         }`}
+                                    style={message.role === "user" && widgetSettings.primary_color ?
+                                        { backgroundColor: widgetSettings.primary_color } : {}}
                                 >
                                     <ReactMarkdown>{message.content}</ReactMarkdown>
                                 </div>
@@ -214,7 +259,11 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
 
                     {isLoading && (
                         <div className="flex gap-2 justify-start mt-4">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
+                            <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground"
+                                style={widgetSettings.primary_color ?
+                                    { backgroundColor: widgetSettings.primary_color } : {}}
+                            >
                                 <ChatIcon />
                             </div>
                             <div className="bg-muted text-foreground rounded-2xl px-4 py-2 text-sm">
@@ -242,14 +291,14 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                 )}
 
                 {/* Footer Input */}
-                <div className="px-3 py-2.5 border-t">
-                    <div className="relative flex items-center">
+                <div className="px-3 py-2.5 border-t w-full">
+                    <div className="relative flex items-center w-full">
                         <Input
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={handleKeyPress}
                             placeholder={widgetSettings.message_placeholder || "Ask anything..."}
-                            className="pr-20 rounded-full"
+                            className="pr-20 rounded-full w-full"
                             disabled={isLoading}
                         />
                         <div className="absolute right-10 top-1/2 -translate-y-1/2">
@@ -291,14 +340,31 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                 </div>
             </div>
 
-            {/* Floating Chat Bubble - moved outside the main container */}
-            <div className="mt-0 relative w-full max-w-md">
+            {/* Floating Chat Bubble - moved outside the main container but inherits theme */}
+            <div className="mt-2 relative w-full max-w-md mx-auto">
                 <div
+                    id="widget-bubble-container"
                     className={`absolute top-0 z-50 ${bubblePosition}`}
                     style={{ transition: "left 0.3s, right 0.3s" }}
+                    data-theme={widgetSettings.chat_theme}
                 >
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer border-4 border-background">
-                        <ChatIcon />
+                    <div
+                        className={`w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer`}
+                        style={widgetSettings.primary_color ?
+                            { backgroundColor: widgetSettings.primary_color } : {}}
+                    >
+                        <div className="flex items-center justify-center w-8 h-8">
+                            {widgetSettings.chat_icon ? (
+                                <img
+                                    src={widgetSettings.chat_icon}
+                                    alt="Chat icon"
+                                    className="w-full h-full object-contain"
+                                    style={{ aspectRatio: "1/1" }}
+                                />
+                            ) : (
+                                <Bot className="h-8 w-8" />
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

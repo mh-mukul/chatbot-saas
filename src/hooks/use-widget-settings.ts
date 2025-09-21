@@ -64,6 +64,9 @@ export const useWidgetSettings = (agentId: string | undefined) => {
     const setIsPrivate = (is_private: boolean) =>
         setWidgetSettings((prev) => (prev ? { ...prev, is_private } : null));
 
+    const setPrimaryColor = (primary_color: string) =>
+        setWidgetSettings((prev) => (prev ? { ...prev, primary_color } : null));
+
     const isChanged =
         widgetSettings && initialWidgetSettings
             ? widgetSettings.display_name !== initialWidgetSettings.display_name ||
@@ -73,7 +76,8 @@ export const useWidgetSettings = (agentId: string | undefined) => {
             widgetSettings.chat_theme !== initialWidgetSettings.chat_theme ||
             widgetSettings.chat_icon !== initialWidgetSettings.chat_icon ||
             widgetSettings.chat_allignment !== initialWidgetSettings.chat_allignment ||
-            widgetSettings.is_private !== initialWidgetSettings.is_private
+            widgetSettings.is_private !== initialWidgetSettings.is_private ||
+            widgetSettings.primary_color !== initialWidgetSettings.primary_color
             : false;
 
     const handleSaveChanges = async () => {
@@ -110,6 +114,7 @@ export const useWidgetSettings = (agentId: string | undefined) => {
         setChatIcon,
         setChatAllignment,
         setIsPrivate,
+        setPrimaryColor,
         handleSaveChanges,
     };
 };

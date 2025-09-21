@@ -1,0 +1,164 @@
+/* Widget Theme Styles - Matching Application Theme */
+
+/* Light theme variables - Using the same HSL values as the app */
+[data-theme="light"] {
+  --widget-background: hsl(0 0% 100%);
+  --widget-foreground: hsl(240 10% 3.9%);
+  --widget-border-color: hsl(240 5.9% 90%);
+  --widget-primary: hsl(240 5.9% 10%);
+  --primary: var(--widget-primary); /* Default that can be overridden */
+  --widget-primary-foreground: hsl(0 0% 98%);
+  --widget-muted: hsl(240 4.8% 95.9%);
+  --widget-muted-foreground: hsl(240 3.8% 46.1%);
+  --widget-accent: hsl(240 4.8% 95.9%);
+  --widget-accent-foreground: hsl(240 5.9% 10%);
+  --widget-card: hsl(0 0% 100%);
+  --widget-card-foreground: hsl(240 10% 3.9%);
+}
+
+/* Dark theme variables - Using the same HSL values as the app */
+[data-theme="dark"] {
+  --widget-background: hsl(240 10% 3.9%);
+  --widget-foreground: hsl(0 0% 98%);
+  --widget-border-color: hsl(240 3.7% 15.9%);
+  --widget-primary: hsl(0 0% 98%);
+  --primary: var(--widget-primary); /* Default that can be overridden */
+  --widget-primary-foreground: hsl(240 5.9% 10%);
+  --widget-muted: hsl(240 3.7% 15.9%);
+  --widget-muted-foreground: hsl(240 5% 64.9%);
+  --widget-accent: hsl(240 3.7% 15.9%);
+  --widget-accent-foreground: hsl(0 0% 98%);
+  --widget-card: hsl(240 10% 3.9%);
+  --widget-card-foreground: hsl(0 0% 98%);
+}
+
+/* Apply theme variables to elements inside the widget container */
+#widget-preview-container {
+  background-color: var(--widget-background);
+  color: var(--widget-foreground);
+  border-color: var(--widget-border-color);
+}
+
+#widget-preview-container .bg-background {
+  background-color: var(--widget-background);
+}
+
+#widget-preview-container .bg-primary {
+  background-color: var(--primary, var(--widget-primary));
+}
+
+#widget-preview-container .text-primary-foreground {
+  color: var(--widget-primary-foreground);
+}
+
+#widget-preview-container .bg-muted {
+  background-color: var(--widget-muted);
+}
+
+#widget-preview-container .text-muted-foreground {
+  color: var(--widget-muted-foreground);
+}
+
+#widget-preview-container .text-foreground {
+  color: var(--widget-foreground);
+}
+
+#widget-preview-container .border {
+  border-color: var(--widget-border-color);
+}
+
+#widget-preview-container .bg-card {
+  background-color: var(--widget-card);
+}
+
+#widget-preview-container .text-card-foreground {
+  color: var(--widget-card-foreground);
+}
+
+#widget-preview-container .bg-accent {
+  background-color: var(--widget-accent);
+}
+
+#widget-preview-container .text-accent-foreground {
+  color: var(--widget-accent-foreground);
+}
+
+/* Apply the same theme to the chat bubble */
+[data-theme="light"] + div .bg-primary {
+  background-color: var(--primary, var(--widget-primary));
+}
+
+[data-theme="dark"] + div .bg-primary {
+  background-color: var(--primary, var(--widget-primary));
+}
+
+/* Apply theme to inputs, buttons and other interactive elements */
+#widget-preview-container input, 
+#widget-preview-container button {
+  background-color: var(--widget-background);
+  color: var(--widget-foreground);
+  border-color: var(--widget-border-color);
+}
+
+#widget-preview-container .border-b {
+  border-bottom-color: var(--widget-border-color);
+}
+
+#widget-preview-container .border-t {
+  border-top-color: var(--widget-border-color);
+}
+
+/* Make shadows match the theme */
+#widget-preview-container.light {
+  box-shadow: 0 8px 32px hsl(0 0% 0% / 0.08);
+}
+
+#widget-preview-container.dark {
+  box-shadow: 0 8px 32px hsl(0 0% 0% / 0.25);
+}
+
+/* Make sure scrollbars match theme */
+#widget-preview-container::-webkit-scrollbar-track {
+  background-color: var(--widget-background);
+}
+
+#widget-preview-container::-webkit-scrollbar-thumb {
+  background-color: var(--widget-muted);
+  border-radius: 4px;
+}
+
+/* Ensure the chat bubble has the right styling */
+#widget-bubble-container .bg-primary {
+  background-color: var(--widget-primary);
+}
+
+#widget-bubble-container .text-primary-foreground {
+  color: var(--widget-primary-foreground);
+}
+
+#widget-bubble-container .border-background {
+  border-color: var(--widget-background);
+}
+
+/* Override any app-specific styles that might be affecting the widget */
+#widget-preview-container * {
+  color: inherit;
+  background-color: inherit;
+}
+
+/* Specific override for message bubbles */
+#widget-preview-container [data-theme="dark"] .bg-muted {
+  background-color: var(--widget-muted) !important;
+}
+
+#widget-preview-container [data-theme="dark"] .bg-primary {
+  background-color: var(--widget-primary) !important;
+}
+
+#widget-preview-container [data-theme="light"] .bg-muted {
+  background-color: var(--widget-muted) !important;
+}
+
+#widget-preview-container [data-theme="light"] .bg-primary {
+  background-color: var(--widget-primary) !important;
+}
