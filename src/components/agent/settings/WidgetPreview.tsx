@@ -353,7 +353,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                         style={widgetSettings.primary_color ?
                             { backgroundColor: widgetSettings.primary_color } : {}}
                     >
-                        <div className="flex items-center justify-center w-8 h-8">
+                        <div className="flex items-center justify-center rounded-full w-15 h-15 overflow-hidden">
                             {widgetSettings.chat_icon ? (
                                 <img
                                     src={widgetSettings.chat_icon}
