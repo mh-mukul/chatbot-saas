@@ -28,6 +28,14 @@ export default function EmbedChat() {
 
             try {
                 const settings = await getChatWidgetSettings(Number(agent_id));
+
+                // Check if the agent is private, show error if it is
+                if (settings.is_private) {
+                    setError("Configuration not found");
+                    setLoading(false);
+                    return;
+                }
+
                 setWidgetSettings(settings);
                 setLoading(false);
             } catch (err) {
@@ -200,7 +208,14 @@ export default function EmbedChat() {
     }
 
     if (error) {
-        return <div className="flex items-center justify-center h-screen text-destructive">{error}</div>
+        return (
+            <div className="flex flex-col items-center justify-center h-screen">
+                <div className="text-xl font-semibold text-destructive mb-2">{error}</div>
+                {error === "Configuration not found" && (
+                    <p className="text-sm text-muted-foreground">This chat widget is not accessible.</p>
+                )}
+            </div>
+        );
     }
 
     // Generate style object for theme customization from widget settings
