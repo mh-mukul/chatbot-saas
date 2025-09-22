@@ -35,6 +35,7 @@ export const playgroundChat = async (data: playgroundChatRequest): Promise<chatR
 export interface embedChatRequest {
     agent_id: string;
     session_id: string;
+    user_id: string;
     query: string;
 }
 
@@ -55,12 +56,22 @@ export interface sessionListResponse {
     created_at: Date;
 }
 
-export const getSessionList = async (id: number): Promise<sessionListResponse[]> => {
+export const getSessionList = async (agent: number): Promise<sessionListResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/chat/sessions/?agent=${id}`);
+        const response = await apiClient.get(`/api/chat/sessions/?agent=${agent}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching session with id ${id}:`, error);
+        console.error(`Error fetching session with id ${agent}:`, error);
+        throw error;
+    }
+};
+
+export const getUserSessionList = async (agent: number, user: string): Promise<sessionListResponse[]> => {
+    try {
+        const response = await apiClient.get(`/api/user-chat/sessions/?agent=${agent}&user=${user}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching session with id ${agent}:`, error);
         throw error;
     }
 };
@@ -74,12 +85,12 @@ export interface sessionMessagesResponse {
     created_at: Date;
 }
 
-export const getSessionMessages = async (session_id: string): Promise<sessionMessagesResponse[]> => {
+export const getSessionMessages = async (session: string): Promise<sessionMessagesResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/chats/?session=${session_id}`);
+        const response = await apiClient.get(`/api/chats/?session=${session}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching session with id ${session_id}:`, error);
+        console.error(`Error fetching session with id ${session}:`, error);
         throw error;
     }
 };

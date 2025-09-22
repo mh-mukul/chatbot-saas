@@ -174,11 +174,11 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
     const ChatIcon = () => {
         if (widgetSettings.chat_icon) {
             return (
-                <div className="flex items-center justify-center overflow-hidden">
+                <div className="flex items-center justify-center overflow-hidden rounded-full">
                     <img
                         src={widgetSettings.chat_icon}
                         alt="Chat icon"
-                        className="object-contain w-5 h-5"
+                        className="object-contain w-8 h-8"
                         style={{
                             aspectRatio: "1/1"
                         }}

@@ -66,7 +66,7 @@ const Login = () => {
                   placeholder="Enter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="pl-10 bg-muted/50 border-border/50 focus:border-primary transition-smooth"
+                  className="pl-10 bg-muted/50 border-border/50 transition-smooth"
                   required
                 />
               </div>
@@ -84,7 +84,7 @@ const Login = () => {
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-muted/50 border-border/50 focus:border-primary transition-smooth"
+                  className="pl-10 bg-muted/50 border-border/50 transition-smooth"
                   required
                 />
               </div>

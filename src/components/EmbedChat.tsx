@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { embedChat as embedChatApi, chatResponse } from "@/services/chat_apis";
+import {
+    embedChat as embedChatApi,
+    chatResponse,
+    getSessionMessages,
+} from "@/services/chat_apis";
 import { getChatWidgetSettings, chatWidgetSettings } from "@/services/embed_chat_apis";
 import { Bot } from "lucide-react";
-import { getOrCreateSessionId } from "@/lib/utils";
+import { getOrCreateSessionId, getOrCreateUserId } from "@/lib/utils";
 import { ChatHeader } from "./embed-chat/ChatHeader";
 import { MessageList } from "./embed-chat/MessageList";
 import { ChatInput } from "./embed-chat/ChatInput";
+import { SessionList } from "./embed-chat/SessionList";
 import { themeStyles as embedChatThemeStyles } from "./embed-chat/theme-styles";
 
 export default function EmbedChat() {
@@ -90,8 +95,11 @@ export default function EmbedChat() {
     const [messages, setMessages] = useState<chatResponse[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [sessionId] = useState<string>(getOrCreateSessionId());
+    const [sessionId, setSessionId] = useState<string>(getOrCreateSessionId());
+    const [userId] = useState<string>(getOrCreateUserId());
     const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
+    const [loadingSession, setLoadingSession] = useState(false);
+    const [showingHistory, setShowingHistory] = useState(false);
 
     // Initialize chat messages with welcome message from widget settings when loaded
     useEffect(() => {
@@ -121,15 +129,63 @@ export default function EmbedChat() {
         }
     }, [widgetSettings]);
 
+    // Handle session selection from history
+    const handleSessionSelect = async (selectedSessionId: string) => {
+        if (selectedSessionId === sessionId) return;
+
+        setLoadingSession(true);
+
+        try {
+            // Fetch messages for the selected session
+            const sessionMessages = await getSessionMessages(selectedSessionId);
+
+            // Convert session messages to chat responses for display
+            const chatMessages: chatResponse[] = [];
+
+            sessionMessages.forEach((msg) => {
+                // Add user message
+                chatMessages.push({
+                    id: `user-${msg.id}`,
+                    role: "user",
+                    content: msg.input,
+                    timestamp: new Date(msg.created_at)
+                });
+
+                // Add assistant message
+                chatMessages.push({
+                    id: `assistant-${msg.id}`,
+                    role: "assistant",
+                    content: msg.output,
+                    timestamp: new Date(msg.created_at)
+                });
+            });
+
+            // Update state with the new session and messages
+            setSessionId(selectedSessionId);
+            setMessages(chatMessages);
+        } catch (err) {
+            console.error("Error loading session:", err);
+            // Show error message as a system message
+            setMessages([{
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: "Sorry, I couldn't load this conversation history.",
+                timestamp: new Date()
+            }]);
+        } finally {
+            setLoadingSession(false);
+        }
+    };
+
     // Chat icon component
     const ChatIcon = () => {
         if (widgetSettings?.chat_icon) {
             return (
-                <div className="flex items-center justify-center overflow-hidden">
+                <div className="flex items-center justify-center overflow-hidden rounded-full">
                     <img
                         src={widgetSettings.chat_icon}
                         alt="Chat icon"
-                        className="object-contain w-5 h-5"
+                        className="object-contain w-8 h-8"
                         style={{
                             aspectRatio: "1/1"
                         }}
@@ -173,6 +229,7 @@ export default function EmbedChat() {
             const response = await embedChatApi({
                 agent_id: effectiveAgentId,
                 session_id: sessionId,
+                user_id: userId,
                 query: currentInput,
             });
 
@@ -223,6 +280,11 @@ export default function EmbedChat() {
         "--widget-primary-color": widgetSettings.primary_color || undefined,
     } as React.CSSProperties : {};
 
+    // Toggle history view
+    const handleToggleHistory = () => {
+        setShowingHistory(prev => !prev);
+    };
+
     return (
         <div
             id="embed-chat-container"
@@ -233,41 +295,62 @@ export default function EmbedChat() {
             <ChatHeader
                 title={widgetSettings?.display_name || "Chat Assistant"}
                 chatIcon={<ChatIcon />}
+                agentId={widgetSettings?.agent_id.toString() || agent_id}
+                showingHistory={showingHistory}
+                onToggleHistory={handleToggleHistory}
+                onSessionSelect={handleSessionSelect}
             />
 
-            {/* Messages Component */}
-            <MessageList
-                messages={messages}
-                isLoading={isLoading}
-                chatIcon={<ChatIcon />}
-            />
-
-            {/* Suggested Messages Section */}
-            {suggestedMessages.length > 0 && !isLoading && !messages.some(msg => msg.role === 'user') && (
-                <div className="px-4 py-2">
-                    <div className="flex flex-wrap gap-2 justify-end">
-                        {suggestedMessages.map((message, index) => (
-                            <div
-                                key={index}
-                                className="border border-muted hover:bg-muted/10 rounded-lg px-3 py-1.5 text-sm cursor-pointer text-foreground transition-colors whitespace-nowrap"
-                                onClick={() => handleSuggestedMessageClick(message)}
-                            >
-                                {message}
-                            </div>
-                        ))}
-                    </div>
+            {showingHistory ? (
+                /* Session History View */
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <SessionList
+                        agentId={widgetSettings?.agent_id.toString() || agent_id}
+                        userId={userId}
+                        onSelectSession={(sessionId) => {
+                            handleSessionSelect(sessionId);
+                            setShowingHistory(false);
+                        }}
+                    />
                 </div>
-            )}
+            ) : (
+                /* Chat View */
+                <>
+                    {/* Messages Component */}
+                    <MessageList
+                        messages={messages}
+                        isLoading={isLoading || loadingSession}
+                        chatIcon={<ChatIcon />}
+                    />
 
-            {/* Input Component */}
-            <ChatInput
-                input={input}
-                setInput={setInput}
-                sendMessage={() => sendMessage()}
-                isLoading={isLoading}
-                placeholder={widgetSettings?.message_placeholder || "Ask anything..."}
-                primaryColor={widgetSettings?.primary_color}
-            />
+                    {/* Suggested Messages Section */}
+                    {suggestedMessages.length > 0 && !isLoading && !messages.some(msg => msg.role === 'user') && (
+                        <div className="px-4 py-2">
+                            <div className="flex flex-wrap gap-2 justify-end">
+                                {suggestedMessages.map((message, index) => (
+                                    <div
+                                        key={index}
+                                        className="border border-muted hover:bg-muted/10 rounded-lg px-3 py-1.5 text-sm cursor-pointer text-foreground transition-colors whitespace-nowrap"
+                                        onClick={() => handleSuggestedMessageClick(message)}
+                                    >
+                                        {message}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Input Component */}
+                    <ChatInput
+                        input={input}
+                        setInput={setInput}
+                        sendMessage={() => sendMessage()}
+                        isLoading={isLoading}
+                        placeholder={widgetSettings?.message_placeholder || "Ask anything..."}
+                        primaryColor={widgetSettings?.primary_color}
+                    />
+                </>
+            )}
         </div>
     );
 }

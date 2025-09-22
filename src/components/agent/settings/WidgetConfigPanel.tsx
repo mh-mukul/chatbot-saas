@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -109,7 +108,7 @@ const WidgetConfigPanel = ({
                                         value={widgetSettings.suggested_messages || ""}
                                         onChange={(e) => onSuggestedMessagesChange(e.target.value)}
                                         className="mt-1"
-                                        placeholder="What services do you offer?\nHow do I contact support?\nWhat are your business hours?"
+                                        placeholder="What services do you offer?"
                                     />
                                     <p className="text-xs text-muted-foreground mt-1">
                                         Separate each question with a new line
