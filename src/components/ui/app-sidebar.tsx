@@ -92,7 +92,7 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
           </span>
         </div>
       </SidebarHeader>
-      <SidebarTrigger className="absolute top-1/2 -right-3 hidden md:inline-flex p-1 rounded-md bg-background border border-border shadow-md hover:bg-muted h-6 w-6">
+      <SidebarTrigger className="absolute top-1/2 -right-3 hidden md:inline-flex p-1 rounded-full bg-background border border-border shadow-md hover:bg-muted h-5 w-5">
         {open ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
       </SidebarTrigger>
       <SidebarContent className="pt-2">
