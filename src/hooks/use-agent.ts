@@ -3,13 +3,13 @@ import {
     getAgentById,
     updateAgent,
     AgentDetails,
-} from "@/services/agent_apis";
+} from "@/services/api/agent_apis";
 import {
     getModelList,
     modelListResponse,
     getPromptTemplateList,
     promptTemplateListResponse,
-} from "@/services/model_apis";
+} from "@/services/api/model_apis";
 import { useToast } from "@/hooks/use-toast";
 import { clearSessionId } from "@/lib/utils";
 

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { getAgents, Agent, deleteAgent as deleteAgentApi, createAgent as createAgentApi } from "@/services/agent_apis";
+import { getAgents, Agent, deleteAgent as deleteAgentApi, createAgent as createAgentApi } from "@/services/api/agent_apis";
 import { formatDistanceToNow } from 'date-fns';
 import {
   AlertDialog,
@@ -36,13 +36,17 @@ const Agents = () => {
       setIsLoading(true);
       try {
         const data = await getAgents();
-        setAgents(data);
+        // Handle case when response data is empty or undefined
+        console.log("Fetched agents:", data);
+        setAgents(Array.isArray(data) ? data : []);
       } catch (error) {
+        console.error("Error fetching agents:", error);
         toast({
           title: "Error fetching agents",
           description: "Could not load agent data. Please try again later.",
           variant: "destructive",
         });
+        setAgents([]);
       } finally {
         setIsLoading(false);
       }
@@ -112,13 +116,15 @@ const Agents = () => {
             Manage and monitor your intelligent agents
           </p>
         </div>
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="transition-spring"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Agent
-        </Button>
+        {agents.length > 0 && (
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="transition-spring"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Agent
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -151,8 +157,8 @@ const Agents = () => {
         </div>
       ) : (
         <>
-          {/* Agents Grid */}
-          {agents.length > 0 && (
+          {/* Agents Grid - Only shown when there are agents */}
+          {agents && agents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {agents.map((agent) => (
                 <Card
@@ -192,7 +198,7 @@ const Agents = () => {
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-blue-400" />
                         <div>
-                          <p className="text-sm font-medium">{agent.conversations.toLocaleString()}</p>
+                          <p className="text-sm font-medium">{agent.conversations ? agent.conversations.toLocaleString() : '0'}</p>
                           <p className="text-xs text-muted-foreground">Conversations</p>
                         </div>
                       </div>
@@ -208,10 +214,8 @@ const Agents = () => {
                 </Card>
               ))}
             </div>
-          )}
-
-          {/* Empty State for when no agents */}
-          {agents.length === 0 && (
+          ) : (
+            // Empty State - Shown when there are no agents
             <div className="text-center py-16">
               <div className="mx-auto w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mb-4">
                 <Plus className="h-8 w-8 text-muted-foreground" />

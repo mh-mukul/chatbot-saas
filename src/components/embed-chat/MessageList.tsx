@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
-import { chatResponse } from "@/services/chat_apis";
+import { chatResponse } from "@/services/api/chat_apis";
 
 interface MessageListProps {
     messages: chatResponse[];

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, Text, Trash2 } from "lucide-react";
-import { textSourceListResponse, deleteSource, deleteSourceRequest, createTextSource, createTextSourceRequest } from "@/services/source_apis";
+import { textSourceListResponse, deleteSource, deleteSourceRequest, createTextSource, createTextSourceRequest } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 

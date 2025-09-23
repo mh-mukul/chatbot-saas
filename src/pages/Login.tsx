@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { loginApi, LoginResponse } from "@/services/api/auth_apis";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -13,21 +14,26 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Static credentials
-    if (username === "admin" && password === "password") {
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/dashboard");
+
+    try {
+      const response: LoginResponse = await loginApi({ username, password });
+      console.log("Login successful:", response);
       toast({
-        title: "Welcome back!",
-        description: "Successfully logged into your AI Agent platform.",
+        title: "Login Successful",
+        description: `Welcome back, ${response.user.first_name}!`,
+        variant: "default",
       });
-    } else {
+      // Redirect to dashboard or another page
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
       toast({
-        title: "Login failed",
-        description: "Invalid credentials. Use 'admin' and 'password'.",
+        title: "Login Failed",
+        description: "Invalid username or password. Please try again.",
         variant: "destructive",
       });
     }
@@ -36,7 +42,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
       <div className="absolute inset-0 opacity-5"></div>
-      
+
       <Card className="w-full max-w-md relative z-10 bg-gradient-card border-border/50 shadow-elegant backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-glow">
@@ -44,10 +50,10 @@ const Login = () => {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold bg-clip-text">
-              AI Agent Platform
+              AgentIQ
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Sign in to manage your intelligent agents
+              Sign in to continue
             </CardDescription>
           </div>
         </CardHeader>
@@ -90,8 +96,8 @@ const Login = () => {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full transition-spring font-medium"
             >
               Sign In
@@ -100,7 +106,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              Demo credentials: <span className="font-mono">admin / password</span>
+              Signup is disabled for now. Please contact the administrator.
             </p>
           </div>
         </CardContent>

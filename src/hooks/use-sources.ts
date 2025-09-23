@@ -17,7 +17,7 @@ import {
     sourceSummaryResponse,
     trainSources,
     getTrainingProgress,
-} from "@/services/source_apis";
+} from "@/services/api/source_apis";
 
 type SourceDetailsType = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
 

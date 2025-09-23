@@ -15,14 +15,15 @@ const Layout = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    const isAuthenticated = localStorage.getItem("token");
     if (!isAuthenticated) {
       navigate("/");
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/");
     toast({
       title: "Logged out",

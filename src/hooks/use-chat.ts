@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { playgroundChat, playgroundChatRequest } from '@/services/chat_apis';
+import { playgroundChat, playgroundChatRequest } from '@/services/api/chat_apis';
 import { useToast } from '@/hooks/use-toast';
 import { getOrCreateSessionId } from '@/lib/utils';
-import { chatResponse } from "@/services/chat_apis";
+import { chatResponse } from "@/services/api/chat_apis";
 
 
 export const useChat = (

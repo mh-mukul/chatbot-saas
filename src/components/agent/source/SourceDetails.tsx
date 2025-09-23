@@ -7,7 +7,7 @@ import {
     fileSourceDetailsResponse,
     textSourceDetailsResponse,
     qnaSourceDetailsResponse
-} from "@/services/source_apis";
+} from "@/services/api/source_apis";
 
 type SourceDetails = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse;
 

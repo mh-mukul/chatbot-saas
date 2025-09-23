@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Send, Bot, User, Smile, RefreshCcw } from "lucide-react";
-import { chatWidgetSettings } from "@/services/embed_chat_apis";
+import { chatWidgetSettings } from "@/services/api/embed_chat_apis";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";

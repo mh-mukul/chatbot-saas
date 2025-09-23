@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
-import { getUserSessionList, sessionListResponse } from "@/services/chat_apis";
+import { getUserSessionList, sessionListResponse } from "@/services/api/chat_apis";
 
 interface SessionListProps {
     agentId: string;

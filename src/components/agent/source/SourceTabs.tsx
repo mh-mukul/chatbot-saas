@@ -5,7 +5,7 @@ import TextSourceTab from "@/components/agent/source/TextSourceTab";
 import QnaSourceTab from "@/components/agent/source/QnaSourceTab";
 import SourceSkeletonLoader from "./common/SourceSkeletonLoader";
 import EmptyState from "./common/EmptyState";
-import { fileSourceListResponse, qnaSourceListResponse, textSourceListResponse } from "@/services/source_apis";
+import { fileSourceListResponse, qnaSourceListResponse, textSourceListResponse } from "@/services/api/source_apis";
 
 interface SourceTabsProps {
     activeTab: string;

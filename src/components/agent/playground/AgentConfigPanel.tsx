@@ -5,9 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AgentDetails } from "@/services/agent_apis";
+import { AgentDetails } from "@/services/api/agent_apis";
 import { formatDistanceToNow } from "date-fns";
-import { modelListResponse, promptTemplateListResponse } from "@/services/model_apis";
+import { modelListResponse, promptTemplateListResponse } from "@/services/api/model_apis";
 import { getAgentTrainingStatusColor } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,7 +55,7 @@ const AgentConfigPanel = ({
                         Playground
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                        Adjust the agent's parameter based on your needs. Make sure to save after making changes.
+                        Adjust the parameters based on your needs & test. If you are satisfied, make sure to save the changes.
                     </p>
                 </div>
 

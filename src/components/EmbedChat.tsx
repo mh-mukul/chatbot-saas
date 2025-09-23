@@ -4,8 +4,8 @@ import {
     embedChat as embedChatApi,
     chatResponse,
     getSessionMessages,
-} from "@/services/chat_apis";
-import { getChatWidgetSettings, chatWidgetSettings } from "@/services/embed_chat_apis";
+} from "@/services/api/chat_apis";
+import { getChatWidgetSettings, chatWidgetSettings } from "@/services/api/embed_chat_apis";
 import { Bot } from "lucide-react";
 import { getOrCreateSessionId, getOrCreateUserId } from "@/lib/utils";
 import { ChatHeader } from "./embed-chat/ChatHeader";

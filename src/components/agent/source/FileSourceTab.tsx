@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
-import { fileSourceListResponse, deleteSource, deleteSourceRequest, uploadFileSource } from "@/services/source_apis";
+import { fileSourceListResponse, deleteSource, deleteSourceRequest, uploadFileSource } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 

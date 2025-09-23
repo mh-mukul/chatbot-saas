@@ -10,7 +10,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Label } from "./ui/label";
-import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/chat_apis";
+import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/api/chat_apis";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 

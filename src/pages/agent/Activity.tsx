@@ -1,4 +1,4 @@
-import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/chat_apis";
+import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/api/chat_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis, Loader2 } from "lucide-react";
