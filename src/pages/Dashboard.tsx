@@ -43,8 +43,8 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold bg-clip-text">
           Dashboard
         </h1>
-        <p className="text-muted-foreground mt-2">
-          Monitor your AI agents and their performance
+        <p className="text-sm text-muted-foreground mt-1">
+          NOTE: This dashboard is a static mockup for design purposes only. Real data will be integrated in future updates. Please navigate to <b>Agents</b> section for to explore core features. 
         </p>
       </div>
 

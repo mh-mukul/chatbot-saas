@@ -232,7 +232,7 @@ const WidgetConfigPanel = ({
                                             <h3 className="font-medium text-green-800 mb-2">Public Widget</h3>
                                             <p className="text-green-700 text-sm">
                                                 Your chat widget is public and ready to be embedded on your website.
-                                                Copy the code below and paste it into your website's HTML.
+                                                Copy the code below and paste it inside the body tag of index.html.
                                             </p>
                                         </div>
                                         <div className="bg-slate-950 rounded-md p-4 overflow-x-auto">
