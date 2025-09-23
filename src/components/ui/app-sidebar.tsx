@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Bot,
+  BotMessageSquare,
   Activity,
   FileText,
   Settings,
@@ -85,11 +86,7 @@ export function AppSidebar({ agentId }: { agentId?: string }) {
     >
       <SidebarHeader className="relative p-3">
         <div className="flex items-center justify-center group-data-[state=collapsed]:justify-center">
-          <img
-            src="/favicon.png"
-            alt="Logo"
-            className="h-8 w-8 min-w-8 flex-shrink-0 transition-all duration-300 group-data-[state=expanded]:mr-2"
-          />
+          <BotMessageSquare className="h-8 w-8 min-w-8 flex-shrink-0 transition-all duration-300 group-data-[state=expanded]:mr-2" />
           <span className="text-lg font-bold transition-opacity duration-300 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:overflow-hidden">
             AgentIQ
           </span>

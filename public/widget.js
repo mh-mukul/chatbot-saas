@@ -1,5 +1,5 @@
 (function () {
-  window.NimbusChatWidget = {
+  window.AgentIQChatWidget = {
     init: function (config) {
       const defaultConfig = {
         agent_id: "",
