@@ -43,26 +43,26 @@ export function useAgent(id: string | undefined) {
         const fetchData = async () => {
             try {
                 // Fetch models first
-                const modelsList = await getModelList();
-                setModels(modelsList);
+                const modelsResponse = await getModelList();
+                setModels(modelsResponse.models);
 
-                const templates = await getPromptTemplateList();
-                setPromptTemplates(templates);
+                const responsePromptTemplates = await getPromptTemplateList();
+                setPromptTemplates(responsePromptTemplates.prompts);
 
                 if (id) {
                     // Then fetch agent details
-                    const agentDetails = await getAgentById(Number(id));
+                    const agentDetails = await getAgentById(id);
                     setAgent(agentDetails);
                     setInitialAgent(agentDetails);
 
                     // Filter only active models
-                    const activeModels = modelsList.filter(model => model.status === 'active');
+                    const activeModels = modelsResponse.models.filter(model => model.is_active);
 
                     // If agent has a model_id, preselect it if it's active
-                    if (agentDetails.model_id && modelsList.length > 0) {
-                        const agentModel = modelsList.find(model => model.id === agentDetails.model_id);
+                    if (agentDetails.model_id && modelsResponse.models.length > 0) {
+                        const agentModel = modelsResponse.models.find(model => model.id === agentDetails.model_id);
 
-                        if (agentModel && agentModel.status === 'active') {
+                        if (agentModel && agentModel.is_active) {
                             // Only select if the model is active
                             setSelectedModel(agentModel);
                         } else if (activeModels.length > 0) {
@@ -101,7 +101,7 @@ export function useAgent(id: string | undefined) {
         if (!agent || !id || !isChanged || !selectedModel) return;
 
         // Check if selected model is active before saving
-        if (selectedModel.status !== 'active') {
+        if (!selectedModel.is_active) {
             toast({
                 title: "Invalid Model Selection",
                 description: "Please select an active model before saving.",
@@ -111,7 +111,7 @@ export function useAgent(id: string | undefined) {
         }
 
         try {
-            const updatedAgentData = await updateAgent(Number(id), {
+            const updatedAgentData = await updateAgent(id, {
                 name: agent.name,
                 system_prompt: agent.system_prompt,
                 model_temperature: agent.model_temperature,
@@ -135,7 +135,7 @@ export function useAgent(id: string | undefined) {
 
     const handleModelChange = (value: string) => {
         const model = models.find(m => m.id === parseInt(value));
-        if (model && model.status === "active") {
+        if (model && model.is_active) {
             setSelectedModel(model);
             setAgent((prev) => (prev ? { ...prev, model_id: parseInt(value) } : null));
         }

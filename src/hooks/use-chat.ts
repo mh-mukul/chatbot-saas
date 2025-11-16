@@ -2,17 +2,22 @@ import { useState } from 'react';
 import { playgroundChat, playgroundChatRequest } from '@/services/api/chat_apis';
 import { useToast } from '@/hooks/use-toast';
 import { getOrCreateSessionId } from '@/lib/utils';
-import { chatResponse } from "@/services/api/chat_apis";
 
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+}
 
 export const useChat = (
-    agentId: number,
+    agentId: string,
     systemPrompt: string,
     temperature: number,
     modelProvider: string = '',
-    modelCode: string = ''
+    modelId: number
 ) => {
-    const [messages, setMessages] = useState<chatResponse[]>([
+    const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
             role: 'assistant',
@@ -26,36 +31,35 @@ export const useChat = (
     const sendMessage = async (content: string) => {
         if (!content.trim()) return;
 
-        const userMessage: chatResponse = {
+        const userMessage: Message = {
             id: Date.now().toString(),
             role: 'user',
-            content,
+            content: content,
             timestamp: new Date(),
         };
-
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
         try {
             const sessionId = getOrCreateSessionId();
+            console.log("Using session ID:", sessionId);
             const request: playgroundChatRequest = {
-                agent_id: agentId,
                 session_id: sessionId,
                 query: content,
                 system_prompt: systemPrompt,
                 temperature: temperature,
                 model_provider: modelProvider,
-                model_code: modelCode,
+                model_id: modelId,
                 platform: 'playground',
             };
 
-            const response = await playgroundChat(request);
+            const response = await playgroundChat(agentId, request);
 
-            const assistantMessage: chatResponse = {
-                id: response.id,
+            const assistantMessage: Message = {
+                id: response.session_id,
                 role: 'assistant',
-                content: response.content,
-                timestamp: new Date(response.timestamp),
+                content: response.ai_message,
+                timestamp: new Date(response.date_time),
             };
 
             setMessages((prev) => [...prev, assistantMessage]);

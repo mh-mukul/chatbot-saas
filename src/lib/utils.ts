@@ -11,6 +11,7 @@ const SESSION_ID_KEY = 'chat_session_id';
 export const getOrCreateSessionId = (): string => {
   let sessionId = localStorage.getItem(SESSION_ID_KEY);
   if (!sessionId) {
+    console.log("Generating new session ID");
     sessionId = crypto.randomUUID();
     localStorage.setItem(SESSION_ID_KEY, sessionId);
   }

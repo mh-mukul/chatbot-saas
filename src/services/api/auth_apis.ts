@@ -5,24 +5,25 @@ const apiClient = axios.create({
 });
 
 export interface LoginRequest {
-    username: string;
+    phone: string;
     password: string;
 }
 
 export interface LoginResponse {
-    token: string;
+    access_token: string;
+    refresh_token: string;
     user: {
         id: number;
-        username: string;
-        first_name: string;
-        last_name: string;
+        name: string;
+        email: string;
+        phone: string;
         image_url: string;
     };
 }
 
 export const loginApi = async (loginData: LoginRequest): Promise<LoginResponse> => {
     try {
-        const response = await apiClient.post('/api/login', loginData);
+        const response = await apiClient.post('/api/v1/login', loginData);
         return response.data.data;
     } catch (error) {
         console.error('Error logging in:', error);

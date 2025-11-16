@@ -25,11 +25,11 @@ const Playground = () => {
 
   // Set up the chat parameters based on agent data
   const chatParams = {
-    agentId: agent?.id || 0,
+    agentId: agent?.uid || '0',
     systemPrompt: agent?.system_prompt || "You are a helpful assistant.",
     temperature: agent?.model_temperature || 0,
     modelProvider: selectedModel?.provider || "",
-    modelCode: selectedModel?.code || ""
+    modelId: selectedModel?.id || 0
   };
 
   // Use our custom hook for chat functionality
@@ -39,7 +39,7 @@ const Playground = () => {
       chatParams.systemPrompt,
       chatParams.temperature,
       chatParams.modelProvider,
-      chatParams.modelCode
+      chatParams.modelId
     );
 
   if (!agent) {

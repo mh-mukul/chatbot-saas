@@ -107,12 +107,12 @@ const AgentConfigPanel = ({
                                     <SelectItem
                                         key={model.id}
                                         value={model.id.toString()}
-                                        disabled={model.status !== 'active'}
+                                        disabled={!model.is_active}
                                     >
                                         <div className="flex items-center gap-2">
-                                            {model.icon_url && (
+                                            {model.icon && (
                                                 <img
-                                                    src={model.icon_url}
+                                                    src={model.icon}
                                                     alt={model.model_name}
                                                     className="h-4 w-4 object-contain"
                                                 />

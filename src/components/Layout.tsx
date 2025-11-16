@@ -37,7 +37,7 @@ const Layout = () => {
   } | null>(null);
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("token");
+    const isAuthenticated = localStorage.getItem("access_token");
     if (!isAuthenticated) {
       navigate("/");
     } else {
@@ -50,7 +50,8 @@ const Layout = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
     navigate("/");
     toast({
