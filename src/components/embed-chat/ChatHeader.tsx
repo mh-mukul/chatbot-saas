@@ -1,6 +1,6 @@
 import { Ellipsis, MessageCirclePlusIcon, History, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { clearSessionId } from "@/lib/utils";
+import { removeSessionId } from "@/lib/utils";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -48,7 +48,7 @@ export function ChatHeader({
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
                             onClick={() => {
-                                clearSessionId();
+                                removeSessionId();
                                 window.location.reload();
                             }}
                             className="flex items-center gap-2 cursor-pointer"

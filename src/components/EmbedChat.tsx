@@ -7,7 +7,7 @@ import {
 } from "@/services/api/chat_apis";
 import { getChatWidgetSettings, chatWidgetSettings } from "@/services/api/embed_chat_apis";
 import { Bot } from "lucide-react";
-import { getOrCreateSessionId, getOrCreateUserId } from "@/lib/utils";
+import { getSessionId, setSessionId, getOrCreateUserId } from "@/lib/utils";
 import { ChatHeader } from "./embed-chat/ChatHeader";
 import { MessageList } from "./embed-chat/MessageList";
 import { ChatInput } from "./embed-chat/ChatInput";

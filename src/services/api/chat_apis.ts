@@ -33,7 +33,7 @@ export interface chatResponse {
 }
 
 export interface playgroundChatRequest {
-    session_id: string;
+    session_id: string | null;
     query: string;
     system_prompt: string;
     temperature: 0 | number;

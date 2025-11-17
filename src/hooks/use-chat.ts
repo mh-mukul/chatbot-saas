@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { playgroundChat, playgroundChatRequest } from '@/services/api/chat_apis';
 import { useToast } from '@/hooks/use-toast';
-import { getOrCreateSessionId } from '@/lib/utils';
+import { getSessionId, setSessionId } from '@/lib/utils';
 
 interface Message {
     id: string;
@@ -25,6 +25,7 @@ export const useChat = (
             timestamp: new Date(),
         },
     ]);
+    const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
@@ -41,10 +42,9 @@ export const useChat = (
         setIsLoading(true);
 
         try {
-            const sessionId = getOrCreateSessionId();
-            console.log("Using session ID:", sessionId);
+            const currentSessionId = sessionId || getSessionId();
             const request: playgroundChatRequest = {
-                session_id: sessionId,
+                session_id: currentSessionId || undefined,
                 query: content,
                 system_prompt: systemPrompt,
                 temperature: temperature,
@@ -55,8 +55,13 @@ export const useChat = (
 
             const response = await playgroundChat(agentId, request);
 
+            if (!currentSessionId) {
+                setSessionId(response.session_id);
+                setSessionIdState(response.session_id);
+            }
+
             const assistantMessage: Message = {
-                id: response.session_id,
+                id: Date.now().toString(),
                 role: 'assistant',
                 content: response.ai_message,
                 timestamp: new Date(response.date_time),

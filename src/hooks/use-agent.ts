@@ -11,7 +11,7 @@ import {
     promptTemplateListResponse,
 } from "@/services/api/model_apis";
 import { useToast } from "@/hooks/use-toast";
-import { clearSessionId } from "@/lib/utils";
+import { removeSessionId } from "@/lib/utils";
 
 export function useAgent(id: string | undefined) {
     const [agent, setAgent] = useState<AgentDetails | null>(null);
@@ -37,7 +37,7 @@ export function useAgent(id: string | undefined) {
         );
 
     useEffect(() => {
-        clearSessionId(); // Clear previous session
+        removeSessionId(); // Clear previous session
         setIsLoading(true);
 
         const fetchData = async () => {
