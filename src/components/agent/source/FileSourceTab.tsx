@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, ChevronDown, ChevronUp, Trash2, AlertCircle } from "lucide-react";
-import { fileSourceListResponse, deleteSource, deleteSourceRequest, uploadFileSource } from "@/services/api/source_apis";
+import { fileSourceListResponse, deleteSource, uploadFileSource } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import DeleteConfirmation from "./DeleteConfirmation";
@@ -10,7 +10,7 @@ import DeleteConfirmation from "./DeleteConfirmation";
 interface FileSourceTabProps {
     fileSources: fileSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
-    agentId: number;
+    agentId: string;
     onSourceDeleted?: () => void;
     onSourceAdded?: () => void;
 }
@@ -44,12 +44,6 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
         return true;
     };
 
-    const data: deleteSourceRequest = {
-        agent_id: agentId,
-        source_id: sourceToDelete!,
-        type: 'file'
-    };
-
     const handleDeleteClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation(); // Prevent card click event
         setSourceToDelete(id);
@@ -59,7 +53,7 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
     const handleDeleteConfirm = async () => {
         if (sourceToDelete) {
             try {
-                await deleteSource(data);
+                await deleteSource(agentId, sourceToDelete);
                 setDeleteDialogOpen(false);
                 setSourceToDelete(null);
                 if (onSourceDeleted) {
@@ -89,8 +83,7 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
         setIsUploading(true);
 
         try {
-            await uploadFileSource({
-                agent_id: agentId,
+            await uploadFileSource(agentId, {
                 file: file
             });
 
@@ -138,8 +131,7 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
         setIsUploading(true);
 
         try {
-            await uploadFileSource({
-                agent_id: agentId,
+            await uploadFileSource(agentId, {
                 file: file
             });
 
@@ -217,7 +209,7 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
 
             <div className="space-y-3">
                 {fileSources.map((file) => (
-                    <Card key={file.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(file.id, 'file')}>
+                    <Card key={file.uid} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(file.uid, 'file')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <FileText className="h-5 w-5 text-primary" />
@@ -229,7 +221,7 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
                                 variant="ghost"
                                 size="icon"
                                 className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-                                onClick={(e) => handleDeleteClick(e, file.id)}
+                                onClick={(e) => handleDeleteClick(e, file.uid)}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>

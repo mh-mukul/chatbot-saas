@@ -56,7 +56,7 @@ const SourceDetails = ({ selectedSource, selectedSourceType, onBackClick }: Sour
             <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border/50 p-6 space-y-6">
                 <h2 className="text-xl font-bold mb-4">Details</h2>
                 <div className="space-y-2 text-sm">
-                    <p><strong>ID:</strong> {selectedSource.id}</p>
+                    <p><strong>ID:</strong> {selectedSource.uid}</p>
                     <div><strong>Status:</strong>
                         <Badge className={getStatusColor(String(selectedSource.is_trained))}>
                             {selectedSource.is_trained === true ? "Trained" : "Not Trained"}

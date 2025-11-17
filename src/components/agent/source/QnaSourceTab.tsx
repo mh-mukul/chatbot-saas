@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, MessageCircleQuestion, Trash2 } from "lucide-react";
-import { qnaSourceListResponse, deleteSource, deleteSourceRequest, createQnaSource, createQnaSourceRequest } from "@/services/api/source_apis";
+import { qnaSourceListResponse, deleteSource, createQnaSource, createQnaSourceRequest } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 
 interface QnaSourceTabProps {
     qnaSources: qnaSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
-    agentId: number;
+    agentId: string;
     onSourceDeleted?: () => void;
     onSourceAdded?: () => void;
 }
@@ -22,15 +22,9 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
     const [title, setTitle] = useState("");
-    const [questions, setQuestions] = useState("");
+    const [questions, setQuestions] = useState([]);
     const [answer, setAnswer] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const data: deleteSourceRequest = {
-        agent_id: agentId,
-        source_id: sourceToDelete!,
-        type: 'qna'
-    };
 
     const handleDeleteClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation(); // Prevent card click event
@@ -41,7 +35,7 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
     const handleDeleteConfirm = async () => {
         if (sourceToDelete) {
             try {
-                await deleteSource(data);
+                await deleteSource(agentId, sourceToDelete);
                 setDeleteDialogOpen(false);
                 setSourceToDelete(null);
                 if (onSourceDeleted) {
@@ -60,19 +54,17 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
         setIsSubmitting(true);
 
         const qnaSourceData: createQnaSourceRequest = {
-            agent_id: agentId,
-            type: 'qna',
             title,
             questions,
             answer
         };
 
         try {
-            await createQnaSource(qnaSourceData);
+            await createQnaSource(agentId, qnaSourceData);
 
             // Reset form fields
             setTitle("");
-            setQuestions("");
+            setQuestions([]);
             setAnswer("");
 
             // Refresh the source list
@@ -117,8 +109,8 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
                                 id="question"
                                 placeholder="Enter questions (one per line)"
                                 className="min-h-24"
-                                value={questions}
-                                onChange={(e) => setQuestions(e.target.value)}
+                                value={questions.join('\n')}
+                                onChange={(e) => setQuestions(e.target.value.split('\n'))}
                             />
                         </div>
                         <div>
@@ -146,7 +138,7 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
 
             <div className="space-y-3">
                 {qnaSources.map((item) => (
-                    <Card key={item.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.id, 'qna')}>
+                    <Card key={item.uid} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.uid, 'qna')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <MessageCircleQuestion className="h-5 w-5 text-primary" />
@@ -158,7 +150,7 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
                                 variant="ghost"
                                 size="icon"
                                 className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-                                onClick={(e) => handleDeleteClick(e, item.id)}
+                                onClick={(e) => handleDeleteClick(e, item.uid)}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>

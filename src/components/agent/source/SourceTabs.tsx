@@ -17,7 +17,7 @@ interface SourceTabsProps {
     isLoadingTextSources: boolean;
     isLoadingQnaSources: boolean;
     handleSourceClick: (sourceId: string, type: string) => void;
-    agentId: number;
+    agentId: string;
     handleSourceDeleted: () => void;
     handleSourceAdded: (sourceType: string) => void;
 }

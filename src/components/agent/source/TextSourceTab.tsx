@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, Text, Trash2 } from "lucide-react";
-import { textSourceListResponse, deleteSource, deleteSourceRequest, createTextSource, createTextSourceRequest } from "@/services/api/source_apis";
+import { textSourceListResponse, deleteSource, createTextSource, createTextSourceRequest } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
 
 interface TextSourceTabProps {
     textSources: textSourceListResponse[];
     onSourceClick: (id: string, type: string) => void;
-    agentId: number;
+    agentId: string;
     onSourceDeleted?: () => void;
     onSourceAdded?: () => void;
 }
@@ -25,12 +25,6 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, o
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const data: deleteSourceRequest = {
-        agent_id: agentId,
-        source_id: sourceToDelete!,
-        type: 'text'
-    };
-
     const handleDeleteClick = (e: React.MouseEvent, id: string) => {
         e.stopPropagation(); // Prevent card click event
         setSourceToDelete(id);
@@ -40,7 +34,7 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, o
     const handleDeleteConfirm = async () => {
         if (sourceToDelete) {
             try {
-                await deleteSource(data);
+                await deleteSource(agentId, sourceToDelete);
                 setDeleteDialogOpen(false);
                 setSourceToDelete(null);
                 if (onSourceDeleted) {
@@ -59,14 +53,12 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, o
         setIsSubmitting(true);
 
         const textSourceData: createTextSourceRequest = {
-            agent_id: agentId,
-            type: 'text',
             title,
             content
         };
 
         try {
-            await createTextSource(textSourceData);
+            await createTextSource(agentId, textSourceData);
 
             // Reset form fields
             setTitle("");
@@ -133,7 +125,7 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, o
 
             <div className="space-y-3">
                 {textSources.map((item) => (
-                    <Card key={item.id} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.id, 'text')}>
+                    <Card key={item.uid} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.uid, 'text')}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <Text className="h-5 w-5 text-primary" />
@@ -145,7 +137,7 @@ const TextSourceTab = ({ textSources, onSourceClick, agentId, onSourceDeleted, o
                                 variant="ghost"
                                 size="icon"
                                 className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-                                onClick={(e) => handleDeleteClick(e, item.id)}
+                                onClick={(e) => handleDeleteClick(e, item.uid)}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>

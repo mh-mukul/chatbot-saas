@@ -51,7 +51,7 @@ const Sources = () => {
         isLoadingTextSources={isLoadingTextSources}
         isLoadingQnaSources={isLoadingQnaSources}
         handleSourceClick={handleSourceClick}
-        agentId={parseInt(id!, 10)}
+        agentId={id}
         handleSourceDeleted={handleSourceDeleted}
         handleSourceAdded={handleSourceAdded}
       />

@@ -43,7 +43,7 @@ export const useSources = (id: string | undefined) => {
     // Load summary when component mounts
     useEffect(() => {
         if (id) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingSummary(true);
             getSourceSummary(agentId)
                 .then(setSourceSummary)
@@ -62,10 +62,10 @@ export const useSources = (id: string | undefined) => {
     // Load file sources only when the "files" tab is active
     useEffect(() => {
         if (id && activeTab === "files" && fileSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingFileSources(true);
             getFileSourceList(agentId)
-                .then(setFileSources)
+                .then(data => setFileSources(data.knowledge_sources))
                 .catch(err => {
                     console.error("Error fetching file sources:", err);
                     toast({
@@ -81,10 +81,10 @@ export const useSources = (id: string | undefined) => {
     // Load text sources only when the "text" tab is active
     useEffect(() => {
         if (id && activeTab === "text" && textSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingTextSources(true);
             getTextSourceList(agentId)
-                .then(setTextSources)
+                .then(data => setTextSources(data.knowledge_sources))
                 .catch(err => {
                     console.error("Error fetching text sources:", err);
                     toast({
@@ -100,10 +100,10 @@ export const useSources = (id: string | undefined) => {
     // Load QnA sources only when the "qa" tab is active
     useEffect(() => {
         if (id && activeTab === "qa" && qnaSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingQnaSources(true);
             getQnaSourceList(agentId)
-                .then(setQnaSources)
+                .then(data => setQnaSources(data.knowledge_sources))
                 .catch(err => {
                     console.error("Error fetching QnA sources:", err);
                     toast({
@@ -121,11 +121,11 @@ export const useSources = (id: string | undefined) => {
         try {
             let details: SourceDetailsType = null;
             if (type === 'file') {
-                details = await getFileSourceDetails(sourceId);
+                details = await getFileSourceDetails(id, sourceId);
             } else if (type === 'text') {
-                details = await getTextSourceDetails(sourceId);
+                details = await getTextSourceDetails(id, sourceId);
             } else if (type === 'qna') {
-                details = await getQnaSourceDetails(sourceId);
+                details = await getQnaSourceDetails(id, sourceId);
             }
             setSelectedSource(details);
         } catch (error) {
@@ -161,21 +161,21 @@ export const useSources = (id: string | undefined) => {
     // Common function to refresh sources
     const refreshSources = () => {
         if (id) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             if (activeTab === "files") {
                 setIsLoadingFileSources(true);
                 getFileSourceList(agentId)
-                    .then(setFileSources)
+                    .then(data => setFileSources(data.knowledge_sources))
                     .finally(() => setIsLoadingFileSources(false));
             } else if (activeTab === "text") {
                 setIsLoadingTextSources(true);
                 getTextSourceList(agentId)
-                    .then(setTextSources)
+                    .then(data => setTextSources(data.knowledge_sources))
                     .finally(() => setIsLoadingTextSources(false));
             } else if (activeTab === "qa") {
                 setIsLoadingQnaSources(true);
                 getQnaSourceList(agentId)
-                    .then(setQnaSources)
+                    .then(data => setQnaSources(data.knowledge_sources))
                     .finally(() => setIsLoadingQnaSources(false));
             }
 
