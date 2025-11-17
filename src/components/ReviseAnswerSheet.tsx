@@ -10,7 +10,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Label } from "./ui/label";
-import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/api/chat_apis";
+import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/api/activity_apis";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -91,7 +91,7 @@ export function ReviseAnswerSheet({ agentId, message, children, onSuccess }: Rev
                             <Label htmlFor="user-message">User Message</Label>
                             <Textarea
                                 id="user-message"
-                                value={message.input}
+                                value={message.human_message}
                                 disabled
                                 className="h-24"
                             />
@@ -100,7 +100,7 @@ export function ReviseAnswerSheet({ agentId, message, children, onSuccess }: Rev
                             <Label htmlFor="agent-response">Agent Response</Label>
                             <Textarea
                                 id="agent-response"
-                                value={message.output}
+                                value={message.ai_message}
                                 disabled
                                 className="h-48"
                             />

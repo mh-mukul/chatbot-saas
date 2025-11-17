@@ -44,7 +44,7 @@ const SourceDetails = ({ selectedSource, selectedSourceType, onBackClick }: Sour
                             {selectedSourceType === 'qna' && 'questions' in selectedSource && (
                                 <div>
                                     <h4 className="font-bold">Questions:</h4>
-                                    <pre className="whitespace-pre-wrap mb-4">{selectedSource.questions}</pre>
+                                    <pre className="whitespace-pre-wrap mb-4">{selectedSource.questions.join('\n')}</pre>
                                     <h4 className="font-bold">Answer:</h4>
                                     <pre className="whitespace-pre-wrap">{selectedSource.answer}</pre>
                                 </div>

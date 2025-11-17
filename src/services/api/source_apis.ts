@@ -105,7 +105,7 @@ export interface qnaSourceListResponse {
 export interface qnaSourceDetailsResponse {
     uid: string;
     title: string;
-    questions: string;
+    questions: string[];
     answer: string;
     is_trained: boolean;
     created_at: Date;

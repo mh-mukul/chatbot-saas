@@ -69,22 +69,21 @@ export const embedChat = async (data: embedChatRequest): Promise<chatResponse> =
     }
 };
 
+export interface Pagination {
+    current_page: number;
+    total_pages: number;
+    total_records: number;
+    records_per_page: number;
+    previous_page_url: string | null;
+    next_page_url: string | null;
+}
+
 export interface sessionListResponse {
     id: number;
     session_id: string;
     input: string;
     created_at: Date;
 }
-
-export const getSessionList = async (agent: number): Promise<sessionListResponse[]> => {
-    try {
-        const response = await apiClient.get(`/api/chat/sessions/?agent=${agent}`);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error fetching session with id ${agent}:`, error);
-        throw error;
-    }
-};
 
 export const getUserSessionList = async (agent: number, user: string): Promise<sessionListResponse[]> => {
     try {
@@ -105,46 +104,12 @@ export interface sessionMessagesResponse {
     created_at: Date;
 }
 
-export const getSessionMessages = async (session: string): Promise<sessionMessagesResponse[]> => {
+export const getUserSessionMessages = async (session: string): Promise<sessionMessagesResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/chats/?session=${session}`);
+        const response = await apiClient.get(`/api/v1/chat/messages/?session=${session}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching session with id ${session}:`, error);
-        throw error;
-    }
-};
-
-export interface reviseAnswerRequest {
-    agent_id: number;
-    chat_id: string;
-    revised_answer: string;
-}
-
-export const reviseAnswer = async (data: reviseAnswerRequest): Promise<void> => {
-    try {
-        const response = await apiClient.post('/api/revise-answer', data);
-        return response.data.data;
-    } catch (error) {
-        console.error('Error revising answer:', error);
-        throw error;
-    }
-}
-
-export interface reviseAnswerResponse {
-    id: string;
-    title: string;
-    question: string;
-    answer: string;
-    created_at: Date;
-}
-
-export const getRevisedAnswer = async (chat_id: number): Promise<reviseAnswerResponse> => {
-    try {
-        const response = await apiClient.get(`/api/revise-answer?chat_id=${chat_id}`);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error fetching revised answer with id ${chat_id}:`, error);
         throw error;
     }
 };
