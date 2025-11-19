@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { playgroundChat, playgroundChatRequest } from '@/services/api/chat_apis';
+import { playgroundChat, playgroundChatRequest } from '@/services/api/playground_chat_apis';
 import { useToast } from '@/hooks/use-toast';
 import { getSessionId, setSessionId } from '@/lib/utils';
 

@@ -37,6 +37,7 @@ export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidg
 }
 
 export interface chatResponse {
+    id: number;
     session_id: string;
     human_message: string;
     ai_message: string;
@@ -48,13 +49,19 @@ export interface chatResponse {
 
 export interface embedChatRequest {
     session_id: string | null;
-    user_id: string;
+    user_uid: string;
     query: string;
+    stream: boolean | false;
 }
 
 export const embedChat = async (agent_uid: string, data: embedChatRequest): Promise<chatResponse> => {
     try {
-        const response = await apiClient.post(`/api/v1/embed-chat/${agent_uid}`, data);
+        const { session_id, ...rest } = data;
+        const payload: any = { ...rest };
+        if (session_id) {
+            payload.session_id = session_id;
+        }
+        const response = await apiClient.post(`/api/v1/chat/${agent_uid}`, payload);
         return response.data.data;
     } catch (error) {
         console.error('Error invoking embed chat:', error);
@@ -72,15 +79,15 @@ export interface Pagination {
 }
 
 export interface sessionListResponse {
-    id: number;
-    session_id: string;
-    input: string;
-    created_at: Date;
+    uid: string;
+    // session_id: string;
+    human_message: string;
+    date_time: Date;
 }
 
-export const getUserSessionList = async (agent_uid: string, user: string): Promise<sessionListResponse[]> => {
+export const getUserSessionList = async (agent_uid: string, user: string): Promise<{ sessions: sessionListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/v1/embed-chat/sessions/${agent_uid}/${user}`);
+        const response = await apiClient.get(`/api/v1/chat/sessions/${agent_uid}?user=${user}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching session with id ${agent_uid}:`, error);
@@ -91,15 +98,18 @@ export const getUserSessionList = async (agent_uid: string, user: string): Promi
 export interface sessionMessagesResponse {
     id: number;
     session_id: string;
-    input: string;
-    output: string;
+    human_message: string;
+    ai_message: string;
     revised: boolean;
-    created_at: Date;
+    date_time: Date;
+    duration: number;
+    positive_feedback: boolean;
+    negative_feedback: boolean;
 }
 
-export const getUserSessionMessages = async (session: string): Promise<sessionMessagesResponse[]> => {
+export const getUserSessionMessages = async (agent: string, user: string, session: string): Promise<sessionMessagesResponse[]> => {
     try {
-        const response = await apiClient.get(`/api/v1/chat/messages/?session=${session}`);
+        const response = await apiClient.get(`/api/v1/chat/messages/${agent}?user=${user}&session_id=${session}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching session with id ${session}:`, error);

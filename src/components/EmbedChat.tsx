@@ -8,7 +8,7 @@ import {
     Message,
 } from "@/services/api/embed_chat_apis";
 import { Bot } from "lucide-react";
-import { getSessionId, setSessionId, getOrCreateUserId } from "@/lib/utils";
+import { getSessionId, setSessionId, getOrCreateUserId } from '@/lib/utils';
 import { ChatHeader } from "./embed-chat/ChatHeader";
 import { MessageList } from "./embed-chat/MessageList";
 import { ChatInput } from "./embed-chat/ChatInput";
@@ -138,7 +138,7 @@ export default function EmbedChat() {
 
         try {
             // Fetch messages for the selected session
-            const sessionMessages = await getUserSessionMessages(selectedSessionId);
+            const sessionMessages = await getUserSessionMessages(agent_uid, userId, selectedSessionId);
 
             // Convert session messages to chat responses for display
             const chatMessages: Message[] = [];
@@ -148,16 +148,16 @@ export default function EmbedChat() {
                 chatMessages.push({
                     id: `user-${msg.id}`,
                     role: "user",
-                    content: msg.input,
-                    timestamp: new Date(msg.created_at)
+                    content: msg.human_message,
+                    timestamp: new Date(msg.date_time)
                 });
 
                 // Add assistant message
                 chatMessages.push({
                     id: `assistant-${msg.id}`,
                     role: "assistant",
-                    content: msg.output,
-                    timestamp: new Date(msg.created_at)
+                    content: msg.ai_message,
+                    timestamp: new Date(msg.date_time)
                 });
             });
 
@@ -226,20 +226,26 @@ export default function EmbedChat() {
             if (!effectiveAgentId) {
                 throw new Error("No agent ID available");
             }
-
+            const currentSessionId = sessionId || getSessionId();
             const response = await embedChatApi(
                 agent_uid,
                 {
-                    session_id: sessionId,
-                    user_id: userId,
+                    session_id: currentSessionId || undefined,
+                    user_uid: userId,
                     query: currentInput,
+                    stream: false,
                 });
+
+            if (!currentSessionId) {
+                setSessionId(response.session_id);
+                setSessionIdState(response.session_id);
+            }
 
             // Add bot response
             setMessages((prev) => [...prev, {
-                id: response.session_id,
+                id: response.id.toString(),
                 role: "assistant",
-                content: response.human_message,
+                content: response.ai_message,
                 timestamp: new Date(response.date_time)
             }]);
         } catch (err) {

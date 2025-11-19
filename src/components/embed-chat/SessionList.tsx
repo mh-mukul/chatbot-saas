@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
-import { getUserSessionList, sessionListResponse } from "@/services/api/chat_apis";
+import { getUserSessionList, sessionListResponse } from "@/services/api/embed_chat_apis";
 
 interface SessionListProps {
     agentId: string;
@@ -25,8 +25,8 @@ export function SessionList({ agentId, userId, onSelectSession }: SessionListPro
             }
 
             try {
-                const sessionList = await getUserSessionList(Number(agentId), userId);
-                setSessions(sessionList);
+                const sessionList = await getUserSessionList(agentId, userId);
+                setSessions(sessionList?.sessions || []);
             } catch (err) {
                 console.error("Error fetching sessions:", err);
                 setError("Failed to load session history");
@@ -61,16 +61,16 @@ export function SessionList({ agentId, userId, onSelectSession }: SessionListPro
             <div className="p-2">
                 {sessions.map((session) => (
                     <div
-                        key={session.session_id}
+                        key={session.uid}
                         className="p-3 cursor-pointer hover:bg-muted/30 transition-colors border-b rounded-md mb-2"
-                        onClick={() => onSelectSession(session.session_id)}
+                        onClick={() => onSelectSession(session.uid)}
                     >
                         <div className="flex items-center gap-2">
                             <MessageCircle className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <p className="text-sm font-medium line-clamp-1">{session.input || "New Chat"}</p>
+                            <p className="text-sm font-medium line-clamp-1">{session.human_message || "New Chat"}</p>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(session.date_time), { addSuffix: true })}
                         </p>
                     </div>
                 ))}
