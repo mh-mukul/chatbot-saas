@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tabs";
 
 interface WidgetConfigPanelProps {
+    agentId: string;
     widgetSettings: chatWidgetSettings;
     isChanged: boolean;
     onDisplayNameChange: (name: string) => void;
@@ -35,6 +36,7 @@ interface WidgetConfigPanelProps {
 }
 
 const WidgetConfigPanel = ({
+    agentId,
     widgetSettings,
     isChanged,
     onDisplayNameChange,
@@ -89,7 +91,7 @@ const WidgetConfigPanel = ({
                                     </Label>
                                     <Textarea
                                         id="initial-messages"
-                                        value={widgetSettings.initial_messages || ""}
+                                        value={widgetSettings.initial_message || ""}
                                         onChange={(e) => onInitialMessagesChange(e.target.value)}
                                         className="mt-1"
                                         placeholder="Hello! How can I help you today?"
@@ -104,8 +106,8 @@ const WidgetConfigPanel = ({
                                         Suggested Questions
                                     </Label>
                                     <Textarea
-                                        id="suggested-messages"
-                                        value={widgetSettings.suggested_messages || ""}
+                                        id="suggested-questions"
+                                        value={widgetSettings.suggested_questions || ""}
                                         onChange={(e) => onSuggestedMessagesChange(e.target.value)}
                                         className="mt-1"
                                         placeholder="What services do you offer?"
@@ -240,7 +242,7 @@ const WidgetConfigPanel = ({
                                                 <code>{`<script src="${window.location.origin}/widget.js"></script>
                                                     <script>
                                                     AgentIQChatWidget.init({
-                                                        agent_id: "${widgetSettings.agent_id}"
+                                                        agent_id: "${agentId}"
                                                     });
                                                 </script>`}
                                                 </code>
@@ -250,7 +252,7 @@ const WidgetConfigPanel = ({
                                             variant="outline"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(
-                                                    `<script src="${window.location.origin}/widget.js"></script>\n<script>\n  AgentIQChatWidget.init({\n    agent_id: "${widgetSettings.agent_id}"\n  });\n</script>`
+                                                    `<script src="${window.location.origin}/widget.js"></script>\n<script>\n  AgentIQChatWidget.init({\n    agent_id: "${agentId}"\n  });\n</script>`
                                                 );
                                             }}
                                             className="w-full"

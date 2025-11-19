@@ -4,35 +4,120 @@ const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
+// Add a request interceptor to include JWT token in the headers
+apiClient.interceptors.request.use(
+    (config) => {
+        const access_token = localStorage.getItem('access_token');
+        if (access_token) {
+            config.headers.Authorization = `Bearer ${access_token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export interface chatWidgetSettings {
-    agent_id: number;
     is_private: boolean;
     display_name: string;
-    initial_messages: string;
-    suggested_messages: string;
+    initial_message: string;
+    suggested_questions: string;
     message_placeholder: string;
     chat_theme: "light" | "dark";
     chat_icon: string;
     chat_bubble_alignment: "left" | "right";
     primary_color: string;
+    secondary_color: string;
 }
 
-export const getChatWidgetSettings = async (agent_id: number): Promise<chatWidgetSettings> => {
+export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidgetSettings> => {
     try {
-        const response = await apiClient.get(`/api/embed-chat/config/?agent_id=${agent_id}`);
+        const response = await apiClient.get(`/api/v1/widget/config/${agent_uid}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching chat widget settings for agent_id ${agent_id}:`, error);
+        console.error(`Error fetching chat widget settings for agent_uid ${agent_uid}:`, error);
         throw error;
     }
 }
 
-export const updateChatWidgetSettings = async (data: chatWidgetSettings): Promise<chatWidgetSettings> => {
+export const updateChatWidgetSettings = async (agent_uid: string, data: chatWidgetSettings): Promise<chatWidgetSettings> => {
     try {
-        const response = await apiClient.put(`/api/embed-chat/config`, data);
+        const response = await apiClient.put(`/api/v1/widget/config/${agent_uid}`, data);
         return response.data.data;
     } catch (error) {
-        console.error(`Error updating chat widget settings for agent_id ${data.agent_id}:`, error);
+        console.error(`Error updating chat widget settings for agent_uid ${agent_uid}:`, error);
         throw error;
     }
 }
+
+export interface chatResponse {
+    session_id: string;
+    human_message: string;
+    ai_message: string;
+    date_time: Date;
+    duration: number;
+    positive_feedback: boolean;
+    negative_feedback: boolean;
+}
+
+export interface embedChatRequest {
+    session_id: string | null;
+    user_id: string;
+    query: string;
+}
+
+export const embedChat = async (agent_uid: string, data: embedChatRequest): Promise<chatResponse> => {
+    try {
+        const response = await apiClient.post(`/api/v1/embed-chat/${agent_uid}`, data);
+        return response.data.data;
+    } catch (error) {
+        console.error('Error invoking embed chat:', error);
+        throw error;
+    }
+};
+
+export interface Pagination {
+    current_page: number;
+    total_pages: number;
+    total_records: number;
+    records_per_page: number;
+    previous_page_url: string | null;
+    next_page_url: string | null;
+}
+
+export interface sessionListResponse {
+    id: number;
+    session_id: string;
+    input: string;
+    created_at: Date;
+}
+
+export const getUserSessionList = async (agent_uid: string, user: string): Promise<sessionListResponse[]> => {
+    try {
+        const response = await apiClient.get(`/api/v1/embed-chat/sessions/${agent_uid}/${user}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching session with id ${agent_uid}:`, error);
+        throw error;
+    }
+};
+
+export interface sessionMessagesResponse {
+    id: number;
+    session_id: string;
+    input: string;
+    output: string;
+    revised: boolean;
+    created_at: Date;
+}
+
+export const getUserSessionMessages = async (session: string): Promise<sessionMessagesResponse[]> => {
+    try {
+        const response = await apiClient.get(`/api/v1/chat/messages/?session=${session}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching session with id ${session}:`, error);
+        throw error;
+    }
+};

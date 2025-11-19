@@ -45,7 +45,7 @@ export interface fileSourceDetailsResponse {
 
 export const getFileSourceList = async (agent_uid: string): Promise<{ knowledge_sources: fileSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/file`);
+        const response = await apiClient.get(`/api/v1/sources?agent=${agent_uid}&type=file`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);
@@ -55,7 +55,7 @@ export const getFileSourceList = async (agent_uid: string): Promise<{ knowledge_
 
 export const getFileSourceDetails = async (agent_uid: string, file_id: string): Promise<fileSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/file/${file_id}`);
+        const response = await apiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=file`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${file_id}:`, error);
@@ -79,7 +79,7 @@ export interface textSourceDetailsResponse {
 
 export const getTextSourceList = async (agent_uid: string): Promise<{ knowledge_sources: textSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/text`);
+        const response = await apiClient.get(`/api/v1/sources?agent=${agent_uid}&type=text`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);
@@ -89,7 +89,7 @@ export const getTextSourceList = async (agent_uid: string): Promise<{ knowledge_
 
 export const getTextSourceDetails = async (agent_uid: string, file_id: string): Promise<textSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/text/${file_id}`);
+        const response = await apiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=text`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${agent_uid}:`, error);
@@ -114,7 +114,7 @@ export interface qnaSourceDetailsResponse {
 
 export const getQnaSourceList = async (agent_uid: string): Promise<{ knowledge_sources: qnaSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/qna`);
+        const response = await apiClient.get(`/api/v1/sources?agent=${agent_uid}&type=qna`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);
@@ -124,7 +124,7 @@ export const getQnaSourceList = async (agent_uid: string): Promise<{ knowledge_s
 
 export const getQnaSourceDetails = async (agent_uid: string, file_id: string): Promise<qnaSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/${agent_uid}/qna/${file_id}`);
+        const response = await apiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=qna`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching source with id ${file_id}:`, error);
@@ -133,15 +133,18 @@ export const getQnaSourceDetails = async (agent_uid: string, file_id: string): P
 };
 
 export interface sourceSummaryResponse {
-    files: number;
-    texts: number;
-    qnas: number;
+    summary: {
+        file: number;
+        text: number;
+        qna: number;
+    }
     training_required: boolean;
+    is_training: boolean;
 }
 
 export const getSourceSummary = async (agent_uid: string): Promise<sourceSummaryResponse> => {
     try {
-        const response = await apiClient.get(`/api/v1/sources/summary/${agent_uid}`);
+        const response = await apiClient.get(`/api/v1/sources-summary?agent=${agent_uid}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching summary with id ${agent_uid}:`, error);

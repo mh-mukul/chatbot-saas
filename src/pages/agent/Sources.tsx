@@ -37,6 +37,7 @@ const Sources = () => {
       />
     );
   }
+  console.log(sourceSummary);
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -81,11 +82,11 @@ const Sources = () => {
         </div>
       ) : (
         <SourceSummary
-          fileSources={sourceSummary?.files || 0}
-          textSources={sourceSummary?.texts || 0}
-          qnaSources={sourceSummary?.qnas || 0}
+          fileSources={sourceSummary?.summary?.file || 0}
+          textSources={sourceSummary?.summary?.text || 0}
+          qnaSources={sourceSummary?.summary?.qna || 0}
           trainingRequired={sourceSummary?.training_required || false}
-          isTraining={isTraining}
+          isTraining={sourceSummary?.is_training || false}
           onTrainAgent={handleTrainAgent}
         />
       )}

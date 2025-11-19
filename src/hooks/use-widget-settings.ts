@@ -22,7 +22,7 @@ export const useWidgetSettings = (agentId: string | undefined) => {
         const fetchWidgetSettings = async () => {
             setIsLoading(true);
             try {
-                const settings = await getChatWidgetSettings(Number(agentId));
+                const settings = await getChatWidgetSettings(agentId);
                 setWidgetSettings(settings);
                 setInitialWidgetSettings(settings);
             } catch (error) {
@@ -70,8 +70,8 @@ export const useWidgetSettings = (agentId: string | undefined) => {
     const isChanged =
         widgetSettings && initialWidgetSettings
             ? widgetSettings.display_name !== initialWidgetSettings.display_name ||
-            widgetSettings.initial_messages !== initialWidgetSettings.initial_messages ||
-            widgetSettings.suggested_messages !== initialWidgetSettings.suggested_messages ||
+            widgetSettings.initial_message !== initialWidgetSettings.initial_message ||
+            widgetSettings.suggested_questions !== initialWidgetSettings.suggested_questions ||
             widgetSettings.message_placeholder !== initialWidgetSettings.message_placeholder ||
             widgetSettings.chat_theme !== initialWidgetSettings.chat_theme ||
             widgetSettings.chat_icon !== initialWidgetSettings.chat_icon ||
@@ -84,7 +84,7 @@ export const useWidgetSettings = (agentId: string | undefined) => {
         if (!widgetSettings || !isChanged) return;
 
         try {
-            const updatedSettings = await updateChatWidgetSettings(widgetSettings);
+            const updatedSettings = await updateChatWidgetSettings(agentId, widgetSettings);
             setWidgetSettings(updatedSettings);
             setInitialWidgetSettings(updatedSettings);
             toast({
@@ -113,6 +113,7 @@ export const useWidgetSettings = (agentId: string | undefined) => {
     };
 
     return {
+        agentId,
         widgetSettings,
         isLoading,
         isChanged,

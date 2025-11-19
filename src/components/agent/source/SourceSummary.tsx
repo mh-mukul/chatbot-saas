@@ -63,7 +63,7 @@ const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired,
                         Training...
                     </>
                 ) : (
-                    "Retrain Agent"
+                    "Train Agent"
                 )}
             </Button>
 
@@ -71,7 +71,7 @@ const SourceSummary = ({ fileSources, textSources, qnaSources, trainingRequired,
                 <Alert variant="destructive" className="mb-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                        Retraining is required for changes to apply
+                        Training is required for changes to apply
                     </AlertDescription>
                 </Alert>
             )}

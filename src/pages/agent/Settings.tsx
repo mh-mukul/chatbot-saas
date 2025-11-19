@@ -33,6 +33,7 @@ const Settings = () => {
     <div className="flex flex-col md:flex-row h-full">
       {/* Left Panel - Configuration */}
       <WidgetConfigPanel
+        agentId={id!}
         widgetSettings={widgetSettings}
         isChanged={isChanged}
         onDisplayNameChange={setDisplayName}

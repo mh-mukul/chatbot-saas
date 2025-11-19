@@ -3,9 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import {
     embedChat as embedChatApi,
     chatResponse,
-    getSessionMessages,
-} from "@/services/api/chat_apis";
-import { getChatWidgetSettings, chatWidgetSettings } from "@/services/api/embed_chat_apis";
+    getUserSessionMessages,
+    getChatWidgetSettings,
+    chatWidgetSettings
+} from "@/services/api/embed_chat_apis";
 import { Bot } from "lucide-react";
 import { getSessionId, setSessionId, getOrCreateUserId } from "@/lib/utils";
 import { ChatHeader } from "./embed-chat/ChatHeader";
@@ -16,7 +17,7 @@ import { themeStyles as embedChatThemeStyles } from "./embed-chat/theme-styles";
 
 export default function EmbedChat() {
     const [searchParams] = useSearchParams();
-    const agent_id = searchParams.get("agent_id") || "";
+    const agent_uid = searchParams.get("agent_uid") || "";
     const theme = searchParams.get("theme") || "light";
     const [widgetSettings, setWidgetSettings] = useState<chatWidgetSettings | null>(null);
     const [loading, setLoading] = useState(true);
@@ -25,14 +26,14 @@ export default function EmbedChat() {
     // Fetch widget settings
     useEffect(() => {
         const fetchSettings = async () => {
-            if (!agent_id) {
+            if (!agent_uid) {
                 setError("Agent ID is required");
                 setLoading(false);
                 return;
             }
 
             try {
-                const settings = await getChatWidgetSettings(Number(agent_id));
+                const settings = await getChatWidgetSettings(agent_uid);
 
                 // Check if the agent is private, show error if it is
                 if (settings.is_private) {
@@ -51,7 +52,7 @@ export default function EmbedChat() {
         };
 
         fetchSettings();
-    }, [agent_id]);
+    }, [agent_uid]);
 
     // Set theme class and inject theme styles
     useEffect(() => {
@@ -95,7 +96,7 @@ export default function EmbedChat() {
     const [messages, setMessages] = useState<chatResponse[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [sessionId, setSessionId] = useState<string>(getOrCreateSessionId());
+    const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [userId] = useState<string>(getOrCreateUserId());
     const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
     const [loadingSession, setLoadingSession] = useState(false);
@@ -107,7 +108,7 @@ export default function EmbedChat() {
             // Set initial messages from widget settings
             const initialMessage = widgetSettings.initial_messages || "Hello! How can I help you today?";
             setMessages([{
-                id: '1',
+                session_id: '1',
                 role: 'assistant',
                 content: initialMessage,
                 timestamp: new Date(),
@@ -137,7 +138,7 @@ export default function EmbedChat() {
 
         try {
             // Fetch messages for the selected session
-            const sessionMessages = await getSessionMessages(selectedSessionId);
+            const sessionMessages = await getUserSessionMessages(selectedSessionId);
 
             // Convert session messages to chat responses for display
             const chatMessages: chatResponse[] = [];
@@ -145,7 +146,7 @@ export default function EmbedChat() {
             sessionMessages.forEach((msg) => {
                 // Add user message
                 chatMessages.push({
-                    id: `user-${msg.id}`,
+                    session_id: `user-${msg.id}`,
                     role: "user",
                     content: msg.input,
                     timestamp: new Date(msg.created_at)
@@ -219,15 +220,15 @@ export default function EmbedChat() {
         }
 
         try {
-            // Call the embedChat API with agent_id from widget settings or URL params
-            const effectiveAgentId = widgetSettings?.agent_id.toString() || agent_id;
+            // Call the embedChat API with agent_uid from widget settings or URL params
+            const effectiveAgentId = widgetSettings?.agent_uid.toString() || agent_uid;
 
             if (!effectiveAgentId) {
                 throw new Error("No agent ID available");
             }
 
             const response = await embedChatApi({
-                agent_id: effectiveAgentId,
+                agent_uid: effectiveAgentId,
                 session_id: sessionId,
                 user_id: userId,
                 query: currentInput,
@@ -295,7 +296,7 @@ export default function EmbedChat() {
             <ChatHeader
                 title={widgetSettings?.display_name || "Chat Assistant"}
                 chatIcon={<ChatIcon />}
-                agentId={widgetSettings?.agent_id.toString() || agent_id}
+                agentId={widgetSettings?.agent_uid.toString() || agent_uid}
                 showingHistory={showingHistory}
                 onToggleHistory={handleToggleHistory}
                 onSessionSelect={handleSessionSelect}
@@ -305,7 +306,7 @@ export default function EmbedChat() {
                 /* Session History View */
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <SessionList
-                        agentId={widgetSettings?.agent_id.toString() || agent_id}
+                        agentId={widgetSettings?.agent_uid.toString() || agent_uid}
                         userId={userId}
                         onSelectSession={(sessionId) => {
                             handleSessionSelect(sessionId);
