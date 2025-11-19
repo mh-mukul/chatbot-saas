@@ -28,12 +28,15 @@ interface WidgetConfigPanelProps {
     onMessagePlaceholderChange: (placeholder: string) => void;
     onChatThemeChange: (theme: "light" | "dark") => void;
     onChatIconChange: (icon: string) => void;
+    onChatIconFileChange: (file: File | null) => void;
     onChatAllignmentChange: (allignment: "left" | "right") => void;
-    onIsPrivateChange: (isPrivate: boolean) => void;
+    onIsPublicChange: (isPublic: boolean) => void;
     onPrimaryColorChange: (color: string) => void;
     onSaveChanges: () => Promise<any>;
     onDiscardChanges?: () => void;
 }
+
+import React, { useRef } from "react";
 
 const WidgetConfigPanel = ({
     agentId,
@@ -45,12 +48,33 @@ const WidgetConfigPanel = ({
     onMessagePlaceholderChange,
     onChatThemeChange,
     onChatIconChange,
+    onChatIconFileChange,
     onChatAllignmentChange,
-    onIsPrivateChange,
+    onIsPublicChange,
     onPrimaryColorChange,
     onSaveChanges,
     onDiscardChanges = () => { },
 }: WidgetConfigPanelProps) => {
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    // Helper to clear file input and remove icon
+    const handleRemoveIcon = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+        onChatIconFileChange(null);
+        onChatIconChange("");
+    };
+
+    // Wrap discard to also clear file input
+    const handleDiscard = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+        onChatIconFileChange(null);
+        onDiscardChanges();
+    };
+
     return (
         <div className="relative w-full md:w-[500px] border-b md:border-b-0 md:border-r flex flex-col">
             <ScrollArea className="h-[calc(100vh-80px)]">
@@ -150,15 +174,45 @@ const WidgetConfigPanel = ({
 
                                 <div>
                                     <Label htmlFor="chat-icon" className="text-sm font-medium">
-                                        Chat Icon URL
+                                        Chat Icon
                                     </Label>
-                                    <Input
-                                        id="chat-icon"
-                                        value={widgetSettings.chat_icon || ""}
-                                        onChange={(e) => onChatIconChange(e.target.value)}
-                                        className="mt-1"
-                                        placeholder="https://example.com/icon.png"
-                                    />
+                                    <div className="mt-1 space-y-2">
+                                        <Input
+                                            id="chat-icon"
+                                            type="file"
+                                            accept="image/*"
+                                            ref={fileInputRef}
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    onChatIconFileChange(file);
+                                                }
+                                            }}
+                                            className="cursor-pointer"
+                                        />
+                                        {widgetSettings.chat_icon && (
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <img
+                                                    src={widgetSettings.chat_icon}
+                                                    alt="Chat icon preview"
+                                                    className="w-10 h-10 object-contain rounded border"
+                                                />
+                                                <span className="text-xs text-muted-foreground">Current icon</span>
+                                                <button
+                                                    type="button"
+                                                    aria-label="Remove icon"
+                                                    onClick={handleRemoveIcon}
+                                                    className="ml-2 text-red-500 hover:text-red-700 text-lg font-bold px-2 rounded focus:outline-none"
+                                                    style={{ lineHeight: 1 }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Upload an image file for the chat icon (PNG, JPG, SVG)
+                                    </p>
                                 </div>
 
                                 <div>
@@ -208,7 +262,7 @@ const WidgetConfigPanel = ({
 
                         <TabsContent value="deploy" className="mt-4">
                             <div className="space-y-4">
-                                {widgetSettings.is_private ? (
+                                {!widgetSettings.is_public ? (
                                     <div className="space-y-4">
                                         <div className="rounded-md bg-amber-50 p-4 border border-amber-200">
                                             <h3 className="font-medium text-amber-800 mb-2">Private Widget</h3>
@@ -221,7 +275,7 @@ const WidgetConfigPanel = ({
                                             onClick={() => {
                                                 // Just update the UI state - don't call API directly
                                                 // This will show the bottom sheet with save/discard options
-                                                onIsPrivateChange(false);
+                                                onIsPublicChange(true);
                                             }}
                                             className="w-full"
                                         >
@@ -277,7 +331,7 @@ const WidgetConfigPanel = ({
                             </p>
                         </div>
                         <div className="flex w-full justify-between gap-4">
-                            <Button variant="outline" className="flex-1" onClick={onDiscardChanges}>
+                            <Button variant="outline" className="flex-1" onClick={handleDiscard}>
                                 Discard
                             </Button>
                             <Button className="flex-1" onClick={onSaveChanges}>

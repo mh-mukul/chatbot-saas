@@ -19,7 +19,7 @@ apiClient.interceptors.request.use(
 );
 
 export interface chatWidgetSettings {
-    is_private: boolean;
+    is_public: boolean;
     display_name: string;
     initial_message: string;
     suggested_questions: string;
@@ -41,9 +41,31 @@ export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidg
     }
 }
 
-export const updateChatWidgetSettings = async (agent_uid: string, data: chatWidgetSettings): Promise<chatWidgetSettings> => {
+export const updateChatWidgetSettings = async (agent_uid: string, data: chatWidgetSettings, chatIconFile?: File): Promise<chatWidgetSettings> => {
     try {
-        const response = await apiClient.put(`/api/v1/widget/config/${agent_uid}`, data);
+        const formData = new FormData();
+        
+        // Append all settings as form fields
+        formData.append('is_public', data.is_public.toString());
+        formData.append('display_name', data.display_name);
+        formData.append('initial_message', data.initial_message);
+        formData.append('suggested_questions', data.suggested_questions);
+        formData.append('message_placeholder', data.message_placeholder);
+        formData.append('chat_theme', data.chat_theme);
+        formData.append('chat_bubble_alignment', data.chat_bubble_alignment);
+        formData.append('primary_color', data.primary_color);
+        formData.append('secondary_color', data.secondary_color);
+        
+        // Only append file if a new file is provided
+        if (chatIconFile) {
+            formData.append('chat_icon', chatIconFile);
+        }
+        
+        const response = await apiClient.put(`/api/v1/widget/config/${agent_uid}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data.data;
     } catch (error) {
         console.error(`Error updating chat widget settings for agent_uid ${agent_uid}:`, error);

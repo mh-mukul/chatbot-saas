@@ -98,7 +98,7 @@ export default function EmbedChat() {
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [userId] = useState<string>(getOrCreateUserId());
-    const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
+    const [suggestedMessages, setSuggestedQuestions] = useState<string[]>([]);
     const [loadingSession, setLoadingSession] = useState(false);
     const [showingHistory, setShowingHistory] = useState(false);
 
@@ -122,7 +122,7 @@ export default function EmbedChat() {
                         .split('\n')
                         .map(msg => msg.trim())
                         .filter(Boolean);
-                    setSuggestedMessages(suggestedArray);
+                    setSuggestedQuestions(suggestedArray);
                 } catch (error) {
                     console.error("Error parsing suggested messages:", error);
                 }

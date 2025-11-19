@@ -14,12 +14,13 @@ const Settings = () => {
     isChanged,
     setDisplayName,
     setInitialMessages,
-    setSuggestedMessages,
+    setSuggestedQuestions,
     setMessagePlaceholder,
     setChatTheme,
     setChatIcon,
+    setChatIconFile,
     setChatAllignment,
-    setIsPrivate,
+    setIsPublic,
     setPrimaryColor,
     handleSaveChanges,
     handleDiscardChanges
@@ -38,12 +39,13 @@ const Settings = () => {
         isChanged={isChanged}
         onDisplayNameChange={setDisplayName}
         onInitialMessagesChange={setInitialMessages}
-        onSuggestedMessagesChange={setSuggestedMessages}
+        onSuggestedMessagesChange={setSuggestedQuestions}
         onMessagePlaceholderChange={setMessagePlaceholder}
         onChatThemeChange={setChatTheme}
         onChatIconChange={setChatIcon}
+        onChatIconFileChange={setChatIconFile}
         onChatAllignmentChange={setChatAllignment}
-        onIsPrivateChange={setIsPrivate}
+        onIsPublicChange={setIsPublic}
         onPrimaryColorChange={setPrimaryColor}
         onSaveChanges={handleSaveChanges}
         onDiscardChanges={handleDiscardChanges}

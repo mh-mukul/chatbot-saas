@@ -55,13 +55,13 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
         role: 'user' | 'assistant';
         content: string;
         timestamp: Date;
-    }>>(parseInitialMessages(widgetSettings.initial_messages));
+    }>>(parseInitialMessages(widgetSettings.initial_message));
 
     const [currentMessage, setCurrentMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const suggestedQuestions = widgetSettings.suggested_messages
-        ? widgetSettings.suggested_messages.split('\n').filter(q => q.trim() !== '')
+    const suggestedQuestions = widgetSettings.suggested_questions
+        ? widgetSettings.suggested_questions.split('\n').filter(q => q.trim() !== '')
         : [];
 
     const handleSendMessage = async (customMessage?: string) => {
@@ -116,7 +116,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
             );
 
             // Get the new initial messages
-            const newInitialMessages = parseInitialMessages(widgetSettings.initial_messages);
+            const newInitialMessages = parseInitialMessages(widgetSettings.initial_message);
 
             // If there are no user messages yet, just return the initial messages
             if (!prevMessages.some(msg => msg.role === 'user')) {
@@ -126,7 +126,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
             // Otherwise, keep the conversation but replace the initial messages
             return [...newInitialMessages, ...nonInitialMessages];
         });
-    }, [widgetSettings.initial_messages]);
+    }, [widgetSettings.initial_message]);
 
     // Set theme based on widget settings - isolating from application theme
     useEffect(() => {
