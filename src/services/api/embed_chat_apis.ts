@@ -4,19 +4,14 @@ const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
-// Add a request interceptor to include JWT token in the headers
-apiClient.interceptors.request.use(
-    (config) => {
-        const access_token = localStorage.getItem('access_token');
-        if (access_token) {
-            config.headers.Authorization = `Bearer ${access_token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+
+export interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+}
+
 
 export interface chatWidgetSettings {
     is_public: boolean;
@@ -37,38 +32,6 @@ export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidg
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching chat widget settings for agent_uid ${agent_uid}:`, error);
-        throw error;
-    }
-}
-
-export const updateChatWidgetSettings = async (agent_uid: string, data: chatWidgetSettings, chatIconFile?: File): Promise<chatWidgetSettings> => {
-    try {
-        const formData = new FormData();
-        
-        // Append all settings as form fields
-        formData.append('is_public', data.is_public.toString());
-        formData.append('display_name', data.display_name);
-        formData.append('initial_message', data.initial_message);
-        formData.append('suggested_questions', data.suggested_questions);
-        formData.append('message_placeholder', data.message_placeholder);
-        formData.append('chat_theme', data.chat_theme);
-        formData.append('chat_bubble_alignment', data.chat_bubble_alignment);
-        formData.append('primary_color', data.primary_color);
-        formData.append('secondary_color', data.secondary_color);
-        
-        // Only append file if a new file is provided
-        if (chatIconFile) {
-            formData.append('chat_icon', chatIconFile);
-        }
-        
-        const response = await apiClient.put(`/api/v1/widget/config/${agent_uid}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error updating chat widget settings for agent_uid ${agent_uid}:`, error);
         throw error;
     }
 }

@@ -4,7 +4,7 @@ import {
     getChatWidgetSettings,
     updateChatWidgetSettings,
     chatWidgetSettings
-} from '@/services/api/embed_chat_apis';
+} from '@/services/api/widget_apis';
 
 export const useWidgetSettings = (agentId: string | undefined) => {
     const [widgetSettings, setWidgetSettings] = useState<chatWidgetSettings | null>(null);

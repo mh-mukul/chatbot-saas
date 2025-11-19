@@ -1,4 +1,4 @@
-import { chatWidgetSettings, updateChatWidgetSettings } from "@/services/api/embed_chat_apis";
+import { chatWidgetSettings } from "@/services/api/widget_apis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
