@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-});
+import { apiClient } from "@/services/api/api_client";
 
 
 export interface Message {
@@ -10,7 +6,7 @@ export interface Message {
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
-}
+};
 
 
 export interface chatWidgetSettings {
@@ -24,7 +20,7 @@ export interface chatWidgetSettings {
     chat_bubble_alignment: "left" | "right";
     primary_color: string;
     secondary_color: string;
-}
+};
 
 export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidgetSettings> => {
     try {
@@ -34,7 +30,7 @@ export const getChatWidgetSettings = async (agent_uid: string): Promise<chatWidg
         console.error(`Error fetching chat widget settings for agent_uid ${agent_uid}:`, error);
         throw error;
     }
-}
+};
 
 export interface chatResponse {
     id: number;
@@ -45,14 +41,14 @@ export interface chatResponse {
     duration: number;
     positive_feedback: boolean;
     negative_feedback: boolean;
-}
+};
 
 export interface embedChatRequest {
     session_id: string | null;
     user_uid: string;
     query: string;
     stream: boolean | false;
-}
+};
 
 export const embedChat = async (agent_uid: string, data: embedChatRequest): Promise<chatResponse> => {
     try {
@@ -76,14 +72,14 @@ export interface Pagination {
     records_per_page: number;
     previous_page_url: string | null;
     next_page_url: string | null;
-}
+};
 
 export interface sessionListResponse {
     uid: string;
     // session_id: string;
     human_message: string;
     date_time: Date;
-}
+};
 
 export const getUserSessionList = async (agent_uid: string, user: string): Promise<{ sessions: sessionListResponse[], pagination: Pagination }> => {
     try {
@@ -105,7 +101,7 @@ export interface sessionMessagesResponse {
     duration: number;
     positive_feedback: boolean;
     negative_feedback: boolean;
-}
+};
 
 export const getUserSessionMessages = async (agent: string, user: string, session: string): Promise<sessionMessagesResponse[]> => {
     try {

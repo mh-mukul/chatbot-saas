@@ -9,7 +9,6 @@ import {
   PanelLeft,
   User as UserIcon
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -23,12 +22,13 @@ import {
   AvatarImage,
   AvatarFallback
 } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isAuthenticated, handleLogout } = useAuth();
   const [user, setUser] = useState<{
     name: string;
     email: string;
@@ -37,28 +37,16 @@ const Layout = () => {
   } | null>(null);
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("access_token");
-    if (!isAuthenticated) {
+    if (isAuthenticated === false) {
       navigate("/");
-    } else {
+    } else if (isAuthenticated === true) {
       // Get user data from localStorage
       const userData = localStorage.getItem("user");
       if (userData) {
         setUser(JSON.parse(userData));
       }
     }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user");
-    navigate("/");
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-  };
+  }, [isAuthenticated, navigate]);
 
   // Get user initials for avatar fallback
   const getUserInitials = (): string => {
@@ -70,6 +58,11 @@ const Layout = () => {
 
   // Extract agent ID from URL if we're in an agent view
   const agentId = location.pathname.match(/\/agent\/([^\/]+)/)?.[1];
+
+  if (isAuthenticated === null) {
+    // You can render a loading spinner here
+    return <div>Loading...</div>;
+  }
 
   return (
     <SidebarProvider>
@@ -108,7 +101,7 @@ const Layout = () => {
                     </div>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                  <DropdownMenuItem onClick={() => handleLogout()} className="text-destructive focus:text-destructive">
                     <LogOut className="h-4 w-4 mr-2" />
                     <span>Logout</span>
                   </DropdownMenuItem>
