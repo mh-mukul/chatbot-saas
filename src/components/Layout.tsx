@@ -30,9 +30,9 @@ const Layout = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [user, setUser] = useState<{
-    username: string;
-    first_name: string;
-    last_name: string;
+    name: string;
+    email: string;
+    phone: string;
     image_url?: string;
   } | null>(null);
 
@@ -63,8 +63,8 @@ const Layout = () => {
   // Get user initials for avatar fallback
   const getUserInitials = (): string => {
     if (!user) return "";
-    const firstInitial = user.first_name ? user.first_name.charAt(0).toUpperCase() : "";
-    const lastInitial = user.last_name ? user.last_name.charAt(0).toUpperCase() : "";
+    const firstInitial = user.name ? user.name.charAt(0).toUpperCase() : "";
+    const lastInitial = user.name ? user.name.split(" ").slice(-1)[0].charAt(0).toUpperCase() : "";
     return `${firstInitial}${lastInitial}`;
   };
 
@@ -93,7 +93,7 @@ const Layout = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 p-0 relative">
                     <Avatar className="h-9 w-9 border border-border/50 hover:border-border transition-colors">
-                      <AvatarImage src={user?.image_url} alt={user?.first_name || "User"} />
+                      <AvatarImage src={user?.image_url} alt={getUserInitials() || "User"} />
                       <AvatarFallback className="text-sm font-medium">
                         {getUserInitials() || <UserIcon className="h-5 w-5" />}
                       </AvatarFallback>
@@ -103,8 +103,8 @@ const Layout = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   {user && (
                     <div className="flex flex-col space-y-1 p-2">
-                      <p className="text-sm font-medium">{`${user.first_name} ${user.last_name}`}</p>
-                      <p className="text-xs text-muted-foreground">{user.username}</p>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   )}
                   <DropdownMenuSeparator />
