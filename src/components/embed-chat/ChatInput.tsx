@@ -55,16 +55,25 @@ export function ChatInput({
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-fit p-0">
-                            <EmojiPicker
-                                className="h-[342px]"
-                                onEmojiSelect={({ emoji }) => {
-                                    setInput(input + emoji);
-                                }}
+                            <div
+                                className={
+                                    (document.getElementById('embed-chat-container')?.getAttribute('data-theme') === 'dark')
+                                        ? 'dark'
+                                        : 'light'
+                                }
+                                data-theme={document.getElementById('embed-chat-container')?.getAttribute('data-theme') || 'light'}
                             >
-                                <EmojiPickerSearch className="h-8 focus:outline-none focus:ring-0" />
-                                <EmojiPickerContent />
-                                <EmojiPickerFooter />
-                            </EmojiPicker>
+                                <EmojiPicker
+                                    className="h-[342px]"
+                                    onEmojiSelect={({ emoji }) => {
+                                        setInput(input + emoji);
+                                    }}
+                                >
+                                    <EmojiPickerSearch className="h-8 focus:outline-none focus:ring-0" />
+                                    <EmojiPickerContent />
+                                    <EmojiPickerFooter />
+                                </EmojiPicker>
+                            </div>
                         </PopoverContent>
                     </Popover>
                 </div>

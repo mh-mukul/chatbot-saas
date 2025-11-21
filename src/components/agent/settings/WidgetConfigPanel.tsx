@@ -296,7 +296,7 @@ const WidgetConfigPanel = ({
                                                 <code>{`<script src="${window.location.origin}/widget.js"></script>
                                                     <script>
                                                     AgentIQChatWidget.init({
-                                                        agent_id: "${agentId}"
+                                                        agent_uid: "${agentId}"
                                                     });
                                                 </script>`}
                                                 </code>
@@ -306,7 +306,7 @@ const WidgetConfigPanel = ({
                                             variant="outline"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(
-                                                    `<script src="${window.location.origin}/widget.js"></script>\n<script>\n  AgentIQChatWidget.init({\n    agent_id: "${agentId}"\n  });\n</script>`
+                                                    `<script src="${window.location.origin}/widget.js"></script>\n<script>\n  AgentIQChatWidget.init({\n    agent_uid: "${agentId}"\n  });\n</script>`
                                                 );
                                             }}
                                             className="w-full"
