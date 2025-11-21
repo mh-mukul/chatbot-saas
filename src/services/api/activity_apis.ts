@@ -29,14 +29,17 @@ export const getSessionList = async (agent: string): Promise<{ sessions: session
 
 export interface sessionMessagesResponse {
     id: number;
-    session_uid: string;
+    session_id: string;
     human_message: string;
     ai_message: string;
-    revised: boolean;
     date_time: Date;
     duration: number;
     positive_feedback: boolean;
     negative_feedback: boolean;
+    qna_matched: boolean;
+    status: string;
+    revised: boolean | null;
+    revised_ai_message: string | null;
 };
 
 export const getSessionMessages = async (agent: string, session: string): Promise<sessionMessagesResponse[]> => {
@@ -51,35 +54,16 @@ export const getSessionMessages = async (agent: string, session: string): Promis
 
 
 export interface reviseAnswerRequest {
-    agent_id: number;
-    chat_id: string;
-    revised_answer: string;
+    session_id: string;
+    revised_ai_message: string;
 };
 
-export const reviseAnswer = async (data: reviseAnswerRequest): Promise<void> => {
+export const reviseAnswer = async (chat_id: number, data: reviseAnswerRequest): Promise<void> => {
     try {
-        const response = await authApiClient.post('/api/revise-answer', data);
+        const response = await authApiClient.post(`/api/v1/chat/revise/${chat_id}`, data);
         return response.data.data;
     } catch (error) {
         console.error('Error revising answer:', error);
-        throw error;
-    }
-};
-
-export interface reviseAnswerResponse {
-    id: string;
-    title: string;
-    question: string;
-    answer: string;
-    created_at: Date;
-};
-
-export const getRevisedAnswer = async (chat_id: number): Promise<reviseAnswerResponse> => {
-    try {
-        const response = await authApiClient.get(`/api/revise-answer?chat_id=${chat_id}`);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error fetching revised answer with id ${chat_id}:`, error);
         throw error;
     }
 };

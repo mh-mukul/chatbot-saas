@@ -10,7 +10,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Label } from "./ui/label";
-import { getRevisedAnswer, reviseAnswer, sessionMessagesResponse } from "@/services/api/activity_apis";
+import { reviseAnswer, sessionMessagesResponse } from "@/services/api/activity_apis";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -28,35 +28,19 @@ export function ReviseAnswerSheet({ agentId, message, children, onSuccess }: Rev
     const { toast } = useToast();
 
     useEffect(() => {
-        const fetchRevisedAnswer = async () => {
-            if (isOpen && message.revised) {
-                try {
-                    const response = await getRevisedAnswer(message.id);
-                    console.log(response);
-                    if (response && response.answer) {
-                        setRevisedAnswerText(response.answer);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch revised answer:", error);
-                    toast({
-                        variant: "destructive",
-                        title: "Error",
-                        description: "Failed to fetch the revised answer.",
-                    });
-                }
-            }
-        };
-
-        fetchRevisedAnswer();
-    }, [isOpen, message.revised, message.id, toast]);
+        if (isOpen && message.revised && message.revised_ai_message) {
+            setRevisedAnswerText(message.revised_ai_message);
+        } else if (isOpen && !message.revised) {
+            setRevisedAnswerText("");
+        }
+    }, [isOpen, message.revised, message.revised_ai_message]);
 
     const handleUpdate = async () => {
         setIsUpdating(true);
         try {
-            await reviseAnswer({
-                agent_id: agentId,
-                chat_id: String(message.id),
-                revised_answer: revisedAnswerText,
+            await reviseAnswer(message.id, {
+                session_id: String(message.session_id),
+                revised_ai_message: revisedAnswerText,
             });
             toast({
                 title: "Success",
