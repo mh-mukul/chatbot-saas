@@ -14,13 +14,16 @@ export interface Pagination {
 export interface fileSourceListResponse {
     uid: string;
     title: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
 };
 
 export interface fileSourceDetailsResponse {
     uid: string;
     title: string;
     content: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
 };
@@ -48,13 +51,16 @@ export const getFileSourceDetails = async (agent_uid: string, file_id: string): 
 export interface textSourceListResponse {
     uid: string;
     title: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
 };
 
 export interface textSourceDetailsResponse {
     uid: string;
     title: string;
     content: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
 };
@@ -82,6 +88,9 @@ export const getTextSourceDetails = async (agent_uid: string, file_id: string): 
 export interface qnaSourceListResponse {
     uid: string;
     title: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
 };
 
 export interface qnaSourceDetailsResponse {
@@ -89,7 +98,7 @@ export interface qnaSourceDetailsResponse {
     title: string;
     questions: string[];
     answer: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
 };
@@ -115,13 +124,20 @@ export const getQnaSourceDetails = async (agent_uid: string, file_id: string): P
 };
 
 export interface sourceSummaryResponse {
-    summary: {
-        file: number;
-        text: number;
-        qna: number;
-    }
-    training_required: boolean;
-    is_training: boolean;
+    file: {
+        failed: number;
+        pending: number;
+        processed: number;
+        processing: number;
+    };
+    qna: {
+        pending: number;
+        processing: number;
+    };
+    text: {
+        pending: number;
+        processing: number;
+    };
 };
 
 export const getSourceSummary = async (agent_uid: string): Promise<sourceSummaryResponse> => {
@@ -193,39 +209,6 @@ export const createQnaSource = async (agent_uid: string, data: createQnaSourceRe
         return response.data.data;
     } catch (error) {
         console.error(`Error creating QnA source:`, error);
-        throw error;
-    }
-};
-
-export interface trainSourcesRequest {
-    agent_id: number;
-};
-
-export interface trainSourcesResponse {
-    execution_id: number;
-};
-
-export const trainSources = async (data: trainSourcesRequest): Promise<trainSourcesResponse> => {
-    try {
-        const response = await authApiClient.post(`/api/train-agent`, data);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error training sources for agent id ${data.agent_id}:`, error);
-        throw error;
-    }
-};
-
-export interface trainProgressResponse {
-    finished: boolean;
-    status: string; // e.g., "running", "success", "failed"
-};
-
-export const getTrainingProgress = async (execution_id: number): Promise<trainProgressResponse> => {
-    try {
-        const response = await authApiClient.get(`/api/training-progress?execution_id=${execution_id}`);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error fetching training progress for execution id ${execution_id}:`, error);
         throw error;
     }
 };

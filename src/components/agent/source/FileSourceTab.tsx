@@ -31,13 +31,19 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
         'text/plain',                   // Plain text files
         'text/csv',                     // CSV files
         'text/markdown',                // Markdown files
-        'text/html'                     // HTML files
+        'text/html',                    // HTML files
+        'application/msword',           // Word documents
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // Word documents
+        'application/vnd.ms-excel',     // Excel documents
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Excel documents
+        'application/vnd.ms-powerpoint', // PowerPoint documents
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PowerPoint documents
     ];
 
     // File validation function
     const validateFile = (file: File): boolean => {
         if (!allowedFileTypes.includes(file.type)) {
-            setFileError(`Invalid file type: ${file.name}. Only PDF and text documents are allowed.`);
+            setFileError(`Invalid file type: ${file.name}. Only PDF, Word, Excel, and text documents are allowed.`);
             return false;
         }
         setFileError(null);

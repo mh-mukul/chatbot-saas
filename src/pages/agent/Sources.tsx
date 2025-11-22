@@ -20,13 +20,12 @@ const Sources = () => {
     isLoadingTextSources,
     isLoadingQnaSources,
     isLoadingSummary,
-    isTraining,
     handleSourceClick,
     handleSourceDeleted,
     handleSourceAdded,
     handleBackClick,
-    handleTrainAgent,
   } = useSources(id);
+
 
   if (selectedSource && selectedSourceType) {
     return (
@@ -82,12 +81,9 @@ const Sources = () => {
         </div>
       ) : (
         <SourceSummary
-          fileSources={sourceSummary?.summary?.file || 0}
-          textSources={sourceSummary?.summary?.text || 0}
-          qnaSources={sourceSummary?.summary?.qna || 0}
-          trainingRequired={sourceSummary?.training_required || false}
-          isTraining={sourceSummary?.is_training || false}
-          onTrainAgent={handleTrainAgent}
+          fileStatus={sourceSummary?.file || { failed: 0, pending: 0, processed: 0, processing: 0 }}
+          textStatus={sourceSummary?.text || { pending: 0, processing: 0 }}
+          qnaStatus={sourceSummary?.qna || { pending: 0, processing: 0 }}
         />
       )}
     </div>
