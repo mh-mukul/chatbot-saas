@@ -15,6 +15,7 @@ import {
     qnaSourceDetailsResponse,
     getSourceSummary,
     sourceSummaryResponse,
+    Pagination,
 } from "@/services/api/source_apis";
 
 type SourceDetailsType = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
@@ -30,6 +31,14 @@ export const useSources = (id: string | undefined) => {
 
     const [selectedSource, setSelectedSource] = useState<SourceDetailsType>(null);
     const [selectedSourceType, setSelectedSourceType] = useState<string | null>(null);
+
+    // Pagination states
+    const [filePagination, setFilePagination] = useState<Pagination | null>(null);
+    const [textPagination, setTextPagination] = useState<Pagination | null>(null);
+    const [qnaPagination, setQnaPagination] = useState<Pagination | null>(null);
+    const [fileCurrentPage, setFileCurrentPage] = useState(1);
+    const [textCurrentPage, setTextCurrentPage] = useState(1);
+    const [qnaCurrentPage, setQnaCurrentPage] = useState(1);
 
     // Loading states
     const [isLoadingFileSources, setIsLoadingFileSources] = useState(false);
@@ -62,8 +71,11 @@ export const useSources = (id: string | undefined) => {
         if (id && activeTab === "files" && fileSources.length === 0) {
             const agentId = id;
             setIsLoadingFileSources(true);
-            getFileSourceList(agentId)
-                .then(data => setFileSources(data.knowledge_sources))
+            getFileSourceList(agentId, fileCurrentPage)
+                .then(data => {
+                    setFileSources(data.knowledge_sources);
+                    setFilePagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching file sources:", err);
                     toast({
@@ -74,15 +86,18 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingFileSources(false));
         }
-    }, [id, activeTab, fileSources.length, toast]);
+    }, [id, activeTab, fileSources.length, fileCurrentPage, toast]);
 
     // Load text sources only when the "text" tab is active
     useEffect(() => {
         if (id && activeTab === "text" && textSources.length === 0) {
             const agentId = id;
             setIsLoadingTextSources(true);
-            getTextSourceList(agentId)
-                .then(data => setTextSources(data.knowledge_sources))
+            getTextSourceList(agentId, textCurrentPage)
+                .then(data => {
+                    setTextSources(data.knowledge_sources);
+                    setTextPagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching text sources:", err);
                     toast({
@@ -93,15 +108,18 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingTextSources(false));
         }
-    }, [id, activeTab, textSources.length, toast]);
+    }, [id, activeTab, textSources.length, textCurrentPage, toast]);
 
     // Load QnA sources only when the "qa" tab is active
     useEffect(() => {
         if (id && activeTab === "qa" && qnaSources.length === 0) {
             const agentId = id;
             setIsLoadingQnaSources(true);
-            getQnaSourceList(agentId)
-                .then(data => setQnaSources(data.knowledge_sources))
+            getQnaSourceList(agentId, qnaCurrentPage)
+                .then(data => {
+                    setQnaSources(data.knowledge_sources);
+                    setQnaPagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching QnA sources:", err);
                     toast({
@@ -112,7 +130,7 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingQnaSources(false));
         }
-    }, [id, activeTab, qnaSources.length, toast]);
+    }, [id, activeTab, qnaSources.length, qnaCurrentPage, toast]);
 
     const handleSourceClick = async (sourceId: string, type: string) => {
         setSelectedSourceType(type);
@@ -162,18 +180,27 @@ export const useSources = (id: string | undefined) => {
             const agentId = id;
             if (activeTab === "files") {
                 setIsLoadingFileSources(true);
-                getFileSourceList(agentId)
-                    .then(data => setFileSources(data.knowledge_sources))
+                getFileSourceList(agentId, fileCurrentPage)
+                    .then(data => {
+                        setFileSources(data.knowledge_sources);
+                        setFilePagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingFileSources(false));
             } else if (activeTab === "text") {
                 setIsLoadingTextSources(true);
-                getTextSourceList(agentId)
-                    .then(data => setTextSources(data.knowledge_sources))
+                getTextSourceList(agentId, textCurrentPage)
+                    .then(data => {
+                        setTextSources(data.knowledge_sources);
+                        setTextPagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingTextSources(false));
             } else if (activeTab === "qa") {
                 setIsLoadingQnaSources(true);
-                getQnaSourceList(agentId)
-                    .then(data => setQnaSources(data.knowledge_sources))
+                getQnaSourceList(agentId, qnaCurrentPage)
+                    .then(data => {
+                        setQnaSources(data.knowledge_sources);
+                        setQnaPagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingQnaSources(false));
             }
 
@@ -190,6 +217,45 @@ export const useSources = (id: string | undefined) => {
         setSelectedSourceType(null);
     };
 
+    // Pagination handlers
+    const handleFilePageChange = (page: number) => {
+        setFileCurrentPage(page);
+        if (id) {
+            setIsLoadingFileSources(true);
+            getFileSourceList(id, page)
+                .then(data => {
+                    setFileSources(data.knowledge_sources);
+                    setFilePagination(data.pagination);
+                })
+                .finally(() => setIsLoadingFileSources(false));
+        }
+    };
+
+    const handleTextPageChange = (page: number) => {
+        setTextCurrentPage(page);
+        if (id) {
+            setIsLoadingTextSources(true);
+            getTextSourceList(id, page)
+                .then(data => {
+                    setTextSources(data.knowledge_sources);
+                    setTextPagination(data.pagination);
+                })
+                .finally(() => setIsLoadingTextSources(false));
+        }
+    };
+
+    const handleQnaPageChange = (page: number) => {
+        setQnaCurrentPage(page);
+        if (id) {
+            setIsLoadingQnaSources(true);
+            getQnaSourceList(id, page)
+                .then(data => {
+                    setQnaSources(data.knowledge_sources);
+                    setQnaPagination(data.pagination);
+                })
+                .finally(() => setIsLoadingQnaSources(false));
+        }
+    };
 
 
     return {
@@ -209,5 +275,15 @@ export const useSources = (id: string | undefined) => {
         handleSourceDeleted,
         handleSourceAdded,
         handleBackClick,
+        // Pagination
+        filePagination,
+        textPagination,
+        qnaPagination,
+        fileCurrentPage,
+        textCurrentPage,
+        qnaCurrentPage,
+        handleFilePageChange,
+        handleTextPageChange,
+        handleQnaPageChange,
     };
 };

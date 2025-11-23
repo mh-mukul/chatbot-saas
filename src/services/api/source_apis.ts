@@ -28,9 +28,9 @@ export interface fileSourceDetailsResponse {
     updated_at: Date;
 };
 
-export const getFileSourceList = async (agent_uid: string): Promise<{ knowledge_sources: fileSourceListResponse[], pagination: Pagination }> => {
+export const getFileSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: fileSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=file`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=file&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);
@@ -65,9 +65,9 @@ export interface textSourceDetailsResponse {
     updated_at: Date;
 };
 
-export const getTextSourceList = async (agent_uid: string): Promise<{ knowledge_sources: textSourceListResponse[], pagination: Pagination }> => {
+export const getTextSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: textSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=text`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=text&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);
@@ -103,9 +103,9 @@ export interface qnaSourceDetailsResponse {
     updated_at: Date;
 };
 
-export const getQnaSourceList = async (agent_uid: string): Promise<{ knowledge_sources: qnaSourceListResponse[], pagination: Pagination }> => {
+export const getQnaSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: qnaSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=qna`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=qna&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching sources with id ${agent_uid}:`, error);

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, ChevronDown, ChevronUp, MessageCircleQuestion, Trash2 } from "lucide-react";
-import { qnaSourceListResponse, deleteSource, createQnaSource, createQnaSourceRequest } from "@/services/api/source_apis";
+import { qnaSourceListResponse, deleteSource, createQnaSource, createQnaSourceRequest, Pagination } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DeleteConfirmation from "./DeleteConfirmation";
+import PaginationControls from "./PaginationControls";
 
 interface QnaSourceTabProps {
     qnaSources: qnaSourceListResponse[];
@@ -15,9 +17,12 @@ interface QnaSourceTabProps {
     agentId: string;
     onSourceDeleted?: () => void;
     onSourceAdded?: () => void;
+    pagination: Pagination | null;
+    currentPage: number;
+    onPageChange: (page: number) => void;
 }
 
-const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded }: QnaSourceTabProps) => {
+const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded, pagination, currentPage, onPageChange }: QnaSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
@@ -76,6 +81,31 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // Helper function to get status badge variant
+    const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+        switch (status.toLowerCase()) {
+            case "processed":
+                return "default";
+            case "processing":
+                return "secondary";
+            case "failed":
+                return "destructive";
+            default:
+                return "outline";
+        }
+    };
+
+    // Helper function to format date
+    const formatDate = (date: Date): string => {
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     return (
@@ -137,26 +167,54 @@ const QnaSourceTab = ({ qnaSources, onSourceClick, agentId, onSourceDeleted, onS
             </Collapsible>
 
             <div className="space-y-3">
-                {qnaSources.map((item) => (
-                    <Card key={item.uid} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(item.uid, 'qna')}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <MessageCircleQuestion className="h-5 w-5 text-primary" />
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-sm">{item.title}</h3>
+                {qnaSources.map((item) => {
+                    const isProcessed = item.status.toLowerCase() === 'processed';
+                    return (
+                        <Card
+                            key={item.uid}
+                            className={`border-border/50 group ${isProcessed ? 'cursor-pointer hover:border-primary/50' : 'opacity-60 cursor-not-allowed'
+                                }`}
+                            onClick={() => isProcessed && onSourceClick(item.uid, 'qna')}
+                        >
+                            <CardContent className="p-4">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-start gap-3 flex-1">
+                                        <MessageCircleQuestion className={`h-5 w-5 mt-0.5 ${isProcessed ? 'text-primary' : 'text-muted-foreground'
+                                            }`} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className={`font-medium text-sm truncate ${!isProcessed && 'text-muted-foreground'
+                                                    }`}>
+                                                    {item.title}
+                                                </h3>
+                                                <Badge variant={getStatusBadgeVariant(item.status)}>
+                                                    {item.status}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatDate(item.created_at)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                        onClick={(e) => handleDeleteClick(e, item.uid)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-                                onClick={(e) => handleDeleteClick(e, item.uid)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+
+                <PaginationControls
+                    pagination={pagination}
+                    currentPage={currentPage}
+                    onPageChange={onPageChange}
+                />
 
                 <DeleteConfirmation
                     isOpen={deleteDialogOpen}

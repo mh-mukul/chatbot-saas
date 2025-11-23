@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { FileText, Upload, ChevronDown, ChevronUp, Trash2, AlertCircle } from "lucide-react";
-import { fileSourceListResponse, deleteSource, uploadFileSource } from "@/services/api/source_apis";
+import { fileSourceListResponse, deleteSource, uploadFileSource, Pagination } from "@/services/api/source_apis";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import DeleteConfirmation from "./DeleteConfirmation";
+import PaginationControls from "./PaginationControls";
 
 interface FileSourceTabProps {
     fileSources: fileSourceListResponse[];
@@ -13,9 +15,12 @@ interface FileSourceTabProps {
     agentId: string;
     onSourceDeleted?: () => void;
     onSourceAdded?: () => void;
+    pagination: Pagination | null;
+    currentPage: number;
+    onPageChange: (page: number) => void;
 }
 
-const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded }: FileSourceTabProps) => {
+const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, onSourceAdded, pagination, currentPage, onPageChange }: FileSourceTabProps) => {
     const [isOpen, setIsOpen] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [sourceToDelete, setSourceToDelete] = useState<string | null>(null);
@@ -152,6 +157,31 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
         }
     }, [agentId, onSourceAdded]);
 
+    // Helper function to get status badge variant
+    const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+        switch (status.toLowerCase()) {
+            case "processed":
+                return "default";
+            case "processing":
+                return "secondary";
+            case "failed":
+                return "destructive";
+            default:
+                return "outline";
+        }
+    };
+
+    // Helper function to format date
+    const formatDate = (date: Date): string => {
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     return (
         <div className="space-y-4">
             <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md border-border/50">
@@ -171,8 +201,8 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
                         <div
                             ref={dropzoneRef}
                             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragOver
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border hover:border-primary/50'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50'
                                 }`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
@@ -214,26 +244,54 @@ const FileSourceTab = ({ fileSources, onSourceClick, agentId, onSourceDeleted, o
             </Collapsible>
 
             <div className="space-y-3">
-                {fileSources.map((file) => (
-                    <Card key={file.uid} className="border-border/50 cursor-pointer group" onClick={() => onSourceClick(file.uid, 'file')}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <FileText className="h-5 w-5 text-primary" />
-                                <div className="flex-1">
-                                    <p className="font-medium text-sm">{file.title}</p>
+                {fileSources.map((file) => {
+                    const isProcessed = file.status.toLowerCase() === 'processed';
+                    return (
+                        <Card
+                            key={file.uid}
+                            className={`border-border/50 group ${isProcessed ? 'cursor-pointer hover:border-primary/50' : 'opacity-60 cursor-not-allowed'
+                                }`}
+                            onClick={() => isProcessed && onSourceClick(file.uid, 'file')}
+                        >
+                            <CardContent className="p-4">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-start gap-3 flex-1">
+                                        <FileText className={`h-5 w-5 mt-0.5 ${isProcessed ? 'text-primary' : 'text-muted-foreground'
+                                            }`} />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className={`font-medium text-sm truncate ${!isProcessed && 'text-muted-foreground'
+                                                    }`}>
+                                                    {file.title}
+                                                </p>
+                                                <Badge variant={getStatusBadgeVariant(file.status)}>
+                                                    {file.status}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatDate(file.created_at)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                        onClick={(e) => handleDeleteClick(e, file.uid)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-                                onClick={(e) => handleDeleteClick(e, file.uid)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+
+                <PaginationControls
+                    pagination={pagination}
+                    currentPage={currentPage}
+                    onPageChange={onPageChange}
+                />
 
                 <DeleteConfirmation
                     isOpen={deleteDialogOpen}

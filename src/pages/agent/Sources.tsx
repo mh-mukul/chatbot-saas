@@ -24,6 +24,15 @@ const Sources = () => {
     handleSourceDeleted,
     handleSourceAdded,
     handleBackClick,
+    filePagination,
+    textPagination,
+    qnaPagination,
+    fileCurrentPage,
+    textCurrentPage,
+    qnaCurrentPage,
+    handleFilePageChange,
+    handleTextPageChange,
+    handleQnaPageChange,
   } = useSources(id);
 
 
@@ -54,6 +63,15 @@ const Sources = () => {
         agentId={id}
         handleSourceDeleted={handleSourceDeleted}
         handleSourceAdded={handleSourceAdded}
+        filePagination={filePagination}
+        textPagination={textPagination}
+        qnaPagination={qnaPagination}
+        fileCurrentPage={fileCurrentPage}
+        textCurrentPage={textCurrentPage}
+        qnaCurrentPage={qnaCurrentPage}
+        handleFilePageChange={handleFilePageChange}
+        handleTextPageChange={handleTextPageChange}
+        handleQnaPageChange={handleQnaPageChange}
       />
       {/* Right Panel - Summary & Actions */}
       {isLoadingSummary ? (
