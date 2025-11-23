@@ -1,7 +1,18 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BotMessageSquare } from "lucide-react";
 import { LoginForm } from "@/components/LoginForm";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("access_token");
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen flex items-center justify-center dotted-background p-4">
       <div className="absolute inset-0 opacity-5"></div>

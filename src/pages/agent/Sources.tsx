@@ -20,13 +20,21 @@ const Sources = () => {
     isLoadingTextSources,
     isLoadingQnaSources,
     isLoadingSummary,
-    isTraining,
     handleSourceClick,
     handleSourceDeleted,
     handleSourceAdded,
     handleBackClick,
-    handleTrainAgent,
+    filePagination,
+    textPagination,
+    qnaPagination,
+    fileCurrentPage,
+    textCurrentPage,
+    qnaCurrentPage,
+    handleFilePageChange,
+    handleTextPageChange,
+    handleQnaPageChange,
   } = useSources(id);
+
 
   if (selectedSource && selectedSourceType) {
     return (
@@ -37,6 +45,7 @@ const Sources = () => {
       />
     );
   }
+  console.log(sourceSummary);
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -51,9 +60,18 @@ const Sources = () => {
         isLoadingTextSources={isLoadingTextSources}
         isLoadingQnaSources={isLoadingQnaSources}
         handleSourceClick={handleSourceClick}
-        agentId={parseInt(id!, 10)}
+        agentId={id}
         handleSourceDeleted={handleSourceDeleted}
         handleSourceAdded={handleSourceAdded}
+        filePagination={filePagination}
+        textPagination={textPagination}
+        qnaPagination={qnaPagination}
+        fileCurrentPage={fileCurrentPage}
+        textCurrentPage={textCurrentPage}
+        qnaCurrentPage={qnaCurrentPage}
+        handleFilePageChange={handleFilePageChange}
+        handleTextPageChange={handleTextPageChange}
+        handleQnaPageChange={handleQnaPageChange}
       />
       {/* Right Panel - Summary & Actions */}
       {isLoadingSummary ? (
@@ -81,12 +99,9 @@ const Sources = () => {
         </div>
       ) : (
         <SourceSummary
-          fileSources={sourceSummary?.files || 0}
-          textSources={sourceSummary?.texts || 0}
-          qnaSources={sourceSummary?.qnas || 0}
-          trainingRequired={sourceSummary?.training_required || false}
-          isTraining={isTraining}
-          onTrainAgent={handleTrainAgent}
+          fileStatus={sourceSummary?.file || { failed: 0, pending: 0, processed: 0, processing: 0 }}
+          textStatus={sourceSummary?.text || { pending: 0, processing: 0 }}
+          qnaStatus={sourceSummary?.qna || { pending: 0, processing: 0 }}
         />
       )}
     </div>

@@ -1,157 +1,176 @@
-import axios from 'axios';
+import { authApiClient } from "@/services/api/api_client";
 
-const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-});
+
+export interface Pagination {
+    current_page: number;
+    total_pages: number;
+    total_records: number;
+    records_per_page: number;
+    previous_page_url: string | null;
+    next_page_url: string | null;
+};
+
 
 export interface fileSourceListResponse {
-    id: string;
+    uid: string;
     title: string;
-}
-
-export interface fileSourceDetailsResponse {
-    id: string;
-    title: string;
-    content: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
-}
+};
 
-export const getFileSourceList = async (agent_id: number): Promise<fileSourceListResponse[]> => {
+export interface fileSourceDetailsResponse {
+    uid: string;
+    title: string;
+    content: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+};
+
+export const getFileSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: fileSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=file`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=file&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching sources with id ${agent_id}:`, error);
+        console.error(`Error fetching sources with id ${agent_uid}:`, error);
         throw error;
     }
 };
 
-export const getFileSourceDetails = async (id: string): Promise<fileSourceDetailsResponse> => {
+export const getFileSourceDetails = async (agent_uid: string, file_id: string): Promise<fileSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=file`);
+        const response = await authApiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=file`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching source with id ${id}:`, error);
+        console.error(`Error fetching source with id ${file_id}:`, error);
         throw error;
     }
 };
 
 export interface textSourceListResponse {
-    id: string;
+    uid: string;
     title: string;
-}
-
-export interface textSourceDetailsResponse {
-    id: string;
-    title: string;
-    content: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
-}
+};
 
-export const getTextSourceList = async (agent_id: number): Promise<textSourceListResponse[]> => {
+export interface textSourceDetailsResponse {
+    uid: string;
+    title: string;
+    content: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+};
+
+export const getTextSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: textSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=text`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=text&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching sources with id ${agent_id}:`, error);
+        console.error(`Error fetching sources with id ${agent_uid}:`, error);
         throw error;
     }
 };
 
-export const getTextSourceDetails = async (id: string): Promise<textSourceDetailsResponse> => {
+export const getTextSourceDetails = async (agent_uid: string, file_id: string): Promise<textSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=text`);
+        const response = await authApiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=text`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching source with id ${id}:`, error);
+        console.error(`Error fetching source with id ${agent_uid}:`, error);
         throw error;
     }
 };
 
 export interface qnaSourceListResponse {
-    id: string;
+    uid: string;
     title: string;
-}
-
-export interface qnaSourceDetailsResponse {
-    id: string;
-    title: string;
-    questions: string;
-    answer: string;
-    is_trained: boolean;
+    status: string;
     created_at: Date;
     updated_at: Date;
-}
+};
 
-export const getQnaSourceList = async (agent_id: number): Promise<qnaSourceListResponse[]> => {
+export interface qnaSourceDetailsResponse {
+    uid: string;
+    title: string;
+    questions: string[];
+    answer: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+};
+
+export const getQnaSourceList = async (agent_uid: string, page: number = 1, limit: number = 10): Promise<{ knowledge_sources: qnaSourceListResponse[], pagination: Pagination }> => {
     try {
-        const response = await apiClient.get(`/api/sources?agent=${agent_id}&type=qna`);
+        const response = await authApiClient.get(`/api/v1/sources?agent=${agent_uid}&type=qna&page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching sources with id ${agent_id}:`, error);
+        console.error(`Error fetching sources with id ${agent_uid}:`, error);
         throw error;
     }
 };
 
-export const getQnaSourceDetails = async (id: string): Promise<qnaSourceDetailsResponse> => {
+export const getQnaSourceDetails = async (agent_uid: string, file_id: string): Promise<qnaSourceDetailsResponse> => {
     try {
-        const response = await apiClient.get(`/api/source/details?file_id=${id}&type=qna`);
+        const response = await authApiClient.get(`/api/v1/sources/${file_id}?agent=${agent_uid}&type=qna`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching source with id ${id}:`, error);
+        console.error(`Error fetching source with id ${file_id}:`, error);
         throw error;
     }
 };
 
 export interface sourceSummaryResponse {
-    files: number;
-    texts: number;
-    qnas: number;
-    training_required: boolean;
-}
+    file: {
+        failed: number;
+        pending: number;
+        processed: number;
+        processing: number;
+    };
+    qna: {
+        pending: number;
+        processing: number;
+    };
+    text: {
+        pending: number;
+        processing: number;
+    };
+};
 
-export const getSourceSummary = async (agent_id: number): Promise<sourceSummaryResponse> => {
+export const getSourceSummary = async (agent_uid: string): Promise<sourceSummaryResponse> => {
     try {
-        const response = await apiClient.get(`/api/sources/summary?agent_id=${agent_id}`);
+        const response = await authApiClient.get(`/api/v1/sources-summary?agent=${agent_uid}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error fetching summary with id ${agent_id}:`, error);
+        console.error(`Error fetching summary with id ${agent_uid}:`, error);
         throw error;
     }
 };
 
-export interface deleteSourceRequest {
-    agent_id: number;
-    source_id: string;
-    type: string;
-}
 
-export const deleteSource = async (data: deleteSourceRequest): Promise<void> => {
+export const deleteSource = async (agent_uid: string, source_id: string): Promise<void> => {
     try {
-        const response = await apiClient.delete(`/api/sources`, { data });
+        const response = await authApiClient.delete(`/api/v1/sources/${agent_uid}/${source_id}`);
         return response.data.data;
     } catch (error) {
-        console.error(`Error deleting source with id ${data.source_id}:`, error);
+        console.error(`Error deleting source with id ${source_id}:`, error);
         throw error;
     }
-}
+};
 
 export interface uploadFileSourceRequest {
-    agent_id: number;
     file: File;
-}
+};
 
-export const uploadFileSource = async (data: uploadFileSourceRequest): Promise<void> => {
+export const uploadFileSource = async (agent_uid: string, data: uploadFileSourceRequest): Promise<void> => {
     try {
         const formData = new FormData();
-        formData.append('agent_id', data.agent_id.toString());
         formData.append('file', data.file);
 
-        const response = await apiClient.post(`/api/sources`, formData, {
+        const response = await authApiClient.post(`/api/v1/sources/file/${agent_uid}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -161,72 +180,35 @@ export const uploadFileSource = async (data: uploadFileSourceRequest): Promise<v
         console.error(`Error uploading file source:`, error);
         throw error;
     }
-}
+};
 
 export interface createTextSourceRequest {
-    agent_id: number;
-    type: string;
     title: string;
     content: string;
-}
+};
 
-export const createTextSource = async (data: createTextSourceRequest): Promise<void> => {
+export const createTextSource = async (agent_uid: string, data: createTextSourceRequest): Promise<void> => {
     try {
-        const response = await apiClient.post(`/api/sources`, data);
+        const response = await authApiClient.post(`/api/v1/sources/text/${agent_uid}`, data);
         return response.data.data;
     } catch (error) {
         console.error(`Error creating text source:`, error);
         throw error;
     }
-}
+};
 
 export interface createQnaSourceRequest {
-    agent_id: number;
-    type: string;
     title: string;
-    questions: string;
+    questions: string[];
     answer: string;
-}
+};
 
-export const createQnaSource = async (data: createQnaSourceRequest): Promise<void> => {
+export const createQnaSource = async (agent_uid: string, data: createQnaSourceRequest): Promise<void> => {
     try {
-        const response = await apiClient.post(`/api/sources`, data);
+        const response = await authApiClient.post(`/api/v1/sources/qna/${agent_uid}`, data);
         return response.data.data;
     } catch (error) {
         console.error(`Error creating QnA source:`, error);
         throw error;
     }
-}
-
-export interface trainSourcesRequest {
-    agent_id: number;
-}
-
-export interface trainSourcesResponse {
-    execution_id: number;
-}
-
-export const trainSources = async (data: trainSourcesRequest): Promise<trainSourcesResponse> => {
-    try {
-        const response = await apiClient.post(`/api/train-agent`, data);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error training sources for agent id ${data.agent_id}:`, error);
-        throw error;
-    }
-}
-
-export interface trainProgressResponse {
-    finished: boolean;
-    status: string; // e.g., "running", "success", "failed"
-}
-
-export const getTrainingProgress = async (execution_id: number): Promise<trainProgressResponse> => {
-    try {
-        const response = await apiClient.get(`/api/training-progress?execution_id=${execution_id}`);
-        return response.data.data;
-    } catch (error) {
-        console.error(`Error fetching training progress for execution id ${execution_id}:`, error);
-        throw error;
-    }
-}
+};

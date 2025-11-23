@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAgentTrainingStatusColor } from "@/lib/utils";
 
 const Agents = () => {
   const navigate = useNavigate();
@@ -35,10 +33,10 @@ const Agents = () => {
     const fetchAgents = async () => {
       setIsLoading(true);
       try {
-        const data = await getAgents();
+        const response = await getAgents();
         // Handle case when response data is empty or undefined
-        console.log("Fetched agents:", data);
-        setAgents(Array.isArray(data) ? data : []);
+        console.log("Fetched agents:", response.agents);
+        setAgents(Array.isArray(response.agents) ? response.agents : []);
       } catch (error) {
         console.error("Error fetching agents:", error);
         toast({
@@ -59,8 +57,8 @@ const Agents = () => {
     if (!agentToDelete) return;
 
     try {
-      await deleteAgentApi(agentToDelete.id);
-      setAgents(agents.filter(agent => agent.id !== agentToDelete.id));
+      await deleteAgentApi(agentToDelete.uid);
+      setAgents(agents.filter(agent => agent.uid !== agentToDelete.uid));
       toast({
         title: "Agent deleted",
         description: `${agentToDelete.name} has been successfully removed.`,
@@ -92,7 +90,7 @@ const Agents = () => {
         title: "Agent Created",
         description: `Successfully created ${newAgent.name}.`,
       });
-      navigate(`/agent/${newAgent.id}/playground`);
+      navigate(`/agent/${newAgent.uid}/playground`);
     } catch (error) {
       toast({
         title: "Error creating agent",
@@ -162,9 +160,9 @@ const Agents = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {agents.map((agent) => (
                 <Card
-                  key={agent.id}
+                  key={agent.uid}
                   className="bg-gradient-card border-border/50 shadow-card hover:shadow-glow transition-spring cursor-pointer group"
-                  onClick={() => navigate(`/agent/${agent.id}/playground`)}
+                  onClick={() => navigate(`/agent/${agent.uid}/playground`)}
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -184,12 +182,6 @@ const Agents = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4">
-                      <Badge className={`${getAgentTrainingStatusColor(agent.training_status)} font-medium`}>
-                        {agent.training_status}
-                      </Badge>
                     </div>
                   </CardHeader>
 

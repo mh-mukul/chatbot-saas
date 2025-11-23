@@ -1,9 +1,9 @@
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
-import { chatResponse } from "@/services/api/chat_apis";
+import { Message } from "@/services/api/embed_chat_apis";
 
 interface MessageListProps {
-    messages: chatResponse[];
+    messages: Message[];
     isLoading: boolean;
     chatIcon: React.ReactNode;
 }

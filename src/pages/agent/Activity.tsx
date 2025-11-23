@@ -1,4 +1,4 @@
-import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/api/chat_apis";
+import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/api/activity_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis, Loader2 } from "lucide-react";
@@ -31,9 +31,9 @@ const ActivityPage = () => {
     if (id) {
       setIsLoadingSessions(true);
       try {
-        const sessions = await getSessionList(Number(id));
+        const response = await getSessionList(id);
         // Ensure sessions is always an array
-        const sessionsArray = Array.isArray(sessions) ? sessions : [];
+        const sessionsArray = Array.isArray(response.sessions) ? response.sessions : [];
         setChatSessions(sessionsArray);
         if (sessionsArray.length > 0) {
           setSelectedSession(sessionsArray[0]);
@@ -57,15 +57,15 @@ const ActivityPage = () => {
       if (selectedSession) {
         setIsLoadingMessages(true);
         try {
-          const sessionMessages = await getSessionMessages(selectedSession.session_id);
+          const sessionMessages = await getSessionMessages(id!, selectedSession.uid);
           // Ensure sessionMessages is always an array
           const messagesArray = Array.isArray(sessionMessages) ? sessionMessages : [];
           const formattedMessages: Message[] = messagesArray.flatMap((msg) => [
-            { role: "user" as const, content: msg.input, created_at: new Date(msg.created_at) },
+            { role: "user" as const, content: msg.human_message, created_at: new Date(msg.date_time) },
             {
               role: "assistant" as const,
-              content: msg.output,
-              created_at: new Date(msg.created_at),
+              content: msg.ai_message,
+              created_at: new Date(msg.date_time),
               revised: msg.revised,
               rawMessage: msg
             },
@@ -151,8 +151,8 @@ const ActivityPage = () => {
             ) : (
               chatSessions.map((session) => (
                 <Card
-                  key={session.id}
-                  className={`cursor-pointer transition-all ${selectedSession?.id === session.id
+                  key={session.uid}
+                  className={`cursor-pointer transition-all ${selectedSession?.uid === session.uid
                     ? "border-primary"
                     : "border-border/50 hover:border-primary/50"
                     }`}
@@ -162,21 +162,21 @@ const ActivityPage = () => {
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-sm">
                         {
-                          session.session_id && session.session_id.trim().length > 20
-                            ? session.session_id.trim().slice(0, 20) + "..."
-                            : session.session_id?.trim()
+                          session.uid && session.uid.trim().length > 20
+                            ? session.uid.trim().slice(0, 20) + "..."
+                            : session.uid?.trim()
                         }
                       </h3>
                       <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(session.date_time), { addSuffix: true })}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
-                        {session.input && session.input.trim().length > 25
-                          ? session.input.trim().slice(0, 25) + "..."
-                          : session.input?.trim()}
+                        {session.human_message && session.human_message.trim().length > 25
+                          ? session.human_message.trim().slice(0, 25) + "..."
+                          : session.human_message?.trim()}
                       </span>
                     </div>
                   </CardContent>
@@ -191,7 +191,7 @@ const ActivityPage = () => {
       <div className="flex-1 flex flex-col">
         <div className="p-3 border-b border-border/50 justify-between flex items-center">
           <p className="text-muted-foreground mt-1">
-            {selectedSession && selectedSession.session_id ? selectedSession.session_id : "No session selected"}
+            {selectedSession && selectedSession.uid ? selectedSession.uid : "No session selected"}
           </p>
           {selectedSession && (
             <Button variant="outline">

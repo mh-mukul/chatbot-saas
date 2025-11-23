@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CycleTheme } from "./ui/cycle-theme"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
-    const [username, setUsername] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const { toast } = useToast();
@@ -21,21 +21,22 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         e.preventDefault();
 
         try {
-            const response: LoginResponse = await loginApi({ username, password });
+            const response: LoginResponse = await loginApi({ phone, password });
             toast({
                 title: "Login Successful",
-                description: `Welcome back, ${response.user.first_name}!`,
+                description: `Welcome back, ${response.user.name}!`,
                 variant: "default",
             });
             // Store token and user data
-            localStorage.setItem("token", response.token);
+            localStorage.setItem("access_token", response.access_token);
+            localStorage.setItem("refresh_token", response.refresh_token);
             localStorage.setItem("user", JSON.stringify(response.user));
             navigate("/dashboard");
         } catch (error) {
             console.error("Login failed:", error);
             toast({
                 title: "Login Failed",
-                description: "Invalid username or password. Please try again.",
+                description: "Invalid phone or password. Please try again.",
                 variant: "destructive",
             });
         }
@@ -52,15 +53,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                                 <p className="text-balance text-muted-foreground">Sign in to continue</p>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="username">Username</Label>
+                                <Label htmlFor="phone">Phone</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
-                                        id="username"
+                                        id="phone"
                                         type="text"
-                                        placeholder="Enter username"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="Enter phone number"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
                                         className="pl-10"
                                         required
                                     />

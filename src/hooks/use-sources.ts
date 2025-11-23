@@ -15,8 +15,7 @@ import {
     qnaSourceDetailsResponse,
     getSourceSummary,
     sourceSummaryResponse,
-    trainSources,
-    getTrainingProgress,
+    Pagination,
 } from "@/services/api/source_apis";
 
 type SourceDetailsType = fileSourceDetailsResponse | textSourceDetailsResponse | qnaSourceDetailsResponse | null;
@@ -33,17 +32,25 @@ export const useSources = (id: string | undefined) => {
     const [selectedSource, setSelectedSource] = useState<SourceDetailsType>(null);
     const [selectedSourceType, setSelectedSourceType] = useState<string | null>(null);
 
+    // Pagination states
+    const [filePagination, setFilePagination] = useState<Pagination | null>(null);
+    const [textPagination, setTextPagination] = useState<Pagination | null>(null);
+    const [qnaPagination, setQnaPagination] = useState<Pagination | null>(null);
+    const [fileCurrentPage, setFileCurrentPage] = useState(1);
+    const [textCurrentPage, setTextCurrentPage] = useState(1);
+    const [qnaCurrentPage, setQnaCurrentPage] = useState(1);
+
     // Loading states
     const [isLoadingFileSources, setIsLoadingFileSources] = useState(false);
     const [isLoadingTextSources, setIsLoadingTextSources] = useState(false);
     const [isLoadingQnaSources, setIsLoadingQnaSources] = useState(false);
     const [isLoadingSummary, setIsLoadingSummary] = useState(false);
-    const [isTraining, setIsTraining] = useState(false);
+
 
     // Load summary when component mounts
     useEffect(() => {
         if (id) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingSummary(true);
             getSourceSummary(agentId)
                 .then(setSourceSummary)
@@ -62,10 +69,13 @@ export const useSources = (id: string | undefined) => {
     // Load file sources only when the "files" tab is active
     useEffect(() => {
         if (id && activeTab === "files" && fileSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingFileSources(true);
-            getFileSourceList(agentId)
-                .then(setFileSources)
+            getFileSourceList(agentId, fileCurrentPage)
+                .then(data => {
+                    setFileSources(data.knowledge_sources);
+                    setFilePagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching file sources:", err);
                     toast({
@@ -76,15 +86,18 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingFileSources(false));
         }
-    }, [id, activeTab, fileSources.length, toast]);
+    }, [id, activeTab, fileSources.length, fileCurrentPage, toast]);
 
     // Load text sources only when the "text" tab is active
     useEffect(() => {
         if (id && activeTab === "text" && textSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingTextSources(true);
-            getTextSourceList(agentId)
-                .then(setTextSources)
+            getTextSourceList(agentId, textCurrentPage)
+                .then(data => {
+                    setTextSources(data.knowledge_sources);
+                    setTextPagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching text sources:", err);
                     toast({
@@ -95,15 +108,18 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingTextSources(false));
         }
-    }, [id, activeTab, textSources.length, toast]);
+    }, [id, activeTab, textSources.length, textCurrentPage, toast]);
 
     // Load QnA sources only when the "qa" tab is active
     useEffect(() => {
         if (id && activeTab === "qa" && qnaSources.length === 0) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             setIsLoadingQnaSources(true);
-            getQnaSourceList(agentId)
-                .then(setQnaSources)
+            getQnaSourceList(agentId, qnaCurrentPage)
+                .then(data => {
+                    setQnaSources(data.knowledge_sources);
+                    setQnaPagination(data.pagination);
+                })
                 .catch(err => {
                     console.error("Error fetching QnA sources:", err);
                     toast({
@@ -114,18 +130,18 @@ export const useSources = (id: string | undefined) => {
                 })
                 .finally(() => setIsLoadingQnaSources(false));
         }
-    }, [id, activeTab, qnaSources.length, toast]);
+    }, [id, activeTab, qnaSources.length, qnaCurrentPage, toast]);
 
     const handleSourceClick = async (sourceId: string, type: string) => {
         setSelectedSourceType(type);
         try {
             let details: SourceDetailsType = null;
             if (type === 'file') {
-                details = await getFileSourceDetails(sourceId);
+                details = await getFileSourceDetails(id, sourceId);
             } else if (type === 'text') {
-                details = await getTextSourceDetails(sourceId);
+                details = await getTextSourceDetails(id, sourceId);
             } else if (type === 'qna') {
-                details = await getQnaSourceDetails(sourceId);
+                details = await getQnaSourceDetails(id, sourceId);
             }
             setSelectedSource(details);
         } catch (error) {
@@ -161,21 +177,30 @@ export const useSources = (id: string | undefined) => {
     // Common function to refresh sources
     const refreshSources = () => {
         if (id) {
-            const agentId = parseInt(id, 10);
+            const agentId = id;
             if (activeTab === "files") {
                 setIsLoadingFileSources(true);
-                getFileSourceList(agentId)
-                    .then(setFileSources)
+                getFileSourceList(agentId, fileCurrentPage)
+                    .then(data => {
+                        setFileSources(data.knowledge_sources);
+                        setFilePagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingFileSources(false));
             } else if (activeTab === "text") {
                 setIsLoadingTextSources(true);
-                getTextSourceList(agentId)
-                    .then(setTextSources)
+                getTextSourceList(agentId, textCurrentPage)
+                    .then(data => {
+                        setTextSources(data.knowledge_sources);
+                        setTextPagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingTextSources(false));
             } else if (activeTab === "qa") {
                 setIsLoadingQnaSources(true);
-                getQnaSourceList(agentId)
-                    .then(setQnaSources)
+                getQnaSourceList(agentId, qnaCurrentPage)
+                    .then(data => {
+                        setQnaSources(data.knowledge_sources);
+                        setQnaPagination(data.pagination);
+                    })
                     .finally(() => setIsLoadingQnaSources(false));
             }
 
@@ -192,86 +217,46 @@ export const useSources = (id: string | undefined) => {
         setSelectedSourceType(null);
     };
 
-    const handleTrainAgent = async () => {
-        if (!id) return;
-
-        setIsTraining(true);
-        try {
-            // Start the training process
-            const agentId = parseInt(id, 10);
-            const trainingResult = await trainSources({ agent_id: agentId });
-            const executionId = trainingResult.execution_id;
-
-            toast({
-                title: "Training started",
-                description: "Your agent is being trained with the latest sources.",
-            });
-
-            // Poll for training status every 3 seconds for up to 30 seconds
-            const maxAttempts = 10; // 30 seconds total (10 attempts × 3 seconds)
-            let attempts = 0;
-
-            const checkTrainingProgress = async () => {
-                try {
-                    const progress = await getTrainingProgress(executionId);
-
-                    if (progress.finished) {
-                        setIsTraining(false);
-
-                        if (progress.status === "success") {
-                            toast({
-                                title: "Training completed",
-                                description: "Your agent has been successfully trained with the latest sources.",
-                            });
-
-                            // Refresh the source summary after training
-                            refreshSources();
-                        } else {
-                            toast({
-                                title: "Training failed",
-                                description: "There was an error training your agent. Please try again.",
-                                variant: "destructive",
-                            });
-                        }
-
-                        return; // Exit the polling loop
-                    }
-
-                    attempts++;
-                    if (attempts < maxAttempts) {
-                        setTimeout(checkTrainingProgress, 3000); // Check again after 3 seconds
-                    } else {
-                        // Max attempts reached, but don't stop showing loading state
-                        // as training might still be in progress
-                        toast({
-                            title: "Training in progress",
-                            description: "Training is still in progress. You'll be notified when it's complete.",
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error checking training progress:", error);
-                    setIsTraining(false);
-                    toast({
-                        title: "Error",
-                        description: "Could not check training progress. Please try again.",
-                        variant: "destructive",
-                    });
-                }
-            };
-
-            // Start polling
-            setTimeout(checkTrainingProgress, 3000);
-
-        } catch (error) {
-            console.error("Error starting training:", error);
-            setIsTraining(false);
-            toast({
-                title: "Error",
-                description: "Could not start training. Please try again.",
-                variant: "destructive",
-            });
+    // Pagination handlers
+    const handleFilePageChange = (page: number) => {
+        setFileCurrentPage(page);
+        if (id) {
+            setIsLoadingFileSources(true);
+            getFileSourceList(id, page)
+                .then(data => {
+                    setFileSources(data.knowledge_sources);
+                    setFilePagination(data.pagination);
+                })
+                .finally(() => setIsLoadingFileSources(false));
         }
     };
+
+    const handleTextPageChange = (page: number) => {
+        setTextCurrentPage(page);
+        if (id) {
+            setIsLoadingTextSources(true);
+            getTextSourceList(id, page)
+                .then(data => {
+                    setTextSources(data.knowledge_sources);
+                    setTextPagination(data.pagination);
+                })
+                .finally(() => setIsLoadingTextSources(false));
+        }
+    };
+
+    const handleQnaPageChange = (page: number) => {
+        setQnaCurrentPage(page);
+        if (id) {
+            setIsLoadingQnaSources(true);
+            getQnaSourceList(id, page)
+                .then(data => {
+                    setQnaSources(data.knowledge_sources);
+                    setQnaPagination(data.pagination);
+                })
+                .finally(() => setIsLoadingQnaSources(false));
+        }
+    };
+
 
     return {
         activeTab,
@@ -286,11 +271,19 @@ export const useSources = (id: string | undefined) => {
         isLoadingTextSources,
         isLoadingQnaSources,
         isLoadingSummary,
-        isTraining,
         handleSourceClick,
         handleSourceDeleted,
         handleSourceAdded,
         handleBackClick,
-        handleTrainAgent,
+        // Pagination
+        filePagination,
+        textPagination,
+        qnaPagination,
+        fileCurrentPage,
+        textCurrentPage,
+        qnaCurrentPage,
+        handleFilePageChange,
+        handleTextPageChange,
+        handleQnaPageChange,
     };
 };

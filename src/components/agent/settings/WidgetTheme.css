@@ -1,3 +1,35 @@
+/* Force emoji picker theme inside widget preview, regardless of global .dark */
+.light [data-slot="emoji-picker"],
+.light [data-slot^="emoji-picker-"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-foreground) !important;
+}
+.light [data-slot="emoji-picker-search-wrapper"],
+.light [data-slot="emoji-picker-footer"],
+.light [data-slot="emoji-picker-category-header"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-muted-foreground) !important;
+}
+.light [data-slot="emoji-picker-emoji"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-foreground) !important;
+}
+
+.dark [data-slot="emoji-picker"],
+.dark [data-slot^="emoji-picker-"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-foreground) !important;
+}
+.dark [data-slot="emoji-picker-search-wrapper"],
+.dark [data-slot="emoji-picker-footer"],
+.dark [data-slot="emoji-picker-category-header"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-muted-foreground) !important;
+}
+.dark [data-slot="emoji-picker-emoji"] {
+  background-color: var(--widget-background) !important;
+  color: var(--widget-foreground) !important;
+}
 /* Widget Theme Styles - Matching Application Theme */
 
 /* Light theme variables - Using the same HSL values as the app */

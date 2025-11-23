@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
     embedChat as embedChatApi,
-    chatResponse,
-    getSessionMessages,
-} from "@/services/api/chat_apis";
-import { getChatWidgetSettings, chatWidgetSettings } from "@/services/api/embed_chat_apis";
+    getUserSessionMessages,
+    getChatWidgetSettings,
+    chatWidgetSettings,
+    Message,
+} from "@/services/api/embed_chat_apis";
 import { Bot } from "lucide-react";
-import { getOrCreateSessionId, getOrCreateUserId } from "@/lib/utils";
+import { getSessionId, setSessionId, getOrCreateUserId, removeSessionId } from '@/lib/utils';
 import { ChatHeader } from "./embed-chat/ChatHeader";
 import { MessageList } from "./embed-chat/MessageList";
 import { ChatInput } from "./embed-chat/ChatInput";
@@ -16,7 +17,7 @@ import { themeStyles as embedChatThemeStyles } from "./embed-chat/theme-styles";
 
 export default function EmbedChat() {
     const [searchParams] = useSearchParams();
-    const agent_id = searchParams.get("agent_id") || "";
+    const agent_uid = searchParams.get("agent_uid") || "";
     const theme = searchParams.get("theme") || "light";
     const [widgetSettings, setWidgetSettings] = useState<chatWidgetSettings | null>(null);
     const [loading, setLoading] = useState(true);
@@ -25,17 +26,17 @@ export default function EmbedChat() {
     // Fetch widget settings
     useEffect(() => {
         const fetchSettings = async () => {
-            if (!agent_id) {
+            if (!agent_uid) {
                 setError("Agent ID is required");
                 setLoading(false);
                 return;
             }
 
             try {
-                const settings = await getChatWidgetSettings(Number(agent_id));
+                const settings = await getChatWidgetSettings(agent_uid);
 
                 // Check if the agent is private, show error if it is
-                if (settings.is_private) {
+                if (!settings.is_public) {
                     setError("Configuration not found");
                     setLoading(false);
                     return;
@@ -51,7 +52,7 @@ export default function EmbedChat() {
         };
 
         fetchSettings();
-    }, [agent_id]);
+    }, [agent_uid]);
 
     // Set theme class and inject theme styles
     useEffect(() => {
@@ -92,42 +93,98 @@ export default function EmbedChat() {
     }, [theme, widgetSettings]);
 
     // Chat state
-    const [messages, setMessages] = useState<chatResponse[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [sessionId, setSessionId] = useState<string>(getOrCreateSessionId());
+    const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [userId] = useState<string>(getOrCreateUserId());
-    const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
+    const [suggestedMessages, setSuggestedQuestions] = useState<string[]>([]);
     const [loadingSession, setLoadingSession] = useState(false);
     const [showingHistory, setShowingHistory] = useState(false);
 
     // Initialize chat messages with welcome message from widget settings when loaded
     useEffect(() => {
+        const loadSession = async (sessionIdToLoad: string) => {
+            setLoadingSession(true);
+            try {
+                const sessionMessages = await getUserSessionMessages(agent_uid, userId, sessionIdToLoad);
+
+                if (sessionMessages.length > 0) {
+                    const chatMessages: Message[] = [];
+                    sessionMessages.forEach((msg) => {
+                        chatMessages.push({
+                            id: `user-${msg.id}`,
+                            role: "user",
+                            content: msg.human_message,
+                            timestamp: new Date(msg.date_time)
+                        });
+                        chatMessages.push({
+                            id: `assistant-${msg.id}`,
+                            role: "assistant",
+                            content: msg.ai_message,
+                            timestamp: new Date(msg.date_time)
+                        });
+                    });
+                    setMessages(chatMessages);
+                } else {
+                    // No messages in session, so remove session id and show initial message
+                    removeSessionId();
+                    setSessionIdState(null);
+                    const initialMessage = widgetSettings?.initial_message || "Hello! How can I help you today?";
+                    setMessages([{
+                        id: '1',
+                        role: 'assistant',
+                        content: initialMessage,
+                        timestamp: new Date(),
+                    }]);
+                }
+            } catch (err) {
+                console.error("Error loading session on mount:", err);
+                removeSessionId();
+                setSessionIdState(null);
+                const initialMessage = widgetSettings?.initial_message || "Hello! How can I help you today?";
+                setMessages([{
+                    id: '1',
+                    role: 'assistant',
+                    content: initialMessage,
+                    timestamp: new Date(),
+                }]);
+            } finally {
+                setLoadingSession(false);
+            }
+        };
+
         if (widgetSettings) {
-            // Set initial messages from widget settings
-            const initialMessage = widgetSettings.initial_messages || "Hello! How can I help you today?";
-            setMessages([{
-                id: '1',
-                role: 'assistant',
-                content: initialMessage,
-                timestamp: new Date(),
-            }]);
+            const existingSessionId = getSessionId();
+            if (existingSessionId) {
+                setSessionIdState(existingSessionId);
+                loadSession(existingSessionId);
+            } else {
+                // Set initial messages from widget settings
+                const initialMessage = widgetSettings.initial_message || "Hello! How can I help you today?";
+                setMessages([{
+                    id: '1',
+                    role: 'assistant',
+                    content: initialMessage,
+                    timestamp: new Date(),
+                }]);
+            }
 
             // Parse and set suggested messages if available
-            if (widgetSettings.suggested_messages) {
+            if (widgetSettings.suggested_questions) {
                 try {
                     // Parse suggested messages with newlines
-                    const suggestedArray = widgetSettings.suggested_messages
+                    const suggestedArray = widgetSettings.suggested_questions
                         .split('\n')
                         .map(msg => msg.trim())
                         .filter(Boolean);
-                    setSuggestedMessages(suggestedArray);
+                    setSuggestedQuestions(suggestedArray);
                 } catch (error) {
                     console.error("Error parsing suggested messages:", error);
                 }
             }
         }
-    }, [widgetSettings]);
+    }, [widgetSettings, agent_uid, userId]);
 
     // Handle session selection from history
     const handleSessionSelect = async (selectedSessionId: string) => {
@@ -137,31 +194,32 @@ export default function EmbedChat() {
 
         try {
             // Fetch messages for the selected session
-            const sessionMessages = await getSessionMessages(selectedSessionId);
+            const sessionMessages = await getUserSessionMessages(agent_uid, userId, selectedSessionId);
 
             // Convert session messages to chat responses for display
-            const chatMessages: chatResponse[] = [];
+            const chatMessages: Message[] = [];
 
             sessionMessages.forEach((msg) => {
                 // Add user message
                 chatMessages.push({
                     id: `user-${msg.id}`,
                     role: "user",
-                    content: msg.input,
-                    timestamp: new Date(msg.created_at)
+                    content: msg.human_message,
+                    timestamp: new Date(msg.date_time)
                 });
 
                 // Add assistant message
                 chatMessages.push({
                     id: `assistant-${msg.id}`,
                     role: "assistant",
-                    content: msg.output,
-                    timestamp: new Date(msg.created_at)
+                    content: msg.ai_message,
+                    timestamp: new Date(msg.date_time)
                 });
             });
 
             // Update state with the new session and messages
             setSessionId(selectedSessionId);
+            setSessionIdState(selectedSessionId);
             setMessages(chatMessages);
         } catch (err) {
             console.error("Error loading session:", err);
@@ -201,7 +259,7 @@ export default function EmbedChat() {
         const messageText = messageOverride || input.trim();
         if ((!messageText || isLoading)) return;
 
-        const userMessage: chatResponse = {
+        const userMessage: Message = {
             id: crypto.randomUUID(),
             role: "user" as const,
             content: messageText,
@@ -219,26 +277,33 @@ export default function EmbedChat() {
         }
 
         try {
-            // Call the embedChat API with agent_id from widget settings or URL params
-            const effectiveAgentId = widgetSettings?.agent_id.toString() || agent_id;
+            // Call the embedChat API with agent_uid from widget settings or URL params
+            const effectiveAgentId = agent_uid;
 
             if (!effectiveAgentId) {
                 throw new Error("No agent ID available");
             }
+            const currentSessionId = sessionId || getSessionId();
+            const response = await embedChatApi(
+                agent_uid,
+                {
+                    session_id: currentSessionId || undefined,
+                    user_uid: userId,
+                    query: currentInput,
+                    stream: false,
+                });
 
-            const response = await embedChatApi({
-                agent_id: effectiveAgentId,
-                session_id: sessionId,
-                user_id: userId,
-                query: currentInput,
-            });
+            if (!currentSessionId) {
+                setSessionId(response.session_id);
+                setSessionIdState(response.session_id);
+            }
 
             // Add bot response
             setMessages((prev) => [...prev, {
-                id: response.id,
-                role: response.role,
-                content: response.content,
-                timestamp: new Date(response.timestamp)
+                id: response.id.toString(),
+                role: "assistant",
+                content: response.ai_message,
+                timestamp: new Date(response.date_time)
             }]);
         } catch (err) {
             console.error("Error invoking embed chat:", err);
@@ -295,7 +360,7 @@ export default function EmbedChat() {
             <ChatHeader
                 title={widgetSettings?.display_name || "Chat Assistant"}
                 chatIcon={<ChatIcon />}
-                agentId={widgetSettings?.agent_id.toString() || agent_id}
+                agentId={agent_uid}
                 showingHistory={showingHistory}
                 onToggleHistory={handleToggleHistory}
                 onSessionSelect={handleSessionSelect}
@@ -305,7 +370,7 @@ export default function EmbedChat() {
                 /* Session History View */
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <SessionList
-                        agentId={widgetSettings?.agent_id.toString() || agent_id}
+                        agentId={agent_uid}
                         userId={userId}
                         onSelectSession={(sessionId) => {
                             handleSessionSelect(sessionId);

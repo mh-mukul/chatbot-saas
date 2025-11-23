@@ -8,18 +8,19 @@ export function cn(...inputs: ClassValue[]) {
 
 
 const SESSION_ID_KEY = 'chat_session_id';
-export const getOrCreateSessionId = (): string => {
-  let sessionId = localStorage.getItem(SESSION_ID_KEY);
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem(SESSION_ID_KEY, sessionId);
-  }
-  return sessionId;
+
+export const getSessionId = (): string | null => {
+  return localStorage.getItem(SESSION_ID_KEY);
 };
 
-export const clearSessionId = () => {
+export const setSessionId = (sessionId: string) => {
+  localStorage.setItem(SESSION_ID_KEY, sessionId);
+}
+
+export const removeSessionId = (): void => {
   localStorage.removeItem(SESSION_ID_KEY);
 };
+
 
 export const getAgentTrainingStatusColor = (status: string) => {
   switch (status) {

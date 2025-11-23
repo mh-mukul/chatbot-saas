@@ -5,7 +5,7 @@ import TextSourceTab from "@/components/agent/source/TextSourceTab";
 import QnaSourceTab from "@/components/agent/source/QnaSourceTab";
 import SourceSkeletonLoader from "./common/SourceSkeletonLoader";
 import EmptyState from "./common/EmptyState";
-import { fileSourceListResponse, qnaSourceListResponse, textSourceListResponse } from "@/services/api/source_apis";
+import { fileSourceListResponse, qnaSourceListResponse, textSourceListResponse, Pagination } from "@/services/api/source_apis";
 
 interface SourceTabsProps {
     activeTab: string;
@@ -17,9 +17,18 @@ interface SourceTabsProps {
     isLoadingTextSources: boolean;
     isLoadingQnaSources: boolean;
     handleSourceClick: (sourceId: string, type: string) => void;
-    agentId: number;
+    agentId: string;
     handleSourceDeleted: () => void;
     handleSourceAdded: (sourceType: string) => void;
+    filePagination: Pagination | null;
+    textPagination: Pagination | null;
+    qnaPagination: Pagination | null;
+    fileCurrentPage: number;
+    textCurrentPage: number;
+    qnaCurrentPage: number;
+    handleFilePageChange: (page: number) => void;
+    handleTextPageChange: (page: number) => void;
+    handleQnaPageChange: (page: number) => void;
 }
 
 const SourceTabs = ({
@@ -35,6 +44,15 @@ const SourceTabs = ({
     agentId,
     handleSourceDeleted,
     handleSourceAdded,
+    filePagination,
+    textPagination,
+    qnaPagination,
+    fileCurrentPage,
+    textCurrentPage,
+    qnaCurrentPage,
+    handleFilePageChange,
+    handleTextPageChange,
+    handleQnaPageChange,
 }: SourceTabsProps) => {
     return (
         <div className="flex-1 p-6">
@@ -62,6 +80,9 @@ const SourceTabs = ({
                                         agentId={agentId}
                                         onSourceDeleted={handleSourceDeleted}
                                         onSourceAdded={() => handleSourceAdded('file')}
+                                        pagination={filePagination}
+                                        currentPage={fileCurrentPage}
+                                        onPageChange={handleFilePageChange}
                                     />
                                 )}
                                 {!isLoadingFileSources && fileSources.length === 0 && (
@@ -83,6 +104,9 @@ const SourceTabs = ({
                                         agentId={agentId}
                                         onSourceDeleted={handleSourceDeleted}
                                         onSourceAdded={() => handleSourceAdded('text')}
+                                        pagination={textPagination}
+                                        currentPage={textCurrentPage}
+                                        onPageChange={handleTextPageChange}
                                     />
                                 )}
                                 {!isLoadingTextSources && textSources.length === 0 && (
@@ -104,6 +128,9 @@ const SourceTabs = ({
                                         agentId={agentId}
                                         onSourceDeleted={handleSourceDeleted}
                                         onSourceAdded={() => handleSourceAdded('Q&A')}
+                                        pagination={qnaPagination}
+                                        currentPage={qnaCurrentPage}
+                                        onPageChange={handleQnaPageChange}
                                     />
                                 )}
                                 {!isLoadingQnaSources && qnaSources.length === 0 && (

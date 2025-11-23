@@ -9,7 +9,6 @@ import {
   PanelLeft,
   User as UserIcon
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -23,52 +22,47 @@ import {
   AvatarImage,
   AvatarFallback
 } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isAuthenticated, handleLogout } = useAuth();
   const [user, setUser] = useState<{
-    username: string;
-    first_name: string;
-    last_name: string;
+    name: string;
+    email: string;
+    phone: string;
     image_url?: string;
   } | null>(null);
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("token");
-    if (!isAuthenticated) {
+    if (isAuthenticated === false) {
       navigate("/");
-    } else {
+    } else if (isAuthenticated === true) {
       // Get user data from localStorage
       const userData = localStorage.getItem("user");
       if (userData) {
         setUser(JSON.parse(userData));
       }
     }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-  };
+  }, [isAuthenticated, navigate]);
 
   // Get user initials for avatar fallback
   const getUserInitials = (): string => {
     if (!user) return "";
-    const firstInitial = user.first_name ? user.first_name.charAt(0).toUpperCase() : "";
-    const lastInitial = user.last_name ? user.last_name.charAt(0).toUpperCase() : "";
+    const firstInitial = user.name ? user.name.charAt(0).toUpperCase() : "";
+    const lastInitial = user.name ? user.name.split(" ").slice(-1)[0].charAt(0).toUpperCase() : "";
     return `${firstInitial}${lastInitial}`;
   };
 
   // Extract agent ID from URL if we're in an agent view
   const agentId = location.pathname.match(/\/agent\/([^\/]+)/)?.[1];
+
+  if (isAuthenticated === null) {
+    // You can render a loading spinner here
+    return <div>Loading...</div>;
+  }
 
   return (
     <SidebarProvider>
@@ -92,7 +86,7 @@ const Layout = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 p-0 relative">
                     <Avatar className="h-9 w-9 border border-border/50 hover:border-border transition-colors">
-                      <AvatarImage src={user?.image_url} alt={user?.first_name || "User"} />
+                      <AvatarImage src={user?.image_url} alt={getUserInitials() || "User"} />
                       <AvatarFallback className="text-sm font-medium">
                         {getUserInitials() || <UserIcon className="h-5 w-5" />}
                       </AvatarFallback>
@@ -102,12 +96,12 @@ const Layout = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   {user && (
                     <div className="flex flex-col space-y-1 p-2">
-                      <p className="text-sm font-medium">{`${user.first_name} ${user.last_name}`}</p>
-                      <p className="text-xs text-muted-foreground">{user.username}</p>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                  <DropdownMenuItem onClick={() => handleLogout()} className="text-destructive focus:text-destructive">
                     <LogOut className="h-4 w-4 mr-2" />
                     <span>Logout</span>
                   </DropdownMenuItem>

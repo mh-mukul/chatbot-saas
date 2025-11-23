@@ -2,7 +2,7 @@
   window.AgentIQChatWidget = {
     init: function (config) {
       const defaultConfig = {
-        agent_id: "",
+        agent_uid: "",
         theme: "light",
         position: "right",
         width: 450,
@@ -10,8 +10,8 @@
         buttonIcon: "💬",
         buttonBackground: "#4f46e5",
         buttonColor: "#ffffff",
-        appBaseUrl: "https://ai-chatbot-saas-demo.vercel.app",
-        apiBaseUrl: "https://n8n.sslwireless.com/webhook",
+        appBaseUrl: "http://localhost:8002",
+        apiBaseUrl: "http://localhost:8001",
         zIndex: 999999,
       };
 
@@ -19,11 +19,11 @@
       const widgetConfig = { ...defaultConfig, ...config };
 
       async function fetchRemoteConfig() {
-        if (!widgetConfig.agent_id) return {};
+        if (!widgetConfig.agent_uid) return {};
 
         try {
           const res = await fetch(
-            `${widgetConfig.apiBaseUrl}/api/embed-chat/config/?agent_id=${widgetConfig.agent_id}`
+            `${widgetConfig.apiBaseUrl}/api/v1/widget/config/${widgetConfig.agent_uid}`,
           );
           if (!res.ok) throw new Error("Failed to fetch widget config");
           return await res.json();
@@ -70,7 +70,7 @@
         // ----------------------
         const iframe = document.createElement("iframe");
         const params = new URLSearchParams({
-          agent_id: widgetConfig.agent_id,
+          agent_uid: widgetConfig.agent_uid,
           theme: widgetConfig.theme,
         });
         iframe.src = `${widgetConfig.appBaseUrl}/embed?${params.toString()}`;

@@ -1,18 +1,23 @@
 import { useState } from 'react';
-import { playgroundChat, playgroundChatRequest } from '@/services/api/chat_apis';
+import { playgroundChat, playgroundChatRequest } from '@/services/api/playground_chat_apis';
 import { useToast } from '@/hooks/use-toast';
-import { getOrCreateSessionId } from '@/lib/utils';
-import { chatResponse } from "@/services/api/chat_apis";
+import { getSessionId, setSessionId } from '@/lib/utils';
 
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+}
 
 export const useChat = (
-    agentId: number,
+    agentId: string,
     systemPrompt: string,
     temperature: number,
     modelProvider: string = '',
-    modelCode: string = ''
+    modelId: number
 ) => {
-    const [messages, setMessages] = useState<chatResponse[]>([
+    const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
             role: 'assistant',
@@ -20,42 +25,46 @@ export const useChat = (
             timestamp: new Date(),
         },
     ]);
+    const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
     const sendMessage = async (content: string) => {
         if (!content.trim()) return;
 
-        const userMessage: chatResponse = {
+        const userMessage: Message = {
             id: Date.now().toString(),
             role: 'user',
-            content,
+            content: content,
             timestamp: new Date(),
         };
-
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
         try {
-            const sessionId = getOrCreateSessionId();
+            const currentSessionId = sessionId || getSessionId();
             const request: playgroundChatRequest = {
-                agent_id: agentId,
-                session_id: sessionId,
+                session_id: currentSessionId || undefined,
                 query: content,
                 system_prompt: systemPrompt,
                 temperature: temperature,
                 model_provider: modelProvider,
-                model_code: modelCode,
+                model_id: modelId,
                 platform: 'playground',
             };
 
-            const response = await playgroundChat(request);
+            const response = await playgroundChat(agentId, request);
 
-            const assistantMessage: chatResponse = {
-                id: response.id,
+            if (!currentSessionId) {
+                setSessionId(response.session_id);
+                setSessionIdState(response.session_id);
+            }
+
+            const assistantMessage: Message = {
+                id: Date.now().toString(),
                 role: 'assistant',
-                content: response.content,
-                timestamp: new Date(response.timestamp),
+                content: response.ai_message,
+                timestamp: new Date(response.date_time),
             };
 
             setMessages((prev) => [...prev, assistantMessage]);
