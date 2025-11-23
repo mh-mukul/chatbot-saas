@@ -6,10 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AgentDetails } from "@/services/api/agent_apis";
-import { formatDistanceToNow } from "date-fns";
 import { modelListResponse, promptTemplateListResponse } from "@/services/api/model_apis";
-import { getAgentTrainingStatusColor } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
@@ -60,24 +57,6 @@ const AgentConfigPanel = ({
                 </div>
 
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <span>Agent Status:</span>
-                        <Badge className={`${getAgentTrainingStatusColor(agent.training_status)} font-medium`}>
-                            {agent.training_status}
-                        </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <span>Last Trained:</span>
-                        <span className="text-sm text-gray-600">
-                            {agent.last_trained_at
-                                ? formatDistanceToNow(new Date(agent.last_trained_at), { addSuffix: true })
-                                : "Never"}
-                        </span>
-                    </div>
-                    <Button className="w-full" disabled={!isChanged} onClick={onSaveChanges}>
-                        Save Changes
-                    </Button>
                     <div>
                         <Label htmlFor="agent-name" className="text-sm font-medium">
                             Agent Name
@@ -187,6 +166,9 @@ const AgentConfigPanel = ({
                             placeholder="Define how your agent should behave..."
                         />
                     </div>
+                    <Button className="w-full" disabled={!isChanged} onClick={onSaveChanges}>
+                        Save Changes
+                    </Button>
                 </div>
             </div>
         </ScrollArea>

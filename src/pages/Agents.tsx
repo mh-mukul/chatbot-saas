@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAgentTrainingStatusColor } from "@/lib/utils";
 
 const Agents = () => {
   const navigate = useNavigate();
@@ -184,12 +182,6 @@ const Agents = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4">
-                      <Badge className={`${getAgentTrainingStatusColor(agent.training_status)} font-medium`}>
-                        {agent.training_status}
-                      </Badge>
                     </div>
                   </CardHeader>
 

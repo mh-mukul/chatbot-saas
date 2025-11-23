@@ -13,7 +13,6 @@ export interface Pagination {
 export interface Agent {
     uid: string;
     name: string;
-    training_status: "trained" | "training" | "not trained";
     created_at: string;
     last_active?: Date;
     conversations?: number;
@@ -24,9 +23,7 @@ export interface AgentDetails {
     name: string;
     system_prompt: string;
     model_temperature: number | 0;
-    training_status: "trained" | "training" | "not trained";
     created_at: string;
-    last_trained_at: string | null;
     model_id: number | null;
     prompt_template_id: number | null;
 };
