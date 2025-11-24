@@ -1,8 +1,8 @@
-import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse } from "@/services/api/activity_apis";
+import { getSessionList, getSessionMessages, sessionListResponse, sessionMessagesResponse, Pagination } from "@/services/api/activity_apis";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, User, Bot, CheckCircle, Filter, RefreshCw, Ellipsis, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
 import { ReviseAnswerSheet, ReviseButton } from "@/components/ReviseAnswerSheet";
@@ -26,30 +26,83 @@ const ActivityPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchSessions = async () => {
+  // Ref for the intersection observer target
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const fetchSessions = async (page: number = 1, append: boolean = false) => {
     if (id) {
-      setIsLoadingSessions(true);
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoadingSessions(true);
+      }
       try {
-        const response = await getSessionList(id);
+        const response = await getSessionList(id, page, 10);
         // Ensure sessions is always an array
         const sessionsArray = Array.isArray(response.sessions) ? response.sessions : [];
-        setChatSessions(sessionsArray);
-        if (sessionsArray.length > 0) {
-          setSelectedSession(sessionsArray[0]);
+
+        if (append) {
+          setChatSessions(prev => [...prev, ...sessionsArray]);
+        } else {
+          setChatSessions(sessionsArray);
+          if (sessionsArray.length > 0) {
+            setSelectedSession(sessionsArray[0]);
+          }
         }
+
+        setPagination(response.pagination);
+        setCurrentPage(page);
       } catch (error) {
         console.error("Failed to fetch sessions:", error);
-        // Set empty array on error
-        setChatSessions([]);
+        // Set empty array on error only if not appending
+        if (!append) {
+          setChatSessions([]);
+        }
       } finally {
-        setIsLoadingSessions(false);
+        if (append) {
+          setIsLoadingMore(false);
+        } else {
+          setIsLoadingSessions(false);
+        }
       }
     }
   };
 
+  const loadMoreSessions = useCallback(() => {
+    if (pagination && currentPage < pagination.total_pages && !isLoadingMore) {
+      fetchSessions(currentPage + 1, true);
+    }
+  }, [pagination, currentPage, isLoadingMore]);
+
+  // Set up intersection observer for infinite scroll
   useEffect(() => {
-    fetchSessions();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreSessions();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [loadMoreSessions]);
+
+  useEffect(() => {
+    fetchSessions(1, false);
   }, [id]);
 
   useEffect(() => {
@@ -116,7 +169,7 @@ const ActivityPage = () => {
           <div>
             <Button
               variant="outline"
-              onClick={fetchSessions}
+              onClick={() => fetchSessions(1, false)}
               disabled={isLoadingSessions}
             >
               {isLoadingSessions ? (
@@ -182,6 +235,21 @@ const ActivityPage = () => {
                   </CardContent>
                 </Card>
               ))
+            )}
+
+            {/* Loading indicator for infinite scroll */}
+            {!isLoadingSessions && chatSessions.length > 0 && (
+              <div ref={loadMoreRef} className="py-4 flex justify-center">
+                {isLoadingMore && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading more sessions...
+                  </div>
+                )}
+                {pagination && currentPage >= pagination.total_pages && (
+                  <p className="text-sm text-muted-foreground">No more sessions to load</p>
+                )}
+              </div>
             )}
           </div>
         </ScrollArea>

@@ -17,9 +17,9 @@ export interface sessionListResponse {
     date_time: Date;
 };
 
-export const getSessionList = async (agent: string): Promise<{ sessions: sessionListResponse[], pagination: Pagination }> => {
+export const getSessionList = async (agent: string, page: number = 1, limit: number = 10): Promise<{ sessions: sessionListResponse[], pagination: Pagination }> => {
     try {
-        const response = await authApiClient.get(`/api/v1/activity/sessions/${agent}`);
+        const response = await authApiClient.get(`/api/v1/activity/sessions/${agent}?page=${page}&limit=${limit}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching session with id ${agent}:`, error);
