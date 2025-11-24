@@ -135,4 +135,17 @@ export const themeStyles = `
     flex-direction: row !important;
     justify-content: flex-end !important;
   }
+
+  /* Custom scrollbar for textarea */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground));
+    border-radius: 20px;
+    opacity: 0.5;
+  }
 `;
