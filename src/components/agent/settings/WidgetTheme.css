@@ -126,6 +126,7 @@
 
 /* Apply theme to inputs, buttons and other interactive elements */
 #widget-preview-container input, 
+#widget-preview-container textarea,
 #widget-preview-container button {
   background-color: var(--widget-background);
   color: var(--widget-foreground);
@@ -193,4 +194,16 @@
 
 #widget-preview-container [data-theme="light"] .bg-primary {
   background-color: var(--widget-primary) !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--widget-muted-foreground);
+  border-radius: 20px;
+  opacity: 0.5;
 }

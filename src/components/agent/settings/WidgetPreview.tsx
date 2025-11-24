@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send, Bot, User, Smile, RefreshCcw } from "lucide-react";
 import { chatWidgetSettings } from "@/services/api/embed_chat_apis";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
@@ -59,6 +59,23 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
 
     const [currentMessage, setCurrentMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [currentMessage]);
 
     const suggestedQuestions = widgetSettings.suggested_questions
         ? widgetSettings.suggested_questions.split('\n').filter(q => q.trim() !== '')
@@ -271,6 +288,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                             </div>
                         </div>
                     )}
+                    <div ref={messagesEndRef} />
                 </ScrollArea>
 
                 {/* Suggested questions - positioned above the footer */}
@@ -293,13 +311,15 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                 {/* Footer Input */}
                 <div className="px-3 py-2.5 border-t w-full">
                     <div className="relative flex items-center w-full">
-                        <Input
+                        <Textarea
+                            ref={textareaRef}
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyDown={handleKeyPress}
                             placeholder={widgetSettings.message_placeholder || "Ask anything..."}
-                            className="pr-20 rounded-full w-full"
+                            className="pr-20 rounded-2xl w-full min-h-[40px] max-h-[120px] resize-none custom-scrollbar"
                             disabled={isLoading}
+                            rows={1}
                         />
                         <div className="absolute right-10 top-1/2 -translate-y-1/2">
                             <Popover>

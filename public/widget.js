@@ -6,7 +6,7 @@
         theme: "light",
         position: "right",
         width: 450,
-        height: 600,
+        height: 800,
         buttonIcon: "💬",
         buttonBackground: "#4f46e5",
         buttonColor: "#ffffff",

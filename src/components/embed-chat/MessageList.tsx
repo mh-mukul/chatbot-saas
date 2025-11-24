@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
 import { Message } from "@/services/api/embed_chat_apis";
@@ -13,6 +14,16 @@ export function MessageList({
     isLoading,
     chatIcon,
 }: MessageListProps) {
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
+
     return (
         <div className="flex-1 overflow-y-auto p-4">
             {messages.map((message, index) => (
@@ -60,6 +71,7 @@ export function MessageList({
                     </div>
                 </div>
             )}
+            <div ref={messagesEndRef} />
         </div>
     );
 }

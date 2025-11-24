@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, Smile } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
     Popover,
@@ -31,16 +31,34 @@ export function ChatInput({
     placeholder,
     primaryColor
 }: ChatInputProps) {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [input]);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    };
+
     return (
         <div className="px-3 py-2.5 border-t w-full">
             <div className="relative flex items-center w-full">
-                <Input
+                <Textarea
+                    ref={textareaRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                    onKeyDown={handleKeyDown}
                     placeholder={isLoading ? "Waiting for response..." : placeholder}
                     disabled={isLoading}
-                    className="pr-20 rounded-full w-full"
+                    className="pr-20 rounded-2xl w-full min-h-[40px] max-h-[120px] resize-none custom-scrollbar"
+                    rows={1}
                 />
                 <div className="absolute right-10 top-1/2 -translate-y-1/2">
                     <Popover>
