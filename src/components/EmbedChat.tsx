@@ -7,11 +7,16 @@ import {
     chatWidgetSettings,
     Message,
 } from "@/services/api/embed_chat_apis";
-import { Bot } from "lucide-react";
+import { Bot, Ellipsis, MessageCirclePlusIcon, History, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { getSessionId, setSessionId, getOrCreateUserId, removeSessionId } from '@/lib/utils';
-import { ChatHeader } from "./embed-chat/ChatHeader";
-import { MessageList } from "./embed-chat/MessageList";
-import { ChatInput } from "./embed-chat/ChatInput";
+import { ChatUI, ChatMessage } from "@/components/shared/chat";
 import { SessionList } from "./embed-chat/SessionList";
 import { themeStyles as embedChatThemeStyles } from "./embed-chat/theme-styles";
 
@@ -94,7 +99,6 @@ export default function EmbedChat() {
 
     // Chat state
     const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionIdState] = useState<string | null>(getSessionId());
     const [userId] = useState<string>(getOrCreateUserId());
@@ -255,9 +259,8 @@ export default function EmbedChat() {
     };
 
     // Send message function
-    async function sendMessage(messageOverride?: string) {
-        const messageText = messageOverride || input.trim();
-        if ((!messageText || isLoading)) return;
+    async function sendMessage(messageText: string) {
+        if (!messageText || isLoading) return;
 
         const userMessage: Message = {
             id: crypto.randomUUID(),
@@ -269,12 +272,6 @@ export default function EmbedChat() {
         // Add user message immediately
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
-        const currentInput = messageText;
-
-        // Only clear input if we're not using an override (suggested message)
-        if (!messageOverride) {
-            setInput("");
-        }
 
         try {
             // Call the embedChat API with agent_uid from widget settings or URL params
@@ -289,7 +286,7 @@ export default function EmbedChat() {
                 {
                     session_id: currentSessionId || undefined,
                     user_uid: userId,
-                    query: currentInput,
+                    query: messageText,
                     stream: false,
                 });
 
@@ -318,12 +315,6 @@ export default function EmbedChat() {
         }
     }
 
-    // Handle suggested message click
-    const handleSuggestedMessageClick = (message: string) => {
-        // Send the suggested message directly without updating the input field
-        sendMessage(message);
-    };
-
     // If still loading or error occurred, show appropriate state
     if (loading) {
         return <div className="flex items-center justify-center h-screen">Loading chat widget...</div>
@@ -350,72 +341,133 @@ export default function EmbedChat() {
         setShowingHistory(prev => !prev);
     };
 
+    // Convert messages to ChatMessage format
+    const chatMessages: ChatMessage[] = messages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+    }));
+
+    // Custom header for embed chat with history toggle
+    const EmbedChatHeader = () => (
+        <div className="px-4 py-4 border-b flex justify-between items-center relative">
+            <div className="flex items-center gap-2">
+                {showingHistory ? (
+                    <Button variant="ghost" size="icon" onClick={handleToggleHistory} className="mr-1">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                ) : null}
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground scale-110">
+                    <ChatIcon />
+                </div>
+                <h2 className="font-medium">{showingHistory ? "Chat History" : widgetSettings?.display_name || "Chat Assistant"}</h2>
+            </div>
+            {!showingHistory && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Ellipsis className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() => {
+                                removeSessionId();
+                                window.location.reload();
+                            }}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <MessageCirclePlusIcon className="h-4 w-4" />
+                            <span>New Chat</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={handleToggleHistory}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <History className="h-4 w-4" />
+                            <span>History</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+        </div>
+    );
+
     return (
         <div
             id="embed-chat-container"
             data-theme={widgetSettings?.chat_theme || theme}
             className={`flex flex-col h-screen w-full bg-background border rounded-lg shadow-lg text-foreground ${widgetSettings?.chat_theme || theme}`}
             style={customStyles}>
-            {/* Header Component */}
-            <ChatHeader
-                title={widgetSettings?.display_name || "Chat Assistant"}
-                chatIcon={<ChatIcon />}
-                agentId={agent_uid}
-                showingHistory={showingHistory}
-                onToggleHistory={handleToggleHistory}
-                onSessionSelect={handleSessionSelect}
-            />
-
             {showingHistory ? (
                 /* Session History View */
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <SessionList
-                        agentId={agent_uid}
-                        userId={userId}
-                        onSelectSession={(sessionId) => {
-                            handleSessionSelect(sessionId);
-                            setShowingHistory(false);
-                        }}
-                    />
-                </div>
+                <>
+                    <EmbedChatHeader />
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        <SessionList
+                            agentId={agent_uid}
+                            userId={userId}
+                            onSelectSession={(sessionId) => {
+                                handleSessionSelect(sessionId);
+                                setShowingHistory(false);
+                            }}
+                        />
+                    </div>
+                </>
             ) : (
                 /* Chat View */
-                <>
-                    {/* Messages Component */}
-                    <MessageList
-                        messages={messages}
-                        isLoading={isLoading || loadingSession}
-                        chatIcon={<ChatIcon />}
-                    />
-
-                    {/* Suggested Messages Section */}
-                    {suggestedMessages.length > 0 && !isLoading && !messages.some(msg => msg.role === 'user') && (
-                        <div className="px-4 py-2">
-                            <div className="flex flex-wrap gap-2 justify-end">
-                                {suggestedMessages.map((message, index) => (
-                                    <div
-                                        key={index}
-                                        className="border border-muted hover:bg-muted/10 rounded-lg px-3 py-1.5 text-sm cursor-pointer text-foreground transition-colors whitespace-nowrap"
-                                        onClick={() => handleSuggestedMessageClick(message)}
+                <ChatUI
+                    messages={chatMessages}
+                    isLoading={isLoading || loadingSession}
+                    config={{
+                        displayName: widgetSettings?.display_name || "Chat Assistant",
+                        placeholder: widgetSettings?.message_placeholder || "Ask anything...",
+                        theme: widgetSettings?.chat_theme as 'light' | 'dark',
+                        primaryColor: widgetSettings?.primary_color,
+                        chatIcon: <ChatIcon />,
+                        showHeader: true,
+                        showTimestamp: true,
+                        containerClassName: "h-full rounded-none border-0",
+                    }}
+                    features={{
+                        suggestedQuestions: suggestedMessages,
+                        headerActions: (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Ellipsis className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            removeSessionId();
+                                            window.location.reload();
+                                        }}
+                                        className="flex items-center gap-2 cursor-pointer"
                                     >
-                                        {message}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Input Component */}
-                    <ChatInput
-                        input={input}
-                        setInput={setInput}
-                        sendMessage={() => sendMessage()}
-                        isLoading={isLoading}
-                        placeholder={widgetSettings?.message_placeholder || "Ask anything..."}
-                        primaryColor={widgetSettings?.primary_color}
-                    />
-                </>
+                                        <MessageCirclePlusIcon className="h-4 w-4" />
+                                        <span>New Chat</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={handleToggleHistory}
+                                        className="flex items-center gap-2 cursor-pointer"
+                                    >
+                                        <History className="h-4 w-4" />
+                                        <span>History</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ),
+                        showEmojiPicker: true,
+                    }}
+                    callbacks={{
+                        onSendMessage: sendMessage,
+                    }}
+                />
             )}
         </div>
     );
 }
+

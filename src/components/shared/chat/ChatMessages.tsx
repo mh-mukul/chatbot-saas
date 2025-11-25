@@ -1,19 +1,16 @@
 import { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
-import { Message } from "@/services/api/embed_chat_apis";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChatMessage, ChatConfig } from "./types";
 
-interface MessageListProps {
-    messages: Message[];
+interface ChatMessagesProps {
+    messages: ChatMessage[];
     isLoading: boolean;
-    chatIcon: React.ReactNode;
+    config?: ChatConfig;
 }
 
-export function MessageList({
-    messages,
-    isLoading,
-    chatIcon,
-}: MessageListProps) {
+export function ChatMessages({ messages, isLoading, config }: ChatMessagesProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -24,13 +21,16 @@ export function MessageList({
         scrollToBottom();
     }, [messages, isLoading]);
 
+    const chatIcon = config?.chatIcon || <Bot className="h-5 w-5" />;
+    const showTimestamp = config?.showTimestamp !== false;
+
     return (
-        <div className="flex-1 overflow-y-auto p-4">
+        <ScrollArea className="flex-1 p-4">
             {messages.map((message, index) => (
                 <div
                     key={message.id}
                     className={`flex items-end gap-2 ${index > 0 ? "mt-4" : ""} 
-                        ${message.role === "user" ? "justify-end user-message" : "justify-start"}`}
+                        ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                     {message.role !== "user" && (
                         <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
@@ -41,16 +41,22 @@ export function MessageList({
                     <div className={`flex flex-col max-w-[75%] min-w-0 ${message.role === "user" ? "items-end" : "items-start"}`}>
                         <div
                             className={`rounded-2xl px-4 py-2 text-sm ${message.role === "user"
-                                ? "bg-primary text-primary-foreground user-bubble rounded-br-none"
-                                : "bg-muted text-foreground rounded-bl-none"
+                                    ? "bg-primary text-primary-foreground rounded-br-none"
+                                    : "bg-muted text-foreground rounded-bl-none"
                                 }`}
-                            style={message.role === "user" ? { backgroundColor: "var(--widget-primary-color)" } : {}}
+                            style={
+                                message.role === "user" && config?.primaryColor
+                                    ? { backgroundColor: config.primaryColor }
+                                    : {}
+                            }
                         >
                             <ReactMarkdown>{message.content}</ReactMarkdown>
                         </div>
-                        <span className={`text-[10px] text-muted-foreground mt-1 ${message.role === "user" ? "text-right" : "text-left"} w-full`}>
-                            {message.timestamp.toLocaleTimeString()}
-                        </span>
+                        {showTimestamp && (
+                            <span className={`text-[10px] text-muted-foreground mt-1 ${message.role === "user" ? "text-right" : "text-left"} w-full`}>
+                                {message.timestamp.toLocaleTimeString()}
+                            </span>
+                        )}
                     </div>
 
                     {message.role === "user" && (
@@ -72,6 +78,6 @@ export function MessageList({
                 </div>
             )}
             <div ref={messagesEndRef} />
-        </div>
+        </ScrollArea>
     );
 }
