@@ -10,11 +10,15 @@ interface SourceSummaryProps {
         processing: number;
     };
     textStatus: {
+        failed: number;
         pending: number;
+        processed: number;
         processing: number;
-    };
+    };  
     qnaStatus: {
+        failed: number;
         pending: number;
+        processed: number;
         processing: number;
     };
 }

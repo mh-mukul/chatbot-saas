@@ -19,8 +19,10 @@ interface SourceDetailsProps {
 
 const getStatusColor = (status: string) => {
     switch (status) {
-        case "true": return "bg-green-500/20 text-green-400 border-green-500/50";
-        case "false": return "bg-red-500/20 text-red-400 border-red-500/50";
+        case "processed": return "bg-green-500/20 text-green-400 border-green-500/50";
+        case "processing": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
+        case "failed": return "bg-red-500/20 text-red-400 border-red-500/50";
+        case "pending": return "bg-gray-500/20 text-gray-400 border-gray-500/50";
         default: return "bg-gray-500/20 text-gray-400 border-gray-500/50";
     }
 };
@@ -58,8 +60,8 @@ const SourceDetails = ({ selectedSource, selectedSourceType, onBackClick }: Sour
                 <div className="space-y-2 text-sm">
                     <p><strong>ID:</strong> {selectedSource.uid}</p>
                     <div><strong>Status:</strong>
-                        <Badge className={getStatusColor(String(selectedSource.is_trained))}>
-                            {selectedSource.is_trained === true ? "Trained" : "Not Trained"}
+                        <Badge className={getStatusColor(String(selectedSource.status))}>
+                            {selectedSource.status}
                         </Badge>
                     </div>
                     <p><strong>Created At:</strong> {new Date(selectedSource.created_at).toLocaleString()}</p>
