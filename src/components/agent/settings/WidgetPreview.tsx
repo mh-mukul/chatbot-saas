@@ -155,7 +155,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
             <div
                 id="widget-preview-container"
                 data-theme={widgetSettings.chat_theme}
-                className={`h-[75vh] w-full max-w-md mx-auto relative mb-0 ${widgetSettings.chat_theme}`}
+                className={`h-[75vh] w-full max-w-md mx-auto relative mb-0 rounded-2xl overflow-hidden ${widgetSettings.chat_theme}`}
                 style={{ width: '28rem', maxWidth: '100%' }}
             >
                 <ChatUI
@@ -168,8 +168,7 @@ const WidgetPreview = ({ widgetSettings }: WidgetPreviewProps) => {
                         primaryColor: widgetSettings.primary_color,
                         chatIcon: <ChatIcon />,
                         showHeader: true,
-                        showTimestamp: true,
-                        containerClassName: "rounded-2xl",
+                        showTimestamp: true
                     }}
                     features={{
                         suggestedQuestions: suggestedQuestions,
