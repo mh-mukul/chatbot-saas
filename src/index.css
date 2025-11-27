@@ -35,11 +35,11 @@ All colors MUST be HSL.
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    
+
     --shadow-elegant: 0 10px 30px -10px hsl(0 0% 0% / 0.1);
     --shadow-glow: 0 0 40px hsl(0 0% 0% / 0.1);
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.08);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
@@ -107,5 +107,20 @@ All colors MUST be HSL.
   .dotted-background {
     background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
     background-size: 20px 20px;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 20px;
   }
 }
